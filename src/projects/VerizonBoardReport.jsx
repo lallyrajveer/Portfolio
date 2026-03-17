@@ -55,7 +55,7 @@ function Header() {
 // ── Section 2: KPI Snapshot ────────────────────────────────────────────────────
 const kpis = [
   { label: "Wireless Service Revenue", value: "$83.7B", note: "FY2025 · #1 in industry",        sub: "+5.0% YoY" },
-  { label: "Postpaid Phone Net Adds",  value: "+362K",  note: "FY2025 full year",               sub: "Recovery after 3yrs of losses" },
+  { label: "Postpaid Phone Net Adds",  value: "+362K",  note: "FY2025 full year",               sub: "Q4 2025: +616K, best quarter since 2019" },
   { label: "Postpaid Phone ARPU",      value: "$57.56", note: "FY2025 avg · industry-leading",  sub: "$7.24 premium vs T-Mobile" },
   { label: "Q4 2025 Net Adds",         value: "+616K",  note: "Best quarter since 2019",        sub: "Strong Q4 momentum" },
 ];
@@ -84,20 +84,21 @@ function KPISnapshot() {
 
 // ── Section 3: Competitive Context ────────────────────────────────────────────
 const revenueData = [
-  { year: "FY2022", VZ: 74.5, Peers: 57.1 },
-  { year: "FY2023", VZ: 76.7, Peers: 60.7 },
-  { year: "FY2024", VZ: 79.7, Peers: 63.8 },
+  { year: "FY2022", VZ: 74.5, Peers: 60.9 },
+  { year: "FY2023", VZ: 76.7, Peers: 63.2 },
+  { year: "FY2024", VZ: 79.1, Peers: 65.9 },
   { year: "FY2025", VZ: 83.7, Peers: 69.4 },
 ];
 
+// Total postpaid phone net adds (Consumer + Business segments)
 const netAddsData = [
-  { year: "FY2022", adds: -158 },
-  { year: "FY2023", adds: -280 },
-  { year: "FY2024", adds: -304 },
+  { year: "FY2022", adds: 201  },
+  { year: "FY2023", adds: 430  },
+  { year: "FY2024", adds: 887  },
   { year: "FY2025", adds: 362  },
 ];
 
-const netAddColors = ["#FFCDD2", "#FFCDD2", "#FFCDD2", C.red];
+const netAddColors = ["#FFCDD2", "#FFADB0", C.red, "#FF6B6B"];
 
 function CompetitiveContext() {
   return (
