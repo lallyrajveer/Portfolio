@@ -129,75 +129,6 @@ function CategoryPill({ cat }) {
 }
 
 // ── Project Modal (live preview) ─────────────────────────────
-function ProjectModal({ project, onClose }) {
-  const Comp = project.component;
-  return (
-    <div onClick={onClose} style={{
-      position: "fixed", inset: 0, background: "rgba(6,14,26,0.75)",
-      backdropFilter: "blur(6px)", zIndex: 200,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: 0,
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff",
-        width: "100%", height: "100vh",
-        overflow: "hidden", display: "flex", flexDirection: "column",
-        boxShadow: "0 32px 80px rgba(0,0,0,0.35)",
-      }}>
-        {/* Modal header */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "18px 28px", borderBottom: "1px solid #E8EAF0",
-          background: "#FAFBFF",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <CategoryPill cat={project.category} />
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "#0B1628" }}>
-              {project.title}
-            </span>
-          </div>
-          <button onClick={onClose} style={{
-            background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9BA3B8",
-          }}>✕</button>
-        </div>
-
-        {/* Live component or placeholder */}
-        <div style={{ flex: 1, overflow: "auto", padding: Comp ? 0 : 40 }}>
-          {Comp ? (
-            <Suspense fallback={
-              <div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>Loading component…</div>
-            }>
-              <Comp />
-            </Suspense>
-          ) : (
-            <div style={{ textAlign: "center", padding: "60px 20px" }}>
-              <div style={{ fontSize: 48, marginBottom: 20 }}>🔧</div>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, color: "#0B1628", marginBottom: 12 }}>
-                Live preview coming soon
-              </p>
-              <p style={{ fontSize: 14, color: "#9BA3B8", maxWidth: 400, margin: "0 auto", lineHeight: 1.7 }}>
-                To add a live preview, import your JSX file in{" "}
-                <code style={{ background: "#F3F4F6", padding: "2px 6px", borderRadius: 3 }}>
-                  src/projects/index.js
-                </code>{" "}
-                and set the <code style={{ background: "#F3F4F6", padding: "2px 6px", borderRadius: 3 }}>component</code> field.
-              </p>
-              <div style={{ marginTop: 32, padding: "20px 24px", background: "#F8F9FF", borderRadius: 8, textAlign: "left", maxWidth: 480, margin: "32px auto 0", border: "1px solid #E8EAF0" }}>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "#4F6BED", marginBottom: 10, letterSpacing: 0.5, textTransform: "uppercase" }}>Description</p>
-                <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.75 }}>{project.description}</p>
-                <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {project.tags.map(t => (
-                    <span key={t} style={{ fontSize: 11, color: "#6B7490", background: "#EDEEF5", padding: "2px 9px", borderRadius: 3 }}>#{t}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Project Card ─────────────────────────────────────────────
 function ProjectCard({ project, onClick }) {
@@ -710,12 +641,31 @@ function ExperienceTimeline() {
   );
 }
 
+// ── Project page (renders when URL hash is #/project/:id) ────
+function ProjectPage() {
+  const id = window.location.hash.replace("#/project/", "");
+  const project = allProjects.find(p => p.id === id);
+  if (!project) return <div style={{ padding: 60, textAlign: "center", color: "#9BA3B8", fontFamily: "'Outfit', sans-serif" }}>Project not found.</div>;
+  const Comp = project.component;
+  return (
+    <WirelessProvider>
+      <Suspense fallback={<div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>Loading…</div>}>
+        {Comp ? <Comp /> : <div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>No live preview available.</div>}
+      </Suspense>
+    </WirelessProvider>
+  );
+}
+
 // ── Main App ─────────────────────────────────────────────────
 export default function App() {
   const [search, setSearch] = useState("");
-  const [selectedProject, setSelectedProject] = useState(null);
   const [showContact, setShowContact] = useState(false);
   const [showResume, setShowResume] = useState(false);
+
+  // Render project fullscreen when opened in a new tab via hash routing
+  if (window.location.hash.startsWith("#/project/")) {
+    return <ProjectPage />;
+  }
 
   const filtered = allProjects.filter(p =>
     !search ||
@@ -1052,7 +1002,7 @@ export default function App() {
               Featured Work <span style={{ display: "block", width: 48, height: 2, background: "#C9A84C" }}/>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-              {featured.map(p => <ProjectCard key={p.id} project={p} onClick={() => setSelectedProject(p)} />)}
+              {featured.map(p => <ProjectCard key={p.id} project={p} onClick={() => window.open(`#/project/${p.id}`, "_blank")} />)}
             </div>
           </div>
         </section>
@@ -1089,7 +1039,7 @@ export default function App() {
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 22 }}>
-              {filtered.map(p => <ProjectCard key={p.id} project={p} onClick={() => setSelectedProject(p)} />)}
+              {filtered.map(p => <ProjectCard key={p.id} project={p} onClick={() => window.open(`#/project/${p.id}`, "_blank")} />)}
             </div>
           )}
         </div>
@@ -1102,7 +1052,6 @@ export default function App() {
       </footer>
 
       {/* ── MODAL ── */}
-      {selectedProject && <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />}
       {showContact && <ContactModal onClose={() => setShowContact(false)} />}
       {showResume && (
         <div style={{ position: "fixed", inset: 0, background: "#fff", zIndex: 200, overflowY: "auto" }}>
