@@ -1,6 +1,7 @@
 import { useState, Suspense } from "react";
 import { projects as allProjects } from "./projects/index.js";
 import Resume from "./Resume.jsx";
+import { WirelessProvider } from "./projects/WirelessContext.js";
 
 // ── Helpers ──────────────────────────────────────────────────
 const CAT_COLORS = {
@@ -726,6 +727,7 @@ export default function App() {
   const featured = allProjects.filter(p => p.featured);
 
   return (
+    <WirelessProvider>
     <div style={{ fontFamily: "'Outfit', sans-serif", background: "#fff", color: "#0B1628", minHeight: "100vh" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -1108,5 +1110,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </WirelessProvider>
   );
 }

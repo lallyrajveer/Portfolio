@@ -2,6 +2,8 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
+import { useWireless } from "./WirelessContext.js";
+import { SCENARIOS, getScenarioMetrics } from "./WirelessShared.js";
 
 const C = {
   red:   "#CD040B",
@@ -54,7 +56,7 @@ function Header() {
 const kpis = [
   { label: "Wireless Service Revenue", value: "$83.7B", note: "FY2025 · #1 in industry",        sub: "+5.0% YoY" },
   { label: "Postpaid Phone Net Adds",  value: "+362K",  note: "FY2025 full year",               sub: "Recovery after 3yrs of losses" },
-  { label: "Postpaid Phone ARPU",      value: "$57.60", note: "FY2025 avg · industry-leading",  sub: "$7.24 premium vs T-Mobile" },
+  { label: "Postpaid Phone ARPU",      value: "$57.56", note: "FY2025 avg · industry-leading",  sub: "$7.24 premium vs T-Mobile" },
   { label: "Q4 2025 Net Adds",         value: "+616K",  note: "Best quarter since 2019",        sub: "Strong Q4 momentum" },
 ];
 
@@ -64,21 +66,15 @@ function KPISnapshot() {
       {sectionLabel("FY2025 At a Glance")}
       <div style={{ display: "flex", gap: 16 }}>
         {kpis.map((k) => (
-          <div key={k.label} style={{
-            ...card, flex: 1, borderTop: `3px solid ${C.red}`, padding: "18px 20px",
-          }}>
+          <div key={k.label} style={{ ...card, flex: 1, borderTop: `3px solid ${C.red}`, padding: "18px 20px" }}>
             <div style={{ fontSize: 11, color: C.muted, textTransform: "uppercase", letterSpacing: "0.09em", marginBottom: 8, fontFamily: "'Outfit', sans-serif" }}>
               {k.label}
             </div>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: C.navy, fontWeight: 700, lineHeight: 1.1, marginBottom: 4 }}>
               {k.value}
             </div>
-            <div style={{ fontSize: 12, color: C.navy, marginBottom: 4, fontFamily: "'Outfit', sans-serif" }}>
-              {k.note}
-            </div>
-            <div style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>
-              {k.sub}
-            </div>
+            <div style={{ fontSize: 12, color: C.navy, marginBottom: 4, fontFamily: "'Outfit', sans-serif" }}>{k.note}</div>
+            <div style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>{k.sub}</div>
           </div>
         ))}
       </div>
@@ -109,7 +105,6 @@ function CompetitiveContext() {
       {sectionLabel("Competitive Context")}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
 
-        {/* Revenue Line Chart */}
         <div style={{ ...card, padding: "24px 20px" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: C.navy, marginBottom: 16, fontFamily: "'Outfit', sans-serif" }}>
             Annual Wireless Service Revenue ($B)
@@ -119,14 +114,8 @@ function CompetitiveContext() {
               <CartesianGrid stroke={C.grid} strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize: 11, fill: C.muted, fontFamily: "'Outfit', sans-serif" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: C.muted, fontFamily: "'Outfit', sans-serif" }} axisLine={false} tickLine={false} domain={[50, 95]} />
-              <Tooltip
-                contentStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, borderRadius: 6, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-                formatter={(v, name) => [`$${v}B`, name]}
-              />
-              <Legend
-                wrapperStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12 }}
-                formatter={(v) => v === "VZ" ? "Verizon" : "Competitor Avg"}
-              />
+              <Tooltip contentStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, borderRadius: 6, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} formatter={(v, name) => [`$${v}B`, name]} />
+              <Legend wrapperStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12 }} formatter={(v) => v === "VZ" ? "Verizon" : "Competitor Avg"} />
               <Line dataKey="VZ" stroke={C.red} strokeWidth={2.5} dot={false} />
               <Line dataKey="Peers" stroke={C.muted} strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
             </LineChart>
@@ -136,7 +125,6 @@ function CompetitiveContext() {
           </div>
         </div>
 
-        {/* Net Adds Bar Chart */}
         <div style={{ ...card, padding: "24px 20px" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: C.navy, marginBottom: 16, fontFamily: "'Outfit', sans-serif" }}>
             Verizon Postpaid Phone Net Adds (K)
@@ -146,15 +134,10 @@ function CompetitiveContext() {
               <CartesianGrid stroke={C.grid} strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="year" tick={{ fontSize: 11, fill: C.muted, fontFamily: "'Outfit', sans-serif" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: C.muted, fontFamily: "'Outfit', sans-serif" }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, borderRadius: 6, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-                formatter={(v) => [`${v}K`, "Net Adds"]}
-              />
+              <Tooltip contentStyle={{ fontFamily: "'Outfit', sans-serif", fontSize: 12, borderRadius: 6, border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }} formatter={(v) => [`${v}K`, "Net Adds"]} />
               <ReferenceLine y={0} stroke={C.navy} strokeWidth={1.5} />
               <Bar dataKey="adds" radius={[4, 4, 0, 0]}>
-                {netAddsData.map((_, i) => (
-                  <Cell key={i} fill={netAddColors[i]} />
-                ))}
+                {netAddsData.map((_, i) => <Cell key={i} fill={netAddColors[i]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -204,32 +187,17 @@ function StrategicPriorities() {
     <div style={{ background: "#fff", padding: "36px 40px" }}>
       {sectionLabel("5 Strategic Priorities for FY2026–FY2027")}
       {priorities.map((p) => (
-        <div key={p.id} style={{
-          ...card, borderLeft: `4px solid ${C.red}`, borderRadius: 6,
-          padding: "18px 20px", marginBottom: 14,
-        }}>
+        <div key={p.id} style={{ ...card, borderLeft: `4px solid ${C.red}`, borderRadius: 6, padding: "18px 20px", marginBottom: 14 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{
-              background: C.red, color: "#fff", fontSize: 10, fontWeight: 700,
-              padding: "2px 8px", borderRadius: 20, fontFamily: "'Outfit', sans-serif",
-              letterSpacing: "0.05em",
-            }}>
+            <span style={{ background: C.red, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, fontFamily: "'Outfit', sans-serif", letterSpacing: "0.05em" }}>
               {p.id}
             </span>
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: C.navy, fontWeight: 700 }}>
-              {p.title}
-            </span>
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: C.navy, fontWeight: 700 }}>{p.title}</span>
           </div>
-          <div style={{ fontSize: 13, color: C.text, lineHeight: 1.7, marginBottom: 10, fontFamily: "'Outfit', sans-serif" }}>
-            {p.body}
-          </div>
+          <div style={{ fontSize: 13, color: C.text, lineHeight: 1.7, marginBottom: 10, fontFamily: "'Outfit', sans-serif" }}>{p.body}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: C.amber, fontFamily: "'Outfit', sans-serif", letterSpacing: "0.05em" }}>
-              EXPECTED IMPACT
-            </span>
-            <span style={{ fontSize: 12, color: C.navy, fontFamily: "'Outfit', sans-serif" }}>
-              {p.impact}
-            </span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.amber, fontFamily: "'Outfit', sans-serif", letterSpacing: "0.05em" }}>EXPECTED IMPACT</span>
+            <span style={{ fontSize: 12, color: C.navy, fontFamily: "'Outfit', sans-serif" }}>{p.impact}</span>
           </div>
         </div>
       ))}
@@ -237,33 +205,111 @@ function StrategicPriorities() {
   );
 }
 
-// ── Section 5: Financial Outlook ───────────────────────────────────────────────
-const tableRows = [
-  { metric: "Wireless Svc Revenue", fy25: "$83.7B", b26: "$86.3B", i26: "$87.5B", b27: "$89.1B", i27: "$91.8B", isUpside: false },
-  { metric: "Phone Net Adds",       fy25: "+362K",  b26: "+400K",  i26: "+600K",  b27: "+450K",  i27: "+800K",  isUpside: false },
-  { metric: "Postpaid ARPU",        fy25: "$57.60", b26: "$57.82", i26: "$58.20", b27: "$58.05", i27: "$58.90", isUpside: false },
-  { metric: "Phone Churn (avg)",    fy25: "0.92%",  b26: "0.91%",  i26: "0.88%",  b27: "0.90%",  i27: "0.86%",  isUpside: false },
-  { metric: "Upside vs Base",       fy25: "—",      b26: "—",      i26: "+$1.2B", b27: "—",      i27: "+$2.7B", isUpside: true  },
-];
+// ── Section 5: Financial Outlook (live-synced to scenario) ────────────────────
+const SCENARIO_LABELS = { bear: "Bear", base: "Base", bull: "Bull", custom: "Custom" };
+const SCENARIO_COLORS = { bear: "#ef4444", base: C.navy, bull: "#16a34a", custom: "#7c3aed" };
 
-const thStyle = (tint) => ({
-  background: tint ? "#FFF5F5" : C.navy,
-  color: tint ? C.navy : "#fff",
-  fontSize: 11, fontWeight: 700,
-  padding: "10px 16px", textAlign: "left",
-  fontFamily: "'Outfit', sans-serif",
-});
+// Fixed "with Initiatives" targets (management aspirations, not scenario-driven)
+const WITH_INIT = {
+  rev26: "$87.5B", rev27: "$91.8B",
+  adds26: "+600K", adds27: "+800K",
+  arpu26: "$58.20", arpu27: "$58.90",
+  churn26: "0.88%", churn27: "0.86%",
+  upside26: "+$1.2B", upside27: "+$2.7B",
+};
 
 function FinancialOutlook() {
+  const { scenario, customDrivers } = useWireless();
+
+  const drivers = scenario === "custom" ? customDrivers : SCENARIOS[scenario];
+  const m = getScenarioMetrics(drivers);
+
+  const scenarioLabel = SCENARIO_LABELS[scenario] || "Base";
+  const scenarioColor = SCENARIO_COLORS[scenario] || C.navy;
+
+  const fmtAdds = (v) => `${v >= 0 ? "+" : ""}${v}K`;
+  const fmtArpu = (v) => `$${v.toFixed(2)}`;
+  const fmtChurn = (v) => `${v.toFixed(2)}%`;
+
+  const tableRows = [
+    {
+      metric: "Postpaid Phone Revenue",
+      fy25: "$62.6B",
+      b26: `$${m.rev26}B`, i26: WITH_INIT.rev26,
+      b27: `$${m.rev27}B`, i27: WITH_INIT.rev27,
+      isUpside: false,
+    },
+    {
+      metric: "Phone Net Adds",
+      fy25: "+362K",
+      b26: fmtAdds(m.netAdds26), i26: WITH_INIT.adds26,
+      b27: fmtAdds(m.netAdds27), i27: WITH_INIT.adds27,
+      isUpside: false,
+    },
+    {
+      metric: "Postpaid ARPU",
+      fy25: "$57.56",
+      b26: fmtArpu(m.arpu26), i26: WITH_INIT.arpu26,
+      b27: fmtArpu(m.arpu27), i27: WITH_INIT.arpu27,
+      isUpside: false,
+    },
+    {
+      metric: "Phone Churn (avg)",
+      fy25: "0.92%",
+      b26: fmtChurn(m.churn26), i26: WITH_INIT.churn26,
+      b27: fmtChurn(m.churn27), i27: WITH_INIT.churn27,
+      isUpside: false,
+    },
+    {
+      metric: "Upside vs Scenario",
+      fy25: "—",
+      b26: "—", i26: WITH_INIT.upside26,
+      b27: "—", i27: WITH_INIT.upside27,
+      isUpside: true,
+    },
+  ];
+
+  const thStyle = (tint) => ({
+    background: tint ? "#FFF5F5" : C.navy,
+    color: tint ? C.navy : "#fff",
+    fontSize: 11, fontWeight: 700,
+    padding: "10px 16px", textAlign: "left",
+    fontFamily: "'Outfit', sans-serif",
+  });
+
   return (
     <div style={{ background: "#F4F5F8", padding: "36px 40px" }}>
       {sectionLabel("Financial Outlook")}
+
+      {/* Scenario badge */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+        <span style={{ fontSize: 12, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>
+          Forecast scenario:
+        </span>
+        <span style={{
+          background: scenarioColor, color: "#fff",
+          fontSize: 12, fontWeight: 700, padding: "3px 14px",
+          borderRadius: 20, fontFamily: "'Outfit', sans-serif",
+        }}>
+          {scenarioLabel}
+        </span>
+        <span style={{ fontSize: 11, color: "#16a34a", fontFamily: "'Outfit', sans-serif", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>
+          ⟳ Live — synced from Wireless Revenue Forecast
+        </span>
+      </div>
 
       <div style={{ ...card, overflow: "hidden", marginBottom: 24 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              {["Metric", "FY2025A", "FY2026E (Base)", "FY2026E (w/ Initiatives)", "FY2027E (Base)", "FY2027E (w/ Initiatives)"].map((h, i) => (
+              {[
+                "Metric",
+                "FY2025A",
+                `FY2026E (${scenarioLabel})`,
+                "FY2026E (w/ Initiatives)",
+                `FY2027E (${scenarioLabel})`,
+                "FY2027E (w/ Initiatives)",
+              ].map((h, i) => (
                 <th key={h} style={thStyle(i === 3 || i === 5)}>{h}</th>
               ))}
             </tr>
@@ -276,9 +322,9 @@ function FinancialOutlook() {
                 <tr key={r.metric}>
                   <td style={{ ...cellBase, background: rowBg, color: C.navy }}>{r.metric}</td>
                   <td style={{ ...cellBase, background: rowBg, color: C.muted }}>{r.fy25}</td>
-                  <td style={{ ...cellBase, background: rowBg, color: C.text }}>{r.b26}</td>
+                  <td style={{ ...cellBase, background: rowBg, color: scenarioColor, fontWeight: 600 }}>{r.b26}</td>
                   <td style={{ ...cellBase, background: r.isUpside ? "#FFFBEB" : "#FFF5F5", color: C.navy }}>{r.i26}</td>
-                  <td style={{ ...cellBase, background: rowBg, color: C.text }}>{r.b27}</td>
+                  <td style={{ ...cellBase, background: rowBg, color: scenarioColor, fontWeight: 600 }}>{r.b27}</td>
                   <td style={{ ...cellBase, background: r.isUpside ? "#FFFBEB" : "#FFF5F5", color: C.navy }}>{r.i27}</td>
                 </tr>
               );
@@ -287,17 +333,13 @@ function FinancialOutlook() {
         </table>
       </div>
 
-      <div style={{ display: "flex", gap: 12 }}>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         {[
-          { text: "Revenue Target: $91.8B by FY2027",        bg: C.red,   color: "#fff" },
+          { text: "Revenue Target: $91.8B by FY2027",          bg: C.red,   color: "#fff" },
           { text: "Net Adds Target: +800K annually by FY2027", bg: C.amber, color: "#fff" },
-          { text: "Churn Goal: <0.86% monthly by FY2027",    bg: C.green, color: "#fff" },
+          { text: "Churn Goal: <0.86% monthly by FY2027",      bg: C.green, color: "#fff" },
         ].map((pill) => (
-          <div key={pill.text} style={{
-            background: pill.bg, color: pill.color,
-            fontSize: 12, fontWeight: 600, padding: "8px 16px",
-            borderRadius: 20, fontFamily: "'Outfit', sans-serif",
-          }}>
+          <div key={pill.text} style={{ background: pill.bg, color: pill.color, fontSize: 12, fontWeight: 600, padding: "8px 16px", borderRadius: 20, fontFamily: "'Outfit', sans-serif" }}>
             {pill.text}
           </div>
         ))}
