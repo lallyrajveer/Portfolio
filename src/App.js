@@ -372,7 +372,7 @@ const EXPERIENCE_DATA = [
       {
         heading: "Wireless KPI Analysis & Reporting",
         items: [
-          "Led KPI reporting and performance analysis for Verizon Business's enterprise wireless segment, supporting a base of 30M+ business postpaid connections and ~$13.9B in annual wireless service revenue.",
+          "Led KPI reporting and performance analysis for Verizon Business's enterprise wireless segment, supporting a base of 13M+ Subs and ~$6.7B in annual wireless service revenue.",
           "Developed high-impact business analyses of Wireless KPIs for executive reviews, modeling performance scenarios to analyze risks and opportunities and delivering actionable recommendations that improved upgrade subsidy revenue.",
           "Automated daily KPI reporting to executives using AI tools, saving the team 500+ hours annually while eliminating manual errors and ensuring 100% data consistency and accuracy.",
           "Produced monthly analyses of business trends and budget variances for Wireline products and Wireless KPIs, supporting 268K–292K quarterly net add targets and management review sessions.",
