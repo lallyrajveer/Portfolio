@@ -713,14 +713,8 @@ function ExperienceTimeline() {
 export default function App() {
   const [search, setSearch] = useState("");
   const [selectedProject, setSelectedProject] = useState(null);
-  const [navScrolled, setNavScrolled] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [showResume, setShowResume] = useState(false);
-
-  // Nav scroll effect
-  if (typeof window !== "undefined") {
-    window.onscroll = () => setNavScrolled(window.scrollY > 40);
-  }
 
   const filtered = allProjects.filter(p =>
     !search ||
