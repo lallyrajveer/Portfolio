@@ -1009,7 +1009,7 @@ export default function App() {
       )}
 
       {/* ── ALL PROJECTS ── */}
-      <section id="projects" style={{ padding: "96px 56px", background: "#fff" }}>
+      <section id="projects" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
             <span style={{ display: "block", width: 48, height: 2, background: "#C9A84C" }}/> Projects <span style={{ display: "block", width: 48, height: 2, background: "#C9A84C" }}/>
