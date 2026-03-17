@@ -307,7 +307,7 @@ export default function Resume({ onBack }) {
                 LinkedIn
               </a>
               <span>·</span>
-              <a href="https://rajveersidhu-self.vercel.app/" target="_blank" rel="noreferrer" style={{ color: GOLD, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}>🌐 Website</a>
+              <a href="https://rajveersidhu-self.vercel.app/" target="_blank" rel="noreferrer" style={{ color: GOLD, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}><span style={{ filter: "sepia(1) saturate(5) hue-rotate(5deg)" }}>🌐</span> Website</a>
             </div>
           </div>
           {/* Accent rule */}
