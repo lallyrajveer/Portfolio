@@ -2,6 +2,7 @@ import { useState, Suspense } from "react";
 import { projects as allProjects } from "./projects/index.js";
 import Resume from "./Resume.jsx";
 import { WirelessProvider } from "./projects/WirelessContext.js";
+import { NetflixProvider } from "./projects/NetflixContext.js";
 
 // ── Helpers ──────────────────────────────────────────────────
 const CAT_COLORS = {
@@ -649,9 +650,11 @@ function ProjectPage() {
   const Comp = project.component;
   return (
     <WirelessProvider>
-      <Suspense fallback={<div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>Loading…</div>}>
-        {Comp ? <Comp /> : <div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>No live preview available.</div>}
-      </Suspense>
+      <NetflixProvider>
+        <Suspense fallback={<div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>Loading…</div>}>
+          {Comp ? <Comp /> : <div style={{ padding: 60, textAlign: "center", color: "#9BA3B8" }}>No live preview available.</div>}
+        </Suspense>
+      </NetflixProvider>
     </WirelessProvider>
   );
 }
@@ -1009,7 +1012,7 @@ export default function App() {
       )}
 
       {/* ── ALL PROJECTS ── */}
-      <section id="projects" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>
+      <section id="projects" style={{ padding: "96px 56px", background: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
             <span style={{ display: "block", width: 48, height: 2, background: "#C9A84C" }}/> Projects <span style={{ display: "block", width: 48, height: 2, background: "#C9A84C" }}/>
