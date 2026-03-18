@@ -9,7 +9,7 @@ export const projects = [
   {
     id: "telecom-analysis",
     title: "U.S. Wireless Competitive Analysis — Postpaid Phone",
-    category: "KPI Dashboards",
+    category: "Competitive Analysis",
     description:
       "Postpaid phone comparative analysis of Verizon, T-Mobile, and AT&T across key wireless KPIs: service revenue, subscribers, net adds, churn, and ARPU. Identifies market leaders and strategic trends from Q1 2023 through Q4 2024.",
     date: "Q4 2024",
@@ -42,12 +42,12 @@ export const projects = [
   */
   {
     id: "netflix-streaming-analysis",
-    title: "Global Streaming Competitive Analysis — Netflix vs. Disney+ vs. Max",
-    category: "KPI Dashboards",
+    title: "Global Streaming Competitive Analysis — Top 5 Services",
+    category: "Competitive Analysis",
     description:
-      "Comparative streaming KPI analysis of Netflix, Disney+, and Max across paid memberships, revenue, net adds, and ARM (Average Revenue per Membership). Tracks Q1 2023 through Q4 2025, including the impact of Netflix's password-sharing crackdown and Disney's Hotstar reclassification.",
+      "Comparative streaming KPI analysis of Netflix, Amazon Prime Video, Disney+, Max, and Paramount+ across paid memberships, revenue, net adds, ARM, and churn. Tracks Q1 2023 through Q4 2025, including Netflix's password-sharing crackdown, Disney's Hotstar reclassification, and Amazon's bundling moat.",
     date: "Q1 2026",
-    tags: ["streaming", "Netflix", "Disney+", "Max", "KPI", "benchmarking"],
+    tags: ["streaming", "Netflix", "Disney+", "Max", "Amazon", "Paramount+", "KPI", "benchmarking"],
     featured: true,
     component: NetflixStreamingAnalysis,
   },
@@ -75,4 +75,4 @@ export const projects = [
   },
 ];
 
-export const categories = ["All", "KPI Dashboards", "Forecasting", "Board Reporting"];
+export const categories = ["All", "Competitive Analysis", "Forecasting", "Board Reporting"];

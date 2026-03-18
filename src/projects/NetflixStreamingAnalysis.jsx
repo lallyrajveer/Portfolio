@@ -617,7 +617,7 @@ export default function NetflixStreamingAnalysis() {
             Global Streaming — Competitive KPI Dashboard
           </h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>
-            Netflix vs. Disney+ vs. Max · Q1 2023 – Q4 2025 · Paid Memberships, Revenue, ARM
+            Netflix · Amazon Prime · Disney+ · Max · Paramount+ · Q1 2023 – Q4 2025 · Memberships, Revenue, ARM, Churn
           </p>
         </div>
       </div>
