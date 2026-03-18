@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Line, BarChart, Bar, ComposedChart, Area,
+  Line, BarChart, Bar, ComposedChart,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, Cell,
 } from "recharts";
@@ -33,112 +33,134 @@ const SLIDER_CONFIG = {
 /* ══════════════════════════════════════════════════════════════
    TAB 1 — SCENARIO FORECAST
    ══════════════════════════════════════════════════════════════ */
+const SC_COLORS = { bear: "#DC2626", base: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
+const SC_LABELS = { bear: "Bear",    base: "Base",    bull: "Bull",    custom: "Custom"  };
+
 function ScenarioTab() {
   const { scenario, setScenario, customDrivers, setCustomDrivers } = useNetflix();
+  const [mechKey, setMechKey] = useState("base");
 
-  const bear = getForecast("bear");
-  const base = getForecast("base");
-  const bull = getForecast("bull");
+  const bear   = getForecast("bear");
+  const base   = getForecast("base");
+  const bull   = getForecast("bull");
   const custom = buildForecast(START.subs, START.arm, customDrivers.netAdds, customDrivers.armGrowth, customDrivers.churn ?? BASE_CHURN, QUARTERS);
+  const allForecasts = { bear, base, bull, custom };
 
-  const histData = HISTORICAL.map(h => ({
-    period: h.period, actual: h.rev,
-    bear_v: null, base_v: null, bull_v: null, custom_v: null, band_lo: null, band_hi: null,
-  }));
+  const fy26 = { bear: +getFY(bear,2026).toFixed(2), base: +getFY(base,2026).toFixed(2), bull: +getFY(bull,2026).toFixed(2), custom: +getFY(custom,2026).toFixed(2) };
+  const fy27 = { bear: +getFY(bear,2027).toFixed(2), base: +getFY(base,2027).toFixed(2), bull: +getFY(bull,2027).toFixed(2), custom: +getFY(custom,2027).toFixed(2) };
 
-  const foreData = QUARTERS.map((q, i) => ({
-    period: q, actual: null,
-    bear_v: bear[i].revenue, base_v: base[i].revenue, bull_v: bull[i].revenue,
-    custom_v: custom[i].revenue,
-    band_lo: bear[i].revenue, band_hi: bull[i].revenue,
-  }));
-
+  const histData = HISTORICAL.map(h => ({ period: h.period, actual: h.rev, bear_v: null, base_v: null, bull_v: null, custom_v: null }));
   const lastActual = HISTORICAL[HISTORICAL.length - 1].rev;
-  const lastHistPatched = {
-    ...histData[histData.length - 1],
-    bear_v: lastActual, base_v: lastActual, bull_v: lastActual, custom_v: lastActual,
-    band_lo: lastActual, band_hi: lastActual,
-  };
-
+  const lastHistPatched = { ...histData[histData.length - 1], bear_v: lastActual, base_v: lastActual, bull_v: lastActual, custom_v: lastActual };
+  const foreData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_v: bear[i].revenue, base_v: base[i].revenue, bull_v: bull[i].revenue, custom_v: custom[i].revenue }));
   const chartData = [...histData.slice(0, -1), lastHistPatched, ...foreData];
 
-  const fy26bear = +getFY(bear,   2026).toFixed(2);
-  const fy26base = +getFY(base,   2026).toFixed(2);
-  const fy26bull = +getFY(bull,   2026).toFixed(2);
-  const fy27bear = +getFY(bear,   2027).toFixed(2);
-  const fy27base = +getFY(base,   2027).toFixed(2);
-  const fy27bull = +getFY(bull,   2027).toFixed(2);
-
-  const SCENARIO_LABELS = { bear: "Bear", base: "Base", bull: "Bull", custom: "Custom" };
-
   const setDriver = (key, value) => {
-    setScenario("custom");
     setCustomDrivers(prev => ({ ...prev, [key]: value }));
   };
 
-  const activeForecast = scenario === "bear" ? bear : scenario === "bull" ? bull : scenario === "custom" ? custom : base;
-  const activeChurn    = scenario === "bear" ? SCENARIOS.bear.churn : scenario === "bull" ? SCENARIOS.bull.churn : scenario === "custom" ? (customDrivers.churn ?? BASE_CHURN) : SCENARIOS.base.churn;
+  const mechForecast = allForecasts[mechKey];
+  const mechChurn    = mechKey === "custom" ? (customDrivers.churn ?? BASE_CHURN) : SCENARIOS[mechKey]?.churn ?? BASE_CHURN;
+
+  const customDriversDisplay = {
+    netAdds:   customDrivers.netAdds,
+    armGrowth: customDrivers.armGrowth,
+    churn:     customDrivers.churn ?? BASE_CHURN,
+  };
 
   return (
     <div>
-      {/* Selector */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: scenario === "custom" ? 12 : 16, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 12, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>
-          Active scenario (synced to Board Report):
-        </span>
-        <div style={{ display: "flex", gap: 6 }}>
-          {["bear","base","bull","custom"].map(key => {
-            const active = scenario === key;
-            return (
-              <button key={key} onClick={() => setScenario(key)} style={{
-                padding: "5px 16px", borderRadius: 20,
-                border: `1.5px solid ${active ? C.NF : C.grid}`,
-                background: active ? C.NF : "#fff",
-                color: active ? "#fff" : C.tick,
-                fontSize: 12, fontFamily: "'Outfit', sans-serif",
-                fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all 0.15s",
-              }}>
-                {SCENARIO_LABELS[key]}
-              </button>
-            );
-          })}
-        </div>
-        <span style={{ fontSize: 11, color: "#16a34a", fontFamily: "'Outfit', sans-serif", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>
-          ⟳ Live — Board Report will reflect this scenario
-        </span>
+      {/* Board Report sync — small secondary row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Board Report to:</span>
+        {["bear","base","bull","custom"].map(key => {
+          const active = scenario === key;
+          return (
+            <button key={key} onClick={() => setScenario(key)} style={{
+              padding: "3px 12px", borderRadius: 20,
+              border: `1.5px solid ${active ? SC_COLORS[key] : C.grid}`,
+              background: active ? SC_COLORS[key] : "#fff",
+              color: active ? "#fff" : C.tick,
+              fontSize: 11, fontFamily: "'Outfit', sans-serif",
+              fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all 0.15s",
+            }}>{SC_LABELS[key]}</button>
+          );
+        })}
+        <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>⟳ Live</span>
       </div>
 
-      {/* Inline custom sliders */}
-      {scenario === "custom" && (
-        <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16, display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-end" }}>
-          {Object.entries(SLIDER_CONFIG).map(([key, cfg]) => {
-            const val = customDrivers[key];
-            const displayVal = key === "netAdds" ? `+${val.toFixed(1)}M` : key === "churn" ? `${val.toFixed(1)}%/mo` : `${val.toFixed(1)}%`;
-            return (
-              <div key={key} style={{ flex: "1 1 160px", minWidth: 140 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: C.tick, fontFamily: "'Outfit', sans-serif" }}>{cfg.label}</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.NF, fontFamily: "'Outfit', sans-serif" }}>{displayVal}</span>
+      {/* 4 scenario summary cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
+        {["bear","base","bull","custom"].map(key => (
+          <div key={key} onClick={() => setScenario(key)} style={{
+            background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+            overflow: "hidden", borderTop: `3px solid ${SC_COLORS[key]}`,
+            cursor: "pointer", outline: scenario === key ? `2px solid ${SC_COLORS[key]}` : "none",
+            outlineOffset: 2,
+          }}>
+            <div style={{ padding: "12px 14px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: SC_COLORS[key], marginBottom: 8 }}>{SC_LABELS[key]}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: C.muted }}>FY2026E</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: C.navy, fontFamily: "'Cormorant Garamond', serif" }}>${fy26[key]}B</div>
                 </div>
-                <input
-                  type="range" min={cfg.min} max={cfg.max} step={cfg.step} value={val}
-                  onChange={e => setDriver(key, parseFloat(e.target.value))}
-                  style={{ width: "100%", accentColor: C.NF, cursor: "pointer" }}
-                />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: C.muted, marginTop: 2 }}>
-                  <span>{cfg.min}{key === "netAdds" ? "M" : "%"}</span>
-                  <span>{cfg.max}{key === "netAdds" ? "M" : "%"}</span>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 10, color: C.muted }}>FY2027E</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: C.navy, fontFamily: "'Cormorant Garamond', serif" }}>${fy27[key]}B</div>
                 </div>
               </div>
-            );
-          })}
-          <button onClick={() => { setCustomDrivers({ netAdds: 6.0, armGrowth: 1.5, churn: 2.3 }); setScenario("custom"); }} style={{ padding: "6px 16px", borderRadius: 20, border: `1.5px solid ${C.NF}`, background: "transparent", color: C.NF, fontSize: 12, fontFamily: "'Outfit', sans-serif", cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap", alignSelf: "center" }}>
-            Reset
-          </button>
-        </div>
-      )}
+              <div style={{ fontSize: 10, color: C.muted, borderTop: `1px solid ${C.grid}`, paddingTop: 8, display: "flex", flexDirection: "column", gap: 2 }}>
+                {key === "custom" ? (
+                  <>
+                    <span>+{customDriversDisplay.netAdds.toFixed(1)}M net adds/Q</span>
+                    <span>{customDriversDisplay.armGrowth.toFixed(1)}% ARM/yr</span>
+                    <span>{customDriversDisplay.churn.toFixed(1)}% churn/mo</span>
+                  </>
+                ) : (
+                  <>
+                    <span>+{SCENARIOS[key].netAdds.toFixed(1)}M net adds/Q</span>
+                    <span>{SCENARIOS[key].armGrowth.toFixed(1)}% ARM/yr</span>
+                    <span>{SCENARIOS[key].churn.toFixed(1)}% churn/mo</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Chart */}
+      {/* Custom sliders — always visible */}
+      <div style={{ background: "#fff", borderRadius: 10, padding: "14px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16, display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-end" }}>
+        <div style={{ alignSelf: "center", minWidth: 52 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#7C3AED" }}>Custom</div>
+          <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Drivers</div>
+        </div>
+        {Object.entries(SLIDER_CONFIG).map(([key, cfg]) => {
+          const val = customDrivers[key];
+          const displayVal = key === "netAdds" ? `+${val.toFixed(1)}M` : key === "churn" ? `${val.toFixed(1)}%/mo` : `${val.toFixed(1)}%`;
+          return (
+            <div key={key} style={{ flex: "1 1 150px", minWidth: 130 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
+                <span style={{ fontSize: 10, color: C.tick }}>{cfg.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED" }}>{displayVal}</span>
+              </div>
+              <input type="range" min={cfg.min} max={cfg.max} step={cfg.step} value={val}
+                onChange={e => setDriver(key, parseFloat(e.target.value))}
+                style={{ width: "100%", accentColor: "#7C3AED", cursor: "pointer" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: C.muted, marginTop: 1 }}>
+                <span>{cfg.min}{key === "netAdds" ? "M" : "%"}</span>
+                <span>{cfg.max}{key === "netAdds" ? "M" : "%"}</span>
+              </div>
+            </div>
+          );
+        })}
+        <button onClick={() => setCustomDrivers({ netAdds: 6.0, armGrowth: 1.5, churn: 2.3 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap", alignSelf: "center" }}>
+          Reset
+        </button>
+      </div>
+
+      {/* Chart — all 4 lines */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 20px" }}>
           Netflix — Revenue Scenarios ($B)
@@ -150,53 +172,49 @@ function ScenarioTab() {
             <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
             <Tooltip formatter={(v, name) => [fmtRev(v), name]} />
             <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
-            <Area dataKey="band_hi" fill={C.NF} stroke="none" fillOpacity={0.08} legendType="none" connectNulls />
-            <Area dataKey="band_lo" fill={C.bg} stroke="none" fillOpacity={1}    legendType="none" connectNulls />
-            <Line dataKey="actual"   name="Historical" stroke={C.NF} strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
-            <Line dataKey="bull_v"   name="Bull"       stroke={C.NF} strokeWidth={scenario === "bull"   ? 3 : 1.8} strokeDasharray={scenario === "bull"   ? undefined : "5 3"} dot={false} connectNulls opacity={scenario === "bull"   ? 1 : 0.5} />
-            <Line dataKey="base_v"   name="Base"       stroke={C.NF} strokeWidth={scenario === "base"   ? 3 : 2}   dot={false} connectNulls opacity={scenario === "base"   ? 1 : 0.5} />
-            <Line dataKey="bear_v"   name="Bear"       stroke={C.NF} strokeWidth={scenario === "bear"   ? 3 : 1.8} strokeDasharray={scenario === "bear"   ? undefined : "5 3"} dot={false} connectNulls opacity={scenario === "bear"   ? 1 : 0.4} />
-            <Line dataKey="custom_v" name="Custom"     stroke="#7C3AED" strokeWidth={scenario === "custom" ? 3 : 1.5} strokeDasharray={scenario === "custom" ? undefined : "4 3"} dot={false} connectNulls opacity={scenario === "custom" ? 1 : 0.4} />
+            <Line dataKey="actual"   name="Historical" stroke={C.navy}       strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
+            <Line dataKey="bear_v"   name="Bear"       stroke={SC_COLORS.bear}   strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="base_v"   name="Base"       stroke={SC_COLORS.base}   strokeWidth={2.5} dot={false} connectNulls />
+            <Line dataKey="bull_v"   name="Bull"       stroke={SC_COLORS.bull}   strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="custom_v" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}   dot={false} connectNulls strokeDasharray="5 3" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Assumptions Table */}
+      {/* Assumptions table — all 4 columns */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
         <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 14px" }}>
           Scenario Assumptions & Implied Revenue
         </h4>
-
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 7, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#92400E", fontFamily: "'Outfit', sans-serif", lineHeight: 1.6 }}>
+        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 7, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
           <strong>ARM growth rationale:</strong> Netflix UCAN price hikes averaged ~7% in 2024 but global blended ARM is diluted by faster international growth at lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales. Base of 3%/yr reflects this blend; Bear (1%) assumes price-hike fatigue and mix headwinds; Bull (5%) assumes ad-tier CPM matures faster and UCAN hikes continue unabated.
         </div>
-
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Driver", "Bear", "Base", "Bull"].map((h, i) => (
-                  <th key={h} style={{ padding: "9px 14px", textAlign: i === 0 ? "left" : "center", background: i === 0 ? "#F4F5F8" : C.NF, color: i === 0 ? C.navy : "#fff", fontWeight: 600, borderBottom: `2px solid ${C.NF}` }}>{h}</th>
+                {["Driver","Bear","Base","Bull","Custom"].map((h, i) => (
+                  <th key={h} style={{ padding: "9px 14px", textAlign: i === 0 ? "left" : "center", background: i === 0 ? "#F4F5F8" : SC_COLORS[["bear","base","bull","custom"][i-1]], color: i === 0 ? C.navy : "#fff", fontWeight: 600, borderBottom: `2px solid ${i === 0 ? C.grid : SC_COLORS[["bear","base","bull","custom"][i-1]]}` }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[
-                ["Qtrly Net Adds (M)",        SCENARIOS.bear.netAdds,    SCENARIOS.base.netAdds,    SCENARIOS.bull.netAdds,    v => (v > 0 ? "+" : "") + v.toFixed(1) + "M"],
-                ["Annual ARM Growth (%)",      SCENARIOS.bear.armGrowth,  SCENARIOS.base.armGrowth,  SCENARIOS.bull.armGrowth,  v => v.toFixed(1) + "%"],
-                ["Monthly Churn Rate (%)",     SCENARIOS.bear.churn,      SCENARIOS.base.churn,      SCENARIOS.bull.churn,      v => v.toFixed(1) + "%/mo"],
-                ["Implied FY2026E Rev ($B)",   fy26bear, fy26base, fy26bull, v => `$${v.toFixed(1)}B`],
-                ["YoY vs FY2025 ($45.2B)",     fy26bear-45.2, fy26base-45.2, fy26bull-45.2, v => `${v>=0?"+":""}${((v/45.2)*100).toFixed(1)}%`],
-                ["Implied FY2027E Rev ($B)",   fy27bear, fy27base, fy27bull, v => `$${v.toFixed(1)}B`],
-                ["YoY FY2027 vs FY2026",       fy27bear-fy26bear, fy27base-fy26base, fy27bull-fy26bull, v => `${v>=0?"+":""}${((v/(v>=0?fy26base:fy26bear))*100).toFixed(1)}%`],
-              ].map(([label, bv, bsv, bulv, fmt], ri) => {
+                ["Qtrly Net Adds (M)",      SCENARIOS.bear.netAdds,   SCENARIOS.base.netAdds,   SCENARIOS.bull.netAdds,   customDriversDisplay.netAdds,   v => `+${v.toFixed(1)}M`],
+                ["Annual ARM Growth (%)",    SCENARIOS.bear.armGrowth, SCENARIOS.base.armGrowth, SCENARIOS.bull.armGrowth, customDriversDisplay.armGrowth, v => `${v.toFixed(1)}%`],
+                ["Monthly Churn Rate (%)",   SCENARIOS.bear.churn,     SCENARIOS.base.churn,     SCENARIOS.bull.churn,     customDriversDisplay.churn,     v => `${v.toFixed(1)}%/mo`],
+                ["Implied FY2026E ($B)",     fy26.bear, fy26.base, fy26.bull, fy26.custom, v => `$${v.toFixed(1)}B`],
+                ["YoY vs FY2025 ($45.2B)",   fy26.bear-45.2, fy26.base-45.2, fy26.bull-45.2, fy26.custom-45.2, v => `${v>=0?"+":""}${((v/45.2)*100).toFixed(1)}%`],
+                ["Implied FY2027E ($B)",     fy27.bear, fy27.base, fy27.bull, fy27.custom, v => `$${v.toFixed(1)}B`],
+                ["YoY FY2027 vs FY2026",     fy27.bear-fy26.bear, fy27.base-fy26.base, fy27.bull-fy26.bull, fy27.custom-fy26.custom, v => `${v>=0?"+":""}${((v/fy26.base)*100).toFixed(1)}%`],
+              ].map(([label, bv, bsv, bulv, cv, fmt], ri) => {
                 const isYoY = label.startsWith("YoY");
                 return (
                   <tr key={label} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
                     <td style={{ padding: "9px 14px", color: isYoY ? C.tick : C.navy, fontWeight: isYoY ? 400 : 500, fontSize: isYoY ? 12 : 13, fontStyle: isYoY ? "italic" : "normal" }}>{label}</td>
-                    <td style={{ padding: "9px 14px", textAlign: "center", color: isYoY ? (bv >= 0 ? "#16a34a" : "#dc2626") : (scenario === "bear" ? C.NF : C.tick), fontWeight: scenario === "bear" && !isYoY ? 700 : 400 }}>{fmt(bv)}</td>
-                    <td style={{ padding: "9px 14px", textAlign: "center", color: isYoY ? (bsv >= 0 ? "#16a34a" : "#dc2626") : (scenario === "base" ? C.NF : C.navy), fontWeight: scenario === "base" && !isYoY ? 700 : 600 }}>{fmt(bsv)}</td>
-                    <td style={{ padding: "9px 14px", textAlign: "center", color: isYoY ? (bulv >= 0 ? "#16a34a" : "#dc2626") : (scenario === "bull" ? C.NF : C.tick), fontWeight: scenario === "bull" && !isYoY ? 700 : 400 }}>{fmt(bulv)}</td>
+                    {[["bear",bv],["base",bsv],["bull",bulv],["custom",cv]].map(([k,v]) => (
+                      <td key={k} style={{ padding: "9px 14px", textAlign: "center", color: isYoY ? (v >= 0 ? "#16a34a" : "#dc2626") : SC_COLORS[k], fontWeight: isYoY ? 400 : 600 }}>{fmt(v)}</td>
+                    ))}
                   </tr>
                 );
               })}
@@ -205,31 +223,47 @@ function ScenarioTab() {
         </div>
       </div>
 
-      {/* Subscriber mechanics table */}
+      {/* Subscriber mechanics — per-scenario selector within section */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 6px" }}>
-          Subscriber Mechanics — {SCENARIO_LABELS[scenario]} Scenario
-        </h4>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 14px", fontFamily: "'Outfit', sans-serif" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+          <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: 0 }}>
+            Subscriber Mechanics
+          </h4>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["bear","base","bull","custom"].map(key => {
+              const active = mechKey === key;
+              return (
+                <button key={key} onClick={() => setMechKey(key)} style={{
+                  padding: "3px 12px", borderRadius: 20,
+                  border: `1.5px solid ${active ? SC_COLORS[key] : C.grid}`,
+                  background: active ? SC_COLORS[key] : "#fff",
+                  color: active ? "#fff" : C.tick,
+                  fontSize: 11, cursor: "pointer", fontWeight: active ? 700 : 400, transition: "all 0.15s",
+                }}>{SC_LABELS[key]}</button>
+              );
+            })}
+          </div>
+        </div>
+        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 14px" }}>
           Gross adds required = Net adds + Churn losses. Churn rate drives acquisition cost, not revenue directly.
         </p>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Quarter", "Begin Subs (M)", "Gross Adds (M)", "Churn Losses (M)", "Net Adds (M)", "End Subs (M)", "Qtrly Rev ($B)"].map((h, i) => (
-                  <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}`, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
+                {["Quarter","Begin Subs (M)","Gross Adds (M)","Churn Losses (M)","Net Adds (M)","End Subs (M)","Qtrly Rev ($B)"].map((h, i) => (
+                  <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${SC_COLORS[mechKey]}`, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {activeForecast.map((row, ri) => (
+              {mechForecast.map((row, ri) => (
                 <tr key={row.period} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
                   <td style={{ padding: "8px 12px", fontWeight: 600, color: C.navy }}>{row.period}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>{row.beginSubs.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: "#16a34a", fontWeight: 600 }}>+{row.grossAdds.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: "#dc2626" }}>−{row.churnLosses.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: C.NF, fontWeight: 700 }}>+{row.netAdds.toFixed(1)}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "center", color: SC_COLORS[mechKey], fontWeight: 700 }}>+{row.netAdds.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy, fontWeight: 600 }}>{row.endSubs.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy }}>${row.revenue.toFixed(2)}B</td>
                 </tr>
@@ -238,9 +272,9 @@ function ScenarioTab() {
           </table>
         </div>
         <p style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
-          Churn losses = {activeChurn.toFixed(1)}%/mo × Begin Subs × 3 months.
-          Gross adds = the number of new subscribers required to land the net adds target given that churn rate.
-          Higher churn inflates gross adds needed, driving up customer acquisition cost — captured in the margin model.
+          Churn losses = {mechChurn.toFixed(1)}%/mo × Begin Subs × 3 months.
+          Gross adds = new subscribers needed to hit the net adds target at that churn rate.
+          Higher churn inflates gross adds needed, driving up CAC — captured in the margin model.
         </p>
       </div>
     </div>
