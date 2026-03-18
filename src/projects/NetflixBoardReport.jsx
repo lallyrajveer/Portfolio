@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useNetflix } from "./NetflixContext.js";
-import { SCENARIOS, getScenarioMetrics } from "./NetflixShared.js";
+import { SCENARIOS, BASE_CHURN, getScenarioMetrics } from "./NetflixShared.js";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
 const NF    = "#E50914";
@@ -173,16 +173,19 @@ function StrategicPriorities() {
 function FinancialOutlook() {
   const { scenario, customDrivers } = useNetflix();
   const isCustom = scenario === "custom";
-  const drivers  = isCustom ? customDrivers : SCENARIOS[scenario] ?? SCENARIOS.base;
+  const drivers  = isCustom
+    ? { ...SCENARIOS.base, ...customDrivers }
+    : SCENARIOS[scenario] ?? SCENARIOS.base;
   const m        = getScenarioMetrics(drivers);
   const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.base;
   const label    = SCENARIO_LABELS[scenario] ?? "Base";
 
   const rows = [
-    { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,      fy27: `+${m.netAdds27}M`,      baseline: "+30M",    target: "+35M"  },
-    { metric: "End-Period Paid Members (M)", fy26: `${m.subs26.toFixed(0)}M`, fy27: `${m.subs27.toFixed(0)}M`, baseline: "362M",   target: "380M"  },
-    { metric: "Avg ARM ($/month)",           fy26: `$${m.arm26}`,            fy27: `$${m.arm27}`,            baseline: "$12.50",  target: "$12.80" },
-    { metric: "Annual Revenue ($B)",         fy26: `$${m.rev26}B`,           fy27: `$${m.rev27}B`,           baseline: "$51B",    target: "$56B"  },
+    { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,        fy27: `+${m.netAdds27}M`,        baseline: "+30M",   target: "+35M"   },
+    { metric: "End-Period Paid Members (M)", fy26: `${m.subs26.toFixed(0)}M`, fy27: `${m.subs27.toFixed(0)}M`, baseline: "362M",   target: "380M"   },
+    { metric: "Avg ARM ($/month)",           fy26: `$${m.arm26}`,             fy27: `$${m.arm27}`,             baseline: "$12.50", target: "$12.80" },
+    { metric: "Monthly Churn Rate",          fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%`, baseline: "~1.9%", target: "<1.8%"  },
+    { metric: "Annual Revenue ($B)",         fy26: `$${m.rev26}B`,            fy27: `$${m.rev27}B`,            baseline: "$51B",   target: "$56B"   },
   ];
 
   return (

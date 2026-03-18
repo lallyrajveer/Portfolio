@@ -70,6 +70,23 @@ const revenueA = [
   { year: "FY2025", Netflix: 45.2, Disney: 11.9, Max: 11.1 },
 ];
 
+// Monthly churn rate (%) — third-party analyst estimates (Antenna/YipitData).
+// None of Netflix, Disney, or Max officially report churn.
+const churnQ = [
+  { q: "Q1'23", Netflix: 2.40, Disney: 3.50, Max: 3.20 },
+  { q: "Q2'23", Netflix: 2.30, Disney: 3.80, Max: 3.50 },
+  { q: "Q3'23", Netflix: 2.20, Disney: 4.00, Max: 3.30 },
+  { q: "Q4'23", Netflix: 1.90, Disney: 3.20, Max: 3.00 },
+  { q: "Q1'24", Netflix: 2.10, Disney: 2.80, Max: 2.80 },
+  { q: "Q2'24", Netflix: 2.00, Disney: 2.70, Max: 2.60 },
+  { q: "Q3'24", Netflix: 2.30, Disney: 2.50, Max: 2.40 },
+  { q: "Q4'24", Netflix: 1.80, Disney: 2.40, Max: 2.20 },
+  { q: "Q1'25", Netflix: 2.00, Disney: 2.30, Max: 2.00 },
+  { q: "Q2'25", Netflix: 2.10, Disney: 2.20, Max: 2.10 },
+  { q: "Q3'25", Netflix: 2.00, Disney: 2.10, Max: 2.00 },
+  { q: "Q4'25", Netflix: 1.90, Disney: 2.00, Max: 1.90 },
+];
+
 // ARM = quarterly revenue / (3 × avg memberships). Disney ARM includes Hulu blended.
 const armQ = [
   { q: "Q1'23", Netflix: 11.73, Disney: 5.51, Max: 8.27 },
@@ -115,6 +132,89 @@ const insights = [
     color: MAX,
   },
 ];
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB 5 — CHURN
+   ═══════════════════════════════════════════════════════════════════════ */
+function ChurnTab() {
+  const latest = churnQ[churnQ.length - 1];
+  return (
+    <div>
+      {/* Disclaimer */}
+      <div style={{ background: "#FFF8EC", border: "1px solid #FDE68A", borderRadius: 8, padding: "10px 16px", marginBottom: 20 }}>
+        <span style={{ fontSize: 12, color: "#92400E" }}>
+          ⚠ Monthly churn rates are third-party analyst estimates (Antenna / YipitData).
+          Netflix, Disney, and Max do not officially disclose churn.
+        </span>
+      </div>
+
+      {/* Summary cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 20 }}>
+        {[
+          { name: "Netflix", color: "#E50914", val: latest.Netflix, note: "Price increases Q3'24 uptick; ad-tier improves retention long-term" },
+          { name: "Disney+", color: "#113CCF", val: latest.Disney,  note: "Improved from ~4% highs in 2023 as content investment stabilized" },
+          { name: "Max",     color: "#8B5CF6", val: latest.Max,     note: "Declining steadily as bundling with Disney+ reduces churn pressure" },
+        ].map(s => (
+          <div key={s.name} style={{ background: "#fff", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${s.color}` }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: s.color, marginBottom: 6 }}>{s.name}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#0B1628", lineHeight: 1 }}>{s.val.toFixed(1)}%</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 4 }}>monthly churn — Q4 2025 est.</div>
+            <div style={{ fontSize: 11, color: "#6B7280", marginTop: 8, lineHeight: 1.5 }}>{s.note}</div>
+          </div>
+        ))}
+      </div>
+
+      <SectionCard title="Monthly Churn Rate — Quarterly Trend (%)">
+        <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 16px" }}>
+          Lower churn = stronger retention. Netflix password-sharing enforcement (Q3'23–Q4'23) improved retention materially.
+        </p>
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={churnQ} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
+            <CartesianGrid {...gridProps} />
+            <XAxis dataKey="q" tick={axisStyle} />
+            <YAxis tick={axisStyle} tickFormatter={v => `${v}%`} domain={[1.5, 4.5]} width={44} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <ReferenceLine x="Q3'23" stroke="#113CCF" strokeDasharray="4 2" strokeWidth={1}
+              label={{ value: "PW sharing crackdown", position: "top", fontSize: 10, fill: "#113CCF" }} />
+            <Line dataKey="Netflix" stroke="#E50914" strokeWidth={2.5} dot={false} />
+            <Line dataKey="Disney"  stroke="#113CCF" strokeWidth={2}   dot={false} />
+            <Line dataKey="Max"     stroke="#8B5CF6" strokeWidth={2}   dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </SectionCard>
+
+      <SectionCard title="Churn Data Table — Monthly Rate (%)">
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
+            <thead>
+              <tr>
+                {["Quarter","Netflix","Disney+","Max","NF–DIS Gap","NF–MAX Gap"].map((h, i) => (
+                  <th key={h} style={{ padding: "7px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: "#0B1628", fontWeight: 600, borderBottom: "2px solid #E50914", fontSize: 11 }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {churnQ.map((row, ri) => (
+                <tr key={row.q} style={{ background: ri % 2 === 0 ? "#FAFAFA" : "#fff" }}>
+                  <td style={{ padding: "7px 12px", fontWeight: 600, color: "#0B1628" }}>{row.q}</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#E50914", fontWeight: 600 }}>{row.Netflix.toFixed(1)}%</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#113CCF" }}>{row.Disney.toFixed(1)}%</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#8B5CF6" }}>{row.Max.toFixed(1)}%</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#6B7280" }}>{(row.Netflix - row.Disney).toFixed(1)}pp</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#6B7280" }}>{(row.Netflix - row.Max).toFixed(1)}pp</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p style={{ fontSize: 11, color: "#6B7280", marginTop: 12, lineHeight: 1.5 }}>
+          Negative gap = Netflix churn is lower than peer. pp = percentage points. All figures are third-party estimates.
+        </p>
+      </SectionCard>
+    </div>
+  );
+}
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
 const axisStyle = { fontSize: 11, fill: MUTED };
@@ -478,7 +578,7 @@ export default function NetflixStreamingAnalysis() {
       {/* Tabs */}
       <div style={{ background: "#fff", borderBottom: `1px solid ${GRID}`, padding: "0 40px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex" }}>
-          {[["overview","Overview"],["subscribers","Subscribers"],["revenue","Revenue"],["arm","ARM"]].map(([id, label]) => (
+          {[["overview","Overview"],["subscribers","Subscribers"],["revenue","Revenue"],["arm","ARM"],["churn","Churn"]].map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)} style={TAB_STYLE(tab === id)}>{label}</button>
           ))}
         </div>
@@ -490,6 +590,7 @@ export default function NetflixStreamingAnalysis() {
         {tab === "subscribers"  && <SubscribersTab />}
         {tab === "revenue"      && <RevenueTab />}
         {tab === "arm"          && <ARMTab />}
+        {tab === "churn"        && <ChurnTab />}
       </div>
 
       {/* Footer */}

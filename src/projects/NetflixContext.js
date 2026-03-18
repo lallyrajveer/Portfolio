@@ -5,7 +5,7 @@ export const NetflixContext = createContext(null);
 export function NetflixProvider({ children }) {
   // "bear" | "base" | "bull" | "custom"
   const [scenario, setScenario] = useState("base");
-  const [customDrivers, setCustomDrivers] = useState({ netAdds: 6.0, armGrowth: 1.5 });
+  const [customDrivers, setCustomDrivers] = useState({ netAdds: 6.0, armGrowth: 1.5, churn: 2.3 });
 
   return (
     <NetflixContext.Provider value={{ scenario, setScenario, customDrivers, setCustomDrivers }}>

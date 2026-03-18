@@ -5,7 +5,7 @@ import {
   ReferenceLine, Cell,
 } from "recharts";
 import {
-  HISTORICAL, START, SCENARIOS, QUARTERS,
+  HISTORICAL, START, SCENARIOS, QUARTERS, BASE_CHURN,
   buildForecast, getForecast, getFY,
 } from "./NetflixShared.js";
 import { useNetflix } from "./NetflixContext.js";
@@ -132,6 +132,7 @@ function ScenarioTab() {
               {[
                 ["Qtrly Net Adds (M)",        SCENARIOS.bear.netAdds,    SCENARIOS.base.netAdds,    SCENARIOS.bull.netAdds,    v => (v > 0 ? "+" : "") + v.toFixed(1) + "M"],
                 ["Annual ARM Growth (%)",      SCENARIOS.bear.armGrowth,  SCENARIOS.base.armGrowth,  SCENARIOS.bull.armGrowth,  v => v.toFixed(1) + "%"],
+                ["Monthly Churn Rate (%)",     SCENARIOS.bear.churn,      SCENARIOS.base.churn,      SCENARIOS.bull.churn,      v => v.toFixed(1) + "%"],
                 ["Implied FY2026E Rev ($B)",   fy26bear, fy26base, fy26bull, v => `$${v.toFixed(1)}B`],
                 ["Implied FY2027E Rev ($B)",   fy27bear, fy27base, fy27bull, v => `$${v.toFixed(1)}B`],
               ].map(([label, bv, bsv, bulv, fmt], ri) => (
@@ -156,16 +157,17 @@ function ScenarioTab() {
 function SensitivityTab() {
   const sc = SCENARIOS.base;
 
-  const computeRev = (netAdds, armGrowth) => {
-    const fc = buildForecast(START.subs, START.arm, netAdds, armGrowth, QUARTERS);
+  const computeRev = (netAdds, armGrowth, churn) => {
+    const fc = buildForecast(START.subs, START.arm, netAdds, armGrowth, churn, QUARTERS);
     return { fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) };
   };
 
-  const baseResult = computeRev(sc.netAdds, sc.armGrowth);
+  const baseResult = computeRev(sc.netAdds, sc.armGrowth, sc.churn);
 
   const drivers = [
-    { label: "Net Adds/Q",  key: "netAdds",   getFn: pct => computeRev(sc.netAdds * (1 + pct / 100), sc.armGrowth) },
-    { label: "ARM Growth",  key: "armGrowth", getFn: pct => computeRev(sc.netAdds, sc.armGrowth * (1 + pct / 100)) },
+    { label: "Net Adds/Q",  key: "netAdds",   getFn: pct => computeRev(sc.netAdds * (1 + pct / 100), sc.armGrowth, sc.churn) },
+    { label: "ARM Growth",  key: "armGrowth", getFn: pct => computeRev(sc.netAdds, sc.armGrowth * (1 + pct / 100), sc.churn) },
+    { label: "Churn Rate",  key: "churn",     getFn: pct => computeRev(sc.netAdds, sc.armGrowth, sc.churn * (1 + pct / 100)) },
   ];
 
   const tornadoBars = [];
@@ -236,7 +238,7 @@ function SensitivityTab() {
                       <tr key={pct} style={{ background: rowBg }}>
                         <td style={{ padding: "8px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{label}</td>
                         <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>
-                          {d.key === "netAdds" ? dv.toFixed(1) + "M" : dv.toFixed(2) + "%"}
+                          {d.key === "netAdds" ? dv.toFixed(1) + "M" : dv.toFixed(2) + "%/mo"}
                         </td>
                         <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
                         <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
@@ -265,6 +267,7 @@ function SensitivityTab() {
 const SLIDER_CONFIG = {
   netAdds:   { min: 0,   max: 18,  step: 0.5, unit: "M/qtr",  label: "Net Adds per Quarter" },
   armGrowth: { min: 0,   max: 4.0, step: 0.1, unit: "%/yr",   label: "Annual ARM Growth"     },
+  churn:     { min: 1.0, max: 4.0, step: 0.1, unit: "%/mo",   label: "Monthly Churn Rate"    },
 };
 
 function CustomTab() {
@@ -276,11 +279,11 @@ function CustomTab() {
   };
 
   const reset = () => {
-    setCustomDrivers({ netAdds: 6.0, armGrowth: 1.5 });
+    setCustomDrivers({ netAdds: 6.0, armGrowth: 1.5, churn: 2.3 });
     setScenario("custom");
   };
 
-  const customForecast = buildForecast(START.subs, START.arm, customDrivers.netAdds, customDrivers.armGrowth, QUARTERS);
+  const customForecast = buildForecast(START.subs, START.arm, customDrivers.netAdds, customDrivers.armGrowth, customDrivers.churn ?? BASE_CHURN, QUARTERS);
   const baseForecast   = getForecast("base");
 
   const chartData = QUARTERS.map((q, i) => ({
@@ -305,7 +308,7 @@ function CustomTab() {
           <div style={{ padding: "18px 16px" }}>
             {Object.entries(SLIDER_CONFIG).map(([key, cfg]) => {
               const val = customDrivers[key];
-              const displayVal = key === "netAdds" ? `+${val.toFixed(1)}M` : `${val.toFixed(1)}%`;
+              const displayVal = key === "netAdds" ? `+${val.toFixed(1)}M` : key === "churn" ? `${val.toFixed(1)}%/mo` : `${val.toFixed(1)}%`;
               return (
                 <div key={key} style={{ marginBottom: 20 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
