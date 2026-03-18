@@ -43,7 +43,7 @@ export const projects = [
   {
     id: "netflix-streaming-analysis",
     title: "Global Streaming Competitive Analysis — Top 5 Services",
-    category: "Competitive Analysis",
+    category: "Streaming Market Analysis",
     description:
       "Comparative streaming KPI analysis of Netflix, Amazon Prime Video, Disney+, Max, and Paramount+ across paid memberships, revenue, net adds, ARM, and churn. Tracks Q1 2023 through Q4 2025, including Netflix's password-sharing crackdown, Disney's Hotstar reclassification, and Amazon's bundling moat.",
     date: "Q1 2026",
@@ -75,4 +75,4 @@ export const projects = [
   },
 ];
 
-export const categories = ["All", "Competitive Analysis", "Forecasting", "Board Reporting"];
+export const categories = ["All", "Streaming Market Analysis", "Forecasting", "Board Reporting"];

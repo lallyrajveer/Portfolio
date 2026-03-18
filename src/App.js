@@ -11,7 +11,7 @@ const CAT_COLORS = {
   "Variance Analysis":{ bg: "#FEF3EC", text: "#9A3412" },
   "Board Reporting": { bg: "#F5EBF8", text: "#6B21A8" },
   Modeling:          { bg: "#ECFAF8", text: "#0F5345" },
-  "Competitive Analysis":  { bg: "#FFF8EB", text: "#92400E" },
+  "Streaming Market Analysis":  { bg: "#FFF8EB", text: "#92400E" },
   Other:             { bg: "#F3F4F6", text: "#374151" },
 };
 
@@ -135,7 +135,7 @@ const WORKFLOW_NODES = [
     id:    "netflix-streaming-analysis",
     step:  "01",
     role:  "Foundation",
-    title: "Competitive Analysis",
+    title: "Streaming Market Analysis",
     desc:  "5-service KPI benchmarks across Netflix, Amazon Prime, Disney+, Max, and Paramount+ — subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
