@@ -11,7 +11,7 @@ const CAT_COLORS = {
   "Variance Analysis":{ bg: "#FEF3EC", text: "#9A3412" },
   "Board Reporting": { bg: "#F5EBF8", text: "#6B21A8" },
   Modeling:          { bg: "#ECFAF8", text: "#0F5345" },
-  "KPI Dashboards":  { bg: "#FFF8EB", text: "#92400E" },
+  "Competitive Analysis":  { bg: "#FFF8EB", text: "#92400E" },
   Other:             { bg: "#F3F4F6", text: "#374151" },
 };
 
@@ -815,7 +815,7 @@ export default function App() {
               ["📊","Budgeting & Forecasting","Annual plans and rolling forecasts tied to business strategy"],
               ["📋","Board Reporting","Executive packages distilling financials into clear narratives"],
               ["🔍","Variance Analysis","Actuals vs. budget deep-dives with root-cause commentary"],
-              ["📈","KPI Dashboards","Real-time performance visibility for finance and operations"],
+              ["📈","Competitive Analysis","Real-time performance visibility for finance and operations"],
             ].map(([icon, name, desc]) => (
               <div key={name} style={{
                 display: "flex", alignItems: "center", gap: 16,
@@ -1050,8 +1050,7 @@ export default function App() {
 
       {/* ── FOOTER ── */}
       <footer style={{ background: "#060E1A", padding: "20px 56px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(201,168,76,0.08)" }}>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", margin: 0 }}>© 2026 Rajveer Sidhu · FP&A Portfolio</p>
-        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", margin: 0 }}>Built with Claude</p>
+        <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", margin: 0 }}>© 2026 Rajveer Sidhu · All Rights Reserved</p>
       </footer>
 
       {/* ── MODAL ── */}
