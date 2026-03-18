@@ -85,17 +85,39 @@ function KPISection() {
 
 function StrategicPriorities() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
-      {priorities.map((p, i) => (
-        <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, flex: 1, lineHeight: 1.3 }}>{p.title}</div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: p.statusColor, background: `${p.statusColor}18`, padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap", marginLeft: 8, flexShrink: 0 }}>{p.status}</span>
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14, marginBottom: 20 }}>
+        {priorities.map((p, i) => (
+          <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, flex: 1, lineHeight: 1.3 }}>{p.title}</div>
+              <span style={{ fontSize: 10, fontWeight: 600, color: p.statusColor, background: `${p.statusColor}18`, padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap", marginLeft: 8, flexShrink: 0 }}>{p.status}</span>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: NF, marginBottom: 6 }}>{p.impact}</div>
+            <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.65 }}>{p.body}</div>
           </div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: NF, marginBottom: 6 }}>{p.impact}</div>
-          <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.65 }}>{p.body}</div>
+        ))}
+      </div>
+
+      {/* Recommendation */}
+      <div style={{ background: "#0B1628", borderRadius: 10, padding: "20px 24px", border: "1px solid rgba(229,9,20,0.25)" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Recommendation — Capital Allocation Priority</div>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 12px" }}>
+          If capital is constrained, <strong style={{ color: "#fff" }}>Ad-Tier Monetization should be funded first.</strong> The infrastructure is already built; the marginal cost of the next dollar of ad revenue is lower than for any other priority on this list. CPM yield optimization and programmatic expansion require execution, not new CapEx — the sensitivity model shows a +1% ARM improvement alone adds ~$0.5B to FY2026E revenue, and the ad tier is the fastest path to that lift.
+        </p>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 12px" }}>
+          <strong style={{ color: "#fff" }}>ARM Pricing ranks second</strong> because it is the only priority with zero incremental content spend — price increases in under-monetized UCAN and EMEA markets flow directly to operating income. The bear case risk (churn acceleration) is manageable given Netflix's demonstrated pricing power in prior cycles.
+        </p>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 14px" }}>
+          Live Events and Global Penetration are high-conviction long-cycle investments where IRR depends heavily on rights costs and market entry timing — fund after the first two, not instead of them. Gaming remains a strategic optionality play; the revenue case is unproven and should be sized accordingly until daily active player data matures.
+        </p>
+        <div style={{ borderTop: "1px solid rgba(229,9,20,0.2)", paddingTop: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>If content budget is cut 10% (~$1.5–2B)</div>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: 0 }}>
+            <strong style={{ color: "#fff" }}>Deprioritize Gaming and Live Events first.</strong> Gaming has no near-term revenue proof point — daily active player data is not yet at a scale that justifies incremental CapEx over ad-tier yield improvement. Live Events rights (sports, live programming) carry the largest upfront cash commitment with the longest payback period; in a constrained budget, deferring a rights renewal is lower-cost than cutting a content slate that is already amortizing. Ad-Tier Monetization and ARM Pricing require no incremental content spend and should be protected in any budget scenario. Global Penetration sits in the middle — localized content investment is more capital-efficient than sports rights, but it is the first to be right-sized (not eliminated) if constraints tighten.
+          </p>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -104,7 +126,7 @@ function FinancialOutlook() {
   const { scenario, customDrivers } = useNetflix();
   const isCustom = scenario === "custom";
   const drivers  = isCustom
-    ? { ...SCENARIOS.base, ...customDrivers }
+    ? { ...SCENARIOS.base, ...customDrivers, netAddsStart: customDrivers.netAdds, netAddsEnd: customDrivers.netAdds, armGrowthStart: customDrivers.armGrowth, armGrowthEnd: customDrivers.armGrowth }
     : SCENARIOS[scenario] ?? SCENARIOS.base;
   const m        = getScenarioMetrics(drivers);
   const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.base;
@@ -161,9 +183,24 @@ function FinancialOutlook() {
         </table>
       </div>
 
-      <div style={{ padding: "12px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
+      <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
+        {scenario === "custom" && (
+          <div style={{ background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
+            <strong>Board view: Custom scenario.</strong> This table reflects preparer-defined assumptions — not the named Bear, Base, or Bull cases. Custom was selected to reflect a scenario where net adds ramp gradually from a conservative Q1 entry point while ARM grows at the Base rate of 3%/yr. If the board should see Base case numbers, switch the scenario in the Revenue Forecast tab.
+          </div>
+        )}
+        {scenario === "base" && (
+          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
+            <strong>Board view: Base scenario.</strong> Assumes 4→8M quarterly net adds ramping over the forecast period and 3%/yr ARM growth — consistent with Netflix's demonstrated pricing trajectory and analyst consensus for a steady-state growth environment.
+          </div>
+        )}
+        {(scenario === "bear" || scenario === "bull") && (
+          <div style={{ background: "#F9FAFB", border: `1px solid ${GRID}`, borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: MUTED, lineHeight: 1.6 }}>
+            <strong>Board view: {label} scenario.</strong> {scenario === "bear" ? "Stress-test case. Assumes pricing headwinds (1%/yr ARM growth) and elevated churn (2.8%/mo). Use this view to size downside risk, not as a planning baseline." : "Upside case. Assumes aggressive ad-tier CPM maturation (5%/yr ARM growth) and churn improvement (1.8%/mo). Use this view to frame the bull thesis, not as a commitment."}
+          </div>
+        )}
         <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.5 }}>
-          FY2026–27 values are driver-based model outputs. Switch scenario in the Netflix Revenue Forecast to update this table.
+          FY2026–27 values are driver-based model outputs. Change the scenario once in the Revenue Forecast — every number in this table updates automatically.
           Strategic targets reflect company-stated ambitions and analyst consensus. Not financial guidance.
         </p>
       </div>
@@ -187,13 +224,13 @@ export default function NetflixBoardReport() {
                 <div style={{ width: 28, height: 28, background: NF, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ color: "#fff", fontWeight: 900, fontSize: 13 }}>N</span>
                 </div>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: NF }}>Board Report</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: NF }}>Executive Deck</span>
               </div>
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 600, color: "#fff", margin: "0 0 6px" }}>
                 Netflix Streaming Strategy
               </h1>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: 0 }}>
-                FP&A Board Report · FY2025 Performance & FY2026–27 Strategic Outlook
+                FP&A Executive Deck · FY2025 Performance & FY2026–27 Strategic Outlook
               </p>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -213,6 +250,14 @@ export default function NetflixBoardReport() {
 
         <SectionHeading title="Strategic Priorities — FY2026–27" />
         <StrategicPriorities />
+
+        <SectionHeading title="Analyst View" />
+        <div style={{ background: "#fff", borderRadius: 10, padding: "22px 26px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}`, marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: MUTED, marginBottom: 10 }}>Preparer's Point of View</div>
+          <p style={{ fontSize: 14, color: NAVY, lineHeight: 1.8, margin: 0 }}>
+            Of the five priorities on this page, <strong>Ad-Supported Tier Monetization will generate the most shareholder value over the next three years</strong> — and it is not close. The core reason is structural: Netflix has already absorbed the cost of building ad-tier infrastructure, signed measurement partnerships, and trained the recommendation system on ad-tier engagement patterns. The next dollar of investment into CPM yield and programmatic fill rates earns a return that no other priority on this list can match, because the marginal cost of additional ad revenue approaches zero once inventory exists. Every other priority requires either large upfront rights spend (Live Events), unproven consumer behavior (Gaming), multi-year market entry cycles (Global Penetration), or execution risk from price elasticity (ARM Pricing). Ad-tier is the one lever Netflix can pull in FY2026 that will show up meaningfully in FY2026 operating income — not FY2028. The counterargument is that ad-tier success depends on advertiser demand and CPM rates that are partially outside Netflix's control; a macro advertising pullback would compress that upside faster than any of the other priorities. That risk is real and should be monitored. But on a risk-adjusted basis, ad-tier monetization is where I would concentrate capital if forced to choose one.
+          </p>
+        </div>
 
         <SectionHeading title="Financial Outlook — FY2026–27E" />
         <FinancialOutlook />

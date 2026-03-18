@@ -136,7 +136,7 @@ const WORKFLOW_NODES = [
     step:  "01",
     role:  "Foundation",
     title: "Streaming Market Analysis",
-    desc:  "5-service KPI benchmarks across Netflix, Amazon Prime, Disney+, Max, and Paramount+ — subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025.",
+    desc:  "5-service KPI benchmarks — subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025. The key finding: Netflix's blended ARM has grown more steadily (+4% CAGR) than its volatile quarterly net adds, which justified making ARM the primary forecast driver rather than subscriber count.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
   {
@@ -144,22 +144,22 @@ const WORKFLOW_NODES = [
     step:  "02",
     role:  "Model",
     title: "Revenue Forecast",
-    desc:  "Driver-based ARM × net adds model. Subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, sensitivity tornado, and EBITDA margin sensitivity.",
-    tags:  ["Bear / Base / Bull", "Sensitivity analysis", "EBITDA tab"],
+    desc:  "ARM × net adds driver model with subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, and a sensitivity analysis. Churn is modeled as a cost driver (CAC), not a revenue driver — a deliberate choice explained in the sensitivity tab because Netflix's guidance targets net adds, not gross.",
+    tags:  ["Bear / Base / Bull", "Sensitivity analysis"],
   },
   {
     id:    "netflix-board-report",
     step:  "03",
     role:  "Output",
-    title: "Board Report",
-    desc:  "Exec-ready board pack: FY2025 KPIs, competitive positioning, five strategic priorities for FY2026–27, and a financial outlook table live-synced to the forecast.",
+    title: "Executive Deck",
+    desc:  "Exec-facing board pack: FY2025 KPIs, competitive positioning, and five strategic priorities for FY2026–27. The financial outlook table pulls live from the forecast model so scenario assumptions and board numbers stay consistent — a single source of truth instead of copy-pasted figures.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
 ];
 
 const CONNECTOR_LABELS = [
-  { top: "Competitive ARM & churn", bottom: "inform model assumptions" },
-  { top: "Scenario selector", bottom: "syncs financial outlook live" },
+  { top: "ARM stability → ARM-first", bottom: "model design" },
+  { top: "Scenario drives exec", bottom: "financials live" },
 ];
 
 function NetflixWorkflow() {
@@ -174,13 +174,13 @@ function NetflixWorkflow() {
             <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Case Study</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Revenue Forecast</span>
           </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
             One Integrated FP&A Workflow
           </h2>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, fontFamily: "'Outfit', sans-serif" }}>
-            Three connected projects — competitive data feeds the model; the model drives the board presentation.
+            Three connected views — competitive data feeds the model; the model drives the board presentation.
           </p>
         </div>
 
@@ -232,7 +232,7 @@ function NetflixWorkflow() {
 
                 {/* CTA */}
                 <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
-                  Open project →
+                  Open →
                 </div>
               </div>
 
@@ -257,7 +257,7 @@ function NetflixWorkflow() {
 
         {/* Bottom note */}
         <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "'Outfit', sans-serif" }}>
-          Scenario selected in the Revenue Forecast updates the Board Report financial outlook in real time via shared React Context.
+          Change the scenario once — every downstream number in the Executive Deck updates automatically.
         </div>
 
       </div>
@@ -938,7 +938,7 @@ export default function App() {
             {[
               "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of expertise in financial audit, accounting, planning, forecasting, and strategic analysis.",
               "Currently, I'm a Financial Planning & Analysis Manager at Verizon, where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
-              "I actively integrate AI tools into my workflow, using them to automate reporting, accelerate scenario modeling, and turn complex data into executive-ready insights. These tools are part of my daily process, saving hundreds of hours annually and enabling analysis at a speed and scale that wasn't previously possible.",
+              "I actively integrate AI into my workflow at every stage: automating recurring variance commentary that previously took a full day, compressing multi-scenario model builds from days to hours, and generating first-draft board narratives directly from data. The measurable result is more time on interpretation and less on production — which is where the actual finance value is.",
               "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I believe AI will play a key role in the future of FP&A, and I'm exploring how to leverage these tools to deliver better insights every day.",
             ].map((para, i) => (
               <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.85, marginBottom: 18 }}>{para}</p>

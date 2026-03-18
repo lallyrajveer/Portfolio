@@ -55,6 +55,20 @@ function ScenarioTab() {
   const foreData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_v: bear[i].revenue, base_v: base[i].revenue, bull_v: bull[i].revenue, custom_v: custom[i].revenue }));
   const chartData = [...histData.slice(0, -1), lastHistPatched, ...foreData];
 
+  // ARM trajectory chart data
+  const lastHistARM = HISTORICAL[HISTORICAL.length - 1].arm;
+  const armHistData = HISTORICAL.map(h => ({ period: h.period, actual: h.arm, bear_a: null, base_a: null, bull_a: null, custom_a: null }));
+  const armLastHist = { ...armHistData[armHistData.length - 1], bear_a: lastHistARM, base_a: lastHistARM, bull_a: lastHistARM, custom_a: lastHistARM };
+  const armForeData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_a: bear[i].arm, base_a: base[i].arm, bull_a: bull[i].arm, custom_a: custom[i].arm }));
+  const armChartData = [...armHistData.slice(0, -1), armLastHist, ...armForeData];
+
+  // Subscriber trajectory chart data
+  const lastHistSubs = HISTORICAL[HISTORICAL.length - 1].subs;
+  const subsHistData = HISTORICAL.map(h => ({ period: h.period, actual: h.subs, bear_s: null, base_s: null, bull_s: null, custom_s: null }));
+  const subsLastHist = { ...subsHistData[subsHistData.length - 1], bear_s: lastHistSubs, base_s: lastHistSubs, bull_s: lastHistSubs, custom_s: lastHistSubs };
+  const subsForeData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_s: bear[i].subs, base_s: base[i].subs, bull_s: bull[i].subs, custom_s: custom[i].subs }));
+  const subsChartData = [...subsHistData.slice(0, -1), subsLastHist, ...subsForeData];
+
   const setDriver = (key, value) => {
     setCustomDrivers(prev => ({ ...prev, [key]: value }));
   };
@@ -70,9 +84,9 @@ function ScenarioTab() {
 
   return (
     <div>
-      {/* Board Report sync — small secondary row */}
+      {/* Executive Deck sync — small secondary row */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Board Report to:</span>
+        <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Executive Deck to:</span>
         {["bear","base","bull","custom"].map(key => {
           const active = scenario === key;
           return (
@@ -119,8 +133,8 @@ function ScenarioTab() {
                   </>
                 ) : (
                   <>
-                    <span>+{SCENARIOS[key].netAdds.toFixed(1)}M net adds/Q</span>
-                    <span>{SCENARIOS[key].armGrowth.toFixed(1)}% ARM/yr</span>
+                    <span>+{SCENARIOS[key].netAddsStart.toFixed(1)}→{SCENARIOS[key].netAddsEnd.toFixed(1)}M adds/Q</span>
+                    <span>{SCENARIOS[key].armGrowthStart.toFixed(1)}→{SCENARIOS[key].armGrowthEnd.toFixed(1)}% ARM/yr</span>
                     <span>{SCENARIOS[key].churn.toFixed(1)}% churn/mo</span>
                   </>
                 )}
@@ -131,6 +145,10 @@ function ScenarioTab() {
       </div>
 
       {/* Custom sliders — always visible */}
+      <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "10px 20px 6px", marginBottom: 4, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
+        <strong>Bear / Base / Bull</strong> are fixed research scenarios with preset assumptions — they represent named market views and cannot be edited.{" "}
+        <strong>Custom</strong> is your own working scenario: adjust the sliders below to test any combination of drivers. The Custom line updates all three charts in real time. Sync the Executive Deck to Custom when you want the financial outlook table to reflect your specific assumptions rather than a named case.
+      </div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "14px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16, display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-end" }}>
         <div style={{ alignSelf: "center", minWidth: 52 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#7C3AED" }}>Custom</div>
@@ -155,7 +173,7 @@ function ScenarioTab() {
             </div>
           );
         })}
-        <button onClick={() => setCustomDrivers({ netAdds: 6.0, armGrowth: 1.5, churn: 2.3 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap", alignSelf: "center" }}>
+        <button onClick={() => setCustomDrivers({ netAdds: 6.0, armGrowth: 3.0, churn: 2.3 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap", alignSelf: "center" }}>
           Reset
         </button>
       </div>
@@ -181,13 +199,61 @@ function ScenarioTab() {
         </ResponsiveContainer>
       </div>
 
+      {/* Subscriber trajectory chart */}
+      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 4px" }}>
+          Netflix — Paid Memberships (M)
+        </h3>
+        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
+          Subscriber growth across scenarios driven by net adds ramp. Bull ceiling reaches ~400M by Q4'27; Bear floor stays near 350M.
+        </p>
+        <ResponsiveContainer width="100%" height={280}>
+          <ComposedChart data={subsChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+            <CartesianGrid {...gridProps} />
+            <XAxis dataKey="period" tick={axisStyle} />
+            <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
+            <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}M` : "—", name]} />
+            <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
+            <Line dataKey="actual"   name="Historical" stroke={C.navy}          strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
+            <Line dataKey="bear_s"   name="Bear"       stroke={SC_COLORS.bear}   strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="base_s"   name="Base"       stroke={SC_COLORS.base}   strokeWidth={2.5} dot={false} connectNulls />
+            <Line dataKey="bull_s"   name="Bull"       stroke={SC_COLORS.bull}   strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="custom_s" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}   dot={false} connectNulls strokeDasharray="5 3" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* ARM trajectory chart */}
+      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 4px" }}>
+          Netflix — Forecasted ARM ($/mo)
+        </h3>
+        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
+          ARM ramps gradually as ad-tier CPM matures and pricing cycles compound. Historical = actuals; forecast lines show per-scenario trajectories.
+        </p>
+        <ResponsiveContainer width="100%" height={280}>
+          <ComposedChart data={armChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+            <CartesianGrid {...gridProps} />
+            <XAxis dataKey="period" tick={axisStyle} />
+            <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
+            <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}/mo` : "—", name]} />
+            <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
+            <Line dataKey="actual"   name="Historical" stroke={C.navy}         strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
+            <Line dataKey="bear_a"   name="Bear"       stroke={SC_COLORS.bear}  strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="base_a"   name="Base"       stroke={SC_COLORS.base}  strokeWidth={2.5} dot={false} connectNulls />
+            <Line dataKey="bull_a"   name="Bull"       stroke={SC_COLORS.bull}  strokeWidth={2}   dot={false} connectNulls />
+            <Line dataKey="custom_a" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}  dot={false} connectNulls strokeDasharray="5 3" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
       {/* Assumptions table — all 4 columns */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
         <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 14px" }}>
           Scenario Assumptions & Implied Revenue
         </h4>
         <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 7, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
-          <strong>ARM growth rationale:</strong> Netflix UCAN price hikes averaged ~7% in 2024 but global blended ARM is diluted by faster international growth at lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales. Base of 3%/yr reflects this blend; Bear (1%) assumes price-hike fatigue and mix headwinds; Bull (5%) assumes ad-tier CPM matures faster and UCAN hikes continue unabated.
+          <strong>ARM growth rationale:</strong> Netflix UCAN price hikes averaged ~7% in 2024 but global blended ARM is diluted by faster international growth at lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales — so ARM growth is expected to accelerate over the forecast as inventory matures. Base ramps 2→4%/yr (avg 3%); Bear 0.5→1.5% (price fatigue early, modest recovery); Bull 3.5→6.5% (ad-tier CPM matures faster, UCAN hikes continue). Custom scenario uses a flat rate.
         </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
@@ -200,8 +266,18 @@ function ScenarioTab() {
             </thead>
             <tbody>
               {[
-                ["Qtrly Net Adds (M)",      SCENARIOS.bear.netAdds,   SCENARIOS.base.netAdds,   SCENARIOS.bull.netAdds,   customDriversDisplay.netAdds,   v => `+${v.toFixed(1)}M`],
-                ["Annual ARM Growth (%)",    SCENARIOS.bear.armGrowth, SCENARIOS.base.armGrowth, SCENARIOS.bull.armGrowth, customDriversDisplay.armGrowth, v => `${v.toFixed(1)}%`],
+                ["Qtrly Net Adds (M)",
+                  `+${SCENARIOS.bear.netAddsStart}→${SCENARIOS.bear.netAddsEnd}M`,
+                  `+${SCENARIOS.base.netAddsStart}→${SCENARIOS.base.netAddsEnd}M`,
+                  `+${SCENARIOS.bull.netAddsStart}→${SCENARIOS.bull.netAddsEnd}M`,
+                  `+${customDriversDisplay.netAdds.toFixed(1)}M`,
+                  v => v],
+                ["Annual ARM Growth (%)",
+                  `${SCENARIOS.bear.armGrowthStart}→${SCENARIOS.bear.armGrowthEnd}%`,
+                  `${SCENARIOS.base.armGrowthStart}→${SCENARIOS.base.armGrowthEnd}%`,
+                  `${SCENARIOS.bull.armGrowthStart}→${SCENARIOS.bull.armGrowthEnd}%`,
+                  `${customDriversDisplay.armGrowth.toFixed(1)}%`,
+                  v => v],
                 ["Monthly Churn Rate (%)",   SCENARIOS.bear.churn,     SCENARIOS.base.churn,     SCENARIOS.bull.churn,     customDriversDisplay.churn,     v => `${v.toFixed(1)}%/mo`],
                 ["Implied FY2026E ($B)",     fy26.bear, fy26.base, fy26.bull, fy26.custom, v => `$${v.toFixed(1)}B`],
                 ["YoY vs FY2025 ($45.2B)",   fy26.bear-45.2, fy26.base-45.2, fy26.bull-45.2, fy26.custom-45.2, v => `${v>=0?"+":""}${((v/45.2)*100).toFixed(1)}%`],
@@ -251,7 +327,7 @@ function ScenarioTab() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Quarter","Begin Subs (M)","Gross Adds (M)","Churn Losses (M)","Net Adds (M)","End Subs (M)","Qtrly Rev ($B)"].map((h, i) => (
+                {["Quarter","Begin Subs (M)","Gross Adds (M)","Churn Losses (M)","Net Adds (M)","End Subs (M)","ARM ($/mo)","Qtrly Rev ($B)"].map((h, i) => (
                   <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${SC_COLORS[mechKey]}`, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
@@ -265,6 +341,7 @@ function ScenarioTab() {
                   <td style={{ padding: "8px 12px", textAlign: "center", color: "#dc2626" }}>−{row.churnLosses.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: SC_COLORS[mechKey], fontWeight: 700 }}>+{row.netAdds.toFixed(1)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy, fontWeight: 600 }}>{row.endSubs.toFixed(1)}</td>
+                  <td style={{ padding: "8px 12px", textAlign: "center", color: SC_COLORS[mechKey], fontWeight: 600 }}>${row.arm.toFixed(2)}</td>
                   <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy }}>${row.revenue.toFixed(2)}B</td>
                 </tr>
               ))}
@@ -274,7 +351,7 @@ function ScenarioTab() {
         <p style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
           Churn losses = {mechChurn.toFixed(1)}%/mo × Begin Subs × 3 months.
           Gross adds = new subscribers needed to hit the net adds target at that churn rate.
-          Higher churn inflates gross adds needed, driving up CAC — captured in the margin model.
+          Higher churn inflates gross adds needed, driving up customer acquisition cost.
         </p>
       </div>
     </div>
@@ -287,33 +364,97 @@ function ScenarioTab() {
 function SensitivityTab() {
   const sc = SCENARIOS.base;
 
+  const baseNetAdds  = (sc.netAddsStart  + sc.netAddsEnd)  / 2;
+  const baseArmGrowth = (sc.armGrowthStart + sc.armGrowthEnd) / 2;
+
+  // Revenue from flat drivers (net-adds and ARM growth held fixed)
   const computeRev = (netAdds, armGrowth, churn) => {
     const fc = buildForecast(START.subs, START.arm, netAdds, armGrowth, churn, QUARTERS);
     return { fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) };
   };
 
-  const baseResult = computeRev(sc.netAdds, sc.armGrowth, sc.churn);
+  // Churn sensitivity: hold gross adds fixed at base level; higher churn reduces net adds → revenue
+  const baseFC = buildForecast(START.subs, START.arm, baseNetAdds, baseArmGrowth, sc.churn, QUARTERS);
+  const computeRevChurnSensitivity = (churnRate) => {
+    let subs = START.subs;
+    let arm  = START.arm;
+    const revs = [];
+    for (let qi = 0; qi < QUARTERS.length; qi++) {
+      const grossAdds   = baseFC[qi].grossAdds;
+      const churnLosses = churnRate / 100 * subs * 3;
+      const netAdds     = grossAdds - churnLosses;
+      const endSubs     = subs + netAdds;
+      const avgSubs     = (subs + endSubs) / 2;
+      arm = arm * (1 + baseArmGrowth / 400);
+      revs.push(+(avgSubs * arm * 3 / 1000).toFixed(2));
+      subs = endSubs;
+    }
+    return {
+      fy26: +revs.slice(0, 4).reduce((s, v) => s + v, 0).toFixed(3),
+      fy27: +revs.slice(4, 8).reduce((s, v) => s + v, 0).toFixed(3),
+    };
+  };
 
+  const baseResult          = computeRev(baseNetAdds, baseArmGrowth, sc.churn);
+  // Churn uses its own base so delta comparison is apples-to-apples within the fixed-gross-adds model
+  const churnSensBaseResult = computeRevChurnSensitivity(sc.churn);
+
+  // Absolute test ranges — economically meaningful stress tests, not ±% of the rate
   const drivers = [
-    { label: "Net Adds/Q",  key: "netAdds",   getFn: pct => computeRev(sc.netAdds * (1 + pct / 100), sc.armGrowth, sc.churn) },
-    { label: "ARM Growth",  key: "armGrowth", getFn: pct => computeRev(sc.netAdds, sc.armGrowth * (1 + pct / 100), sc.churn) },
-    { label: "Churn Rate",  key: "churn",     getFn: pct => computeRev(sc.netAdds, sc.armGrowth, sc.churn * (1 + pct / 100)) },
+    {
+      label: "Net Adds/Q", key: "netAdds", baseVal: baseNetAdds,
+      rows: [
+        { label: "Bear floor",   val: 2.0  },
+        { label: "Low",          val: 4.0  },
+        { label: "Base",         val: baseNetAdds, isBase: true },
+        { label: "High",         val: 8.0  },
+        { label: "Bull ceiling", val: 10.0 },
+      ],
+      getFn: val => computeRev(val, baseArmGrowth, sc.churn),
+      fmt: v => v.toFixed(1) + "M/Q",
+    },
+    {
+      label: "ARM Growth", key: "armGrowth", baseVal: baseArmGrowth,
+      rows: [
+        { label: "Price-hike pause",  val: 0.0  },
+        { label: "Modest",            val: 1.5  },
+        { label: "Base",              val: baseArmGrowth, isBase: true },
+        { label: "Strong hikes",      val: 4.5  },
+        { label: "Aggressive cycle",  val: 6.0  },
+      ],
+      getFn: val => computeRev(baseNetAdds, val, sc.churn),
+      fmt: v => v.toFixed(1) + "%/yr",
+    },
+    {
+      label: "Churn Rate", key: "churn", baseVal: sc.churn,
+      // baseOverride: delta is compared against churnSensBaseResult, not the fixed-net-adds baseResult.
+      // Without this, churn rows compare two different models (fixed-net-adds vs fixed-gross-adds),
+      // which produces zero or near-zero deltas even though churn materially affects subscriber counts.
+      baseOverride: churnSensBaseResult,
+      rows: [
+        { label: "Very low",  val: 1.8  },
+        { label: "Low",       val: 2.05 },
+        { label: "Base",      val: sc.churn, isBase: true },
+        { label: "Elevated",  val: 2.55 },
+        { label: "High",      val: 2.8  },
+      ],
+      getFn: val => computeRevChurnSensitivity(val),
+      fmt: v => v.toFixed(2) + "%/mo",
+    },
   ];
 
+  // Tornado: outermost test values per driver (churn uses its own base for apples-to-apples)
   const tornadoBars = [];
   drivers.forEach(d => {
-    [-10, -5, 5, 10].forEach(pct => {
-      const res   = d.getFn(pct);
-      const delta = +(res.fy26 - baseResult.fy26).toFixed(3);
-      tornadoBars.push({ label: `${d.label} ${pct > 0 ? "+" : ""}${pct}%`, delta, color: delta >= 0 ? "#22c55e" : "#ef4444", driver: d.label, pct, fy26: res.fy26, fy27: res.fy27 });
+    const effectiveBase = d.baseOverride ?? baseResult;
+    const extremes = [d.rows[0], d.rows[d.rows.length - 1]];
+    extremes.forEach(row => {
+      const res   = d.getFn(row.val);
+      const delta = +(res.fy26 - effectiveBase.fy26).toFixed(3);
+      tornadoBars.push({ label: `${d.label}: ${d.fmt(row.val)}`, delta, color: delta >= 0 ? "#22c55e" : "#ef4444", fy26: res.fy26, fy27: res.fy27 });
     });
   });
   tornadoBars.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
-
-  const tableRows = [
-    { pct: -10, label: "-10%" }, { pct: -5, label: "-5%" },
-    { pct: 0,  label: "Base" }, { pct: 5,  label: "+5%" }, { pct: 10, label: "+10%" },
-  ];
 
   return (
     <div>
@@ -321,8 +462,11 @@ function SensitivityTab() {
         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 6px" }}>
           Netflix — FY2026E Revenue Sensitivity
         </h3>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-          Impact of ±5% / ±10% driver changes on FY2026E annual revenue vs. Base ($B)
+        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 4px", fontFamily: "'Outfit', sans-serif" }}>
+          Absolute stress-test ranges per driver vs. Base case — FY2026E revenue delta ($B)
+        </p>
+        <p style={{ fontSize: 11, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
+          Churn: gross adds held fixed at base level; higher churn reduces net adds and revenue. Net Adds & ARM Growth: all other drivers held at base.
         </p>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart layout="vertical" data={tornadoBars} margin={{ top: 4, right: 60, bottom: 4, left: 120 }}>
@@ -357,19 +501,17 @@ function SensitivityTab() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tableRows.map(({ pct, label }) => {
-                    const isBase = pct === 0;
-                    const res    = isBase ? baseResult : d.getFn(pct);
-                    const dv     = isBase ? sc[d.key] : sc[d.key] * (1 + pct / 100);
-                    const deltaB   = +(res.fy26 - baseResult.fy26).toFixed(3);
-                    const deltaPct = +((deltaB / baseResult.fy26) * 100).toFixed(2);
-                    const rowBg = isBase ? "#FFFBEB" : deltaB > 0 ? "#F0FDF4" : deltaB < 0 ? "#FEF2F2" : "#fff";
+                  {d.rows.map(row => {
+                    const isBase       = !!row.isBase;
+                    const effectiveBase = d.baseOverride ?? baseResult;
+                    const res          = isBase ? effectiveBase : d.getFn(row.val);
+                    const deltaB       = +(res.fy26 - effectiveBase.fy26).toFixed(3);
+                    const deltaPct     = +((deltaB / effectiveBase.fy26) * 100).toFixed(2);
+                    const rowBg    = isBase ? "#FFFBEB" : deltaB > 0 ? "#F0FDF4" : deltaB < 0 ? "#FEF2F2" : "#fff";
                     return (
-                      <tr key={pct} style={{ background: rowBg }}>
-                        <td style={{ padding: "8px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{label}</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>
-                          {d.key === "netAdds" ? dv.toFixed(1) + "M" : dv.toFixed(2) + "%/mo"}
-                        </td>
+                      <tr key={row.label} style={{ background: rowBg }}>
+                        <td style={{ padding: "8px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{row.label}</td>
+                        <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>{d.fmt(row.val)}</td>
                         <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
                         <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
                         <td style={{ padding: "8px 12px", textAlign: "center", color: isBase ? C.tick : deltaB > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
@@ -391,170 +533,6 @@ function SensitivityTab() {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════
-   TAB 3 — MARGIN & EBITDA
-   ══════════════════════════════════════════════════════════════ */
-
-// Netflix FY2025 actual: ~29% operating margin. FY2024: 26.7%.
-// Bear: content cost inflation + elevated churn → higher CAC compresses margin.
-// Base: continuation of FY2025 guided range (26–29%), modest efficiency gains.
-// Bull: strong operating leverage as revenue scales faster than content spend.
-const MARGIN_SCENARIOS = {
-  bear: { fy26: 0.25, fy27: 0.26, label: "Cost Pressure",      color: "#DC2626", desc: "Content cost inflation (+5% YoY), elevated churn → higher gross adds needed → higher CAC. Limited pricing leverage compresses margin vs. FY2025." },
-  base: { fy26: 0.28, fy27: 0.29, label: "Guided Continuation", color: "#1D4ED8", desc: "Consistent with Netflix's stated 26–29% operating margin target. Modest content spend efficiency and ad-tier contribution partially offset FX headwinds." },
-  bull: { fy26: 0.31, fy27: 0.33, label: "Operating Leverage",  color: "#16A34A", desc: "Revenue scales faster than content spend. Ad-tier CPM matures, pricing power holds in UCAN/EMEA. Low churn reduces gross add CAC burden significantly." },
-};
-
-// Netflix FY2025 operating cost context (approximate):
-//   Content amortization: ~$15–17B   Marketing: ~$2.5B   Tech & Dev: ~$3B   G&A: ~$1.5B
-//   Total operating costs: ~$32B on $45.2B revenue → ~29% op margin
-const FY25_REV = 45.2;
-const FY25_OP_INC = FY25_REV * 0.29; // ~$13.1B baseline
-
-function EBITDATab() {
-  const bear = getForecast("bear");
-  const base = getForecast("base");
-  const bull = getForecast("bull");
-
-  const revScenarios = [
-    { key: "bear", label: "Bear", fy26rev: +getFY(bear, 2026).toFixed(1), fy27rev: +getFY(bull, 2027).toFixed(1), color: "#DC2626" },
-    { key: "base", label: "Base", fy26rev: +getFY(base, 2026).toFixed(1), fy27rev: +getFY(base, 2027).toFixed(1), color: "#1D4ED8" },
-    { key: "bull", label: "Bull", fy26rev: +getFY(bull, 2026).toFixed(1), fy27rev: +getFY(bull, 2027).toFixed(1), color: "#16A34A" },
-  ];
-  // fix bear fy27 (was accidentally set to bull)
-  revScenarios[0].fy27rev = +getFY(bear, 2027).toFixed(1);
-
-  const marginKeys = ["bear", "base", "bull"];
-
-  const matrixData26 = revScenarios.map(r => {
-    const row = { revLabel: `${r.label} Rev ($${r.fy26rev}B)`, revColor: r.color };
-    marginKeys.forEach(mk => {
-      row[mk] = +(r.fy26rev * MARGIN_SCENARIOS[mk].fy26).toFixed(1);
-    });
-    return row;
-  });
-  const matrixData27 = revScenarios.map(r => {
-    const row = { revLabel: `${r.label} Rev ($${r.fy27rev}B)`, revColor: r.color };
-    marginKeys.forEach(mk => {
-      row[mk] = +(r.fy27rev * MARGIN_SCENARIOS[mk].fy27).toFixed(1);
-    });
-    return row;
-  });
-
-  // Waterfall-style bar data: Base rev + Base margin for each year, vs FY2025
-  const waterfallData = [
-    { period: "FY2025A",   opInc: +FY25_OP_INC.toFixed(1),              fill: "#6B7280" },
-    { period: "FY2026E Bear", opInc: +(revScenarios[0].fy26rev * MARGIN_SCENARIOS.bear.fy26).toFixed(1), fill: "#DC2626" },
-    { period: "FY2026E Base", opInc: +(revScenarios[1].fy26rev * MARGIN_SCENARIOS.base.fy26).toFixed(1), fill: "#1D4ED8" },
-    { period: "FY2026E Bull", opInc: +(revScenarios[2].fy26rev * MARGIN_SCENARIOS.bull.fy26).toFixed(1), fill: "#16A34A" },
-    { period: "FY2027E Bear", opInc: +(revScenarios[0].fy27rev * MARGIN_SCENARIOS.bear.fy27).toFixed(1), fill: "#DC2626" },
-    { period: "FY2027E Base", opInc: +(revScenarios[1].fy27rev * MARGIN_SCENARIOS.base.fy27).toFixed(1), fill: "#1D4ED8" },
-    { period: "FY2027E Bull", opInc: +(revScenarios[2].fy27rev * MARGIN_SCENARIOS.bull.fy27).toFixed(1), fill: "#16A34A" },
-  ];
-
-  return (
-    <div>
-      {/* Methodology note */}
-      <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "12px 16px", marginBottom: 20, fontSize: 12, color: "#1E40AF", fontFamily: "'Outfit', sans-serif", lineHeight: 1.6 }}>
-        <strong>Margin model:</strong> Operating income = Revenue × Operating margin %. Margin scenarios are independent of revenue scenarios — each intersection shows a distinct outcome.
-        Netflix FY2025 actual operating margin: ~29% ($13.1B on $45.2B). FY2024: 26.7%.
-        Bear margin reflects content cost inflation and higher gross-add CAC from elevated churn. Bull margin reflects operating leverage as revenue scales faster than the (largely fixed) content amortization base.
-      </div>
-
-      {/* Margin scenario cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginBottom: 20 }}>
-        {marginKeys.map(mk => {
-          const m = MARGIN_SCENARIOS[mk];
-          return (
-            <div key={mk} style={{ background: "#fff", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${m.color}` }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: m.color, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>{m.label}</div>
-              <div style={{ display: "flex", gap: 16, marginBottom: 8 }}>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#0B1628", lineHeight: 1 }}>{(m.fy26 * 100).toFixed(0)}%</div>
-                  <div style={{ fontSize: 10, color: "#6B7280" }}>FY2026E margin</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#0B1628", lineHeight: 1 }}>{(m.fy27 * 100).toFixed(0)}%</div>
-                  <div style={{ fontSize: 10, color: "#6B7280" }}>FY2027E margin</div>
-                </div>
-              </div>
-              <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.5 }}>{m.desc}</div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Operating income bar chart */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 6px" }}>
-          Implied Operating Income — All Combinations ($B)
-        </h3>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-          Each bar = Revenue scenario × its matching margin scenario. Red = Bear, Blue = Base, Green = Bull.
-        </p>
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={waterfallData} margin={{ top: 8, right: 20, bottom: 4, left: 8 }}>
-            <CartesianGrid {...gridProps} />
-            <XAxis dataKey="period" tick={{ fontSize: 10, fill: C.tick }} />
-            <YAxis tick={axisStyle} tickFormatter={v => `$${v}B`} width={52} domain={[0, "auto"]} />
-            <Tooltip formatter={v => [`$${v}B`, "Op. Income"]} />
-            <ReferenceLine y={FY25_OP_INC} stroke={C.grid} strokeDasharray="4 2" label={{ value: `FY25A $${FY25_OP_INC.toFixed(1)}B`, position: "insideTopRight", fontSize: 10, fill: C.muted }} />
-            <Bar dataKey="opInc" radius={[4, 4, 0, 0]}>
-              {waterfallData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Sensitivity matrix */}
-      {[{ year: "FY2026E", data: matrixData26 }, { year: "FY2027E", data: matrixData27 }].map(({ year, data }) => (
-        <div key={year} style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-          <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 14px" }}>
-            {year} — Operating Income Sensitivity Matrix ($B)
-          </h4>
-          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 12px", fontFamily: "'Outfit', sans-serif" }}>
-            Rows = revenue scenario · Columns = margin scenario · Each cell = Revenue × Margin
-          </p>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
-            <thead>
-              <tr>
-                <th style={{ padding: "9px 14px", textAlign: "left", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}` }}>Revenue Scenario</th>
-                {marginKeys.map(mk => (
-                  <th key={mk} style={{ padding: "9px 14px", textAlign: "center", background: "#F4F5F8", color: MARGIN_SCENARIOS[mk].color, fontWeight: 700, borderBottom: `2px solid ${C.NF}` }}>
-                    {MARGIN_SCENARIOS[mk].label}<br /><span style={{ fontWeight: 400, color: C.muted, fontSize: 11 }}>{((year === "FY2026E" ? MARGIN_SCENARIOS[mk].fy26 : MARGIN_SCENARIOS[mk].fy27) * 100).toFixed(0)}% margin</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, ri) => (
-                <tr key={ri} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
-                  <td style={{ padding: "9px 14px", fontWeight: 600, color: row.revColor }}>{row.revLabel}</td>
-                  {marginKeys.map(mk => {
-                    const val = row[mk];
-                    const isBase = mk === "base" && row.revLabel.startsWith("Base");
-                    return (
-                      <td key={mk} style={{ padding: "9px 14px", textAlign: "center", fontWeight: isBase ? 700 : 500, color: isBase ? C.NF : C.navy, background: isBase ? "#FFF8F8" : undefined }}>
-                        ${val.toFixed(1)}B
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
-
-      {/* Cost context footnote */}
-      <div style={{ background: "#F8F9FA", borderRadius: 8, padding: "14px 16px", fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif", lineHeight: 1.6 }}>
-        <strong style={{ color: C.navy }}>Cost structure context (FY2025 approximate):</strong> Content amortization ~$15–17B · Marketing ~$2.5B · Technology & Development ~$3.0B · G&A ~$1.5B · Total operating costs ~$32B.
-        Operating leverage arises because content spend is largely fixed in the near term (multi-year licensing, studio output deals) while incremental ARM and subscriber revenue flows through at high contribution margin.
-        Bear margin compression driven primarily by higher gross-add CAC (more subscribers must be acquired to offset elevated churn) and content cost inflation not offset by ARM growth.
-      </div>
-    </div>
-  );
-}
 
 /* ══════════════════════════════════════════════════════════════
    ROOT
@@ -568,7 +546,6 @@ export default function NetflixRevenueForecast() {
   const tabs = [
     { id: "scenarios",   label: "Scenario Forecast" },
     { id: "sensitivity", label: "Sensitivity Analysis" },
-    { id: "ebitda",      label: "Margin & EBITDA" },
   ];
 
   return (
@@ -625,7 +602,6 @@ export default function NetflixRevenueForecast() {
       <div style={{ paddingBottom: 28 }}>
         {activeTab === "scenarios"   && <ScenarioTab />}
         {activeTab === "sensitivity" && <SensitivityTab />}
-        {activeTab === "ebitda"      && <EBITDATab />}
       </div>
 
       {/* Footer */}

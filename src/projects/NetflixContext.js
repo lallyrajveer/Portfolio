@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 const LS_SCENARIO = "netflix_scenario";
 const LS_DRIVERS  = "netflix_custom_drivers";
 
-const DEFAULT_DRIVERS = { netAdds: 6.0, armGrowth: 1.5, churn: 2.3 };
+const DEFAULT_DRIVERS = { netAdds: 6.0, armGrowth: 3.0, churn: 2.3 };
 
 function readLS(key, fallback) {
   try {

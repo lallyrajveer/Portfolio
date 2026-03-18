@@ -56,7 +56,7 @@ export const projects = [
     title: "Netflix Revenue Forecast — ARM-Based Model",
     category: "Forecasting",
     description:
-      "Driver-based revenue forecast for Netflix through FY2027, projecting from two key levers — quarterly net membership adds and annual ARM growth — across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and a custom scenario builder synced to the Board Report.",
+      "Driver-based revenue forecast for Netflix through FY2027, projecting from two key levers — quarterly net membership adds and annual ARM growth — across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and a custom scenario builder synced to the Executive Deck.",
     date: "Q1 2026",
     tags: ["forecast", "Netflix", "streaming", "scenario analysis", "ARM", "driver-based"],
     featured: true,
@@ -64,12 +64,12 @@ export const projects = [
   },
   {
     id: "netflix-board-report",
-    title: "Netflix Streaming Strategy — Board Report",
+    title: "Netflix Streaming Strategy — Executive Deck",
     category: "Board Reporting",
     description:
-      "Board-level strategic report from a Netflix FP&A perspective. Presents FY2025 competitive KPIs, competitive context vs. Disney+ and Max, five strategic priorities for FY2026–27, and a financial outlook table live-synced to the Netflix Revenue Forecast scenario selector.",
+      "Exec-facing strategic deck from a Netflix FP&A perspective. Presents FY2025 competitive KPIs, competitive context vs. Disney+ and Max, five strategic priorities for FY2026–27, and a financial outlook table live-synced to the Netflix Revenue Forecast scenario selector.",
     date: "Q1 2026",
-    tags: ["board report", "strategy", "Netflix", "streaming", "FP&A"],
+    tags: ["executive deck", "strategy", "Netflix", "streaming", "FP&A"],
     featured: true,
     component: NetflixBoardReport,
   },

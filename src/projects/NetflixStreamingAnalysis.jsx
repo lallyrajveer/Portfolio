@@ -140,8 +140,8 @@ const insights = [
     color: DISNEY,
   },
   {
-    title: "Max accelerating with global expansion",
-    body: "Max added 34M subscribers in FY2025, driven by international market launches across Europe and Latin America. Revenue per member declined as international mix grows, but total DTC revenue reached $11.1B.",
+    title: "Max: volume growth, price compression — a threat to Netflix's ad tier",
+    body: "Max added 34M subscribers in FY2025 while ARM fell from $7.77 to $7.19 — a 7% decline in monetization as international mix grew. This is a price-led growth strategy, not a quality-led one. The direct competitive risk to Netflix is at the ad-supported tier: if Max establishes itself as the premium-but-cheaper alternative in EMEA and Latin America at $7/mo, it caps Netflix's ability to raise ad-tier prices in those markets without triggering churn to Max. The mitigant: Max's content library is weaker in non-English markets, and Netflix's local-language originals (Squid Game, etc.) create switching costs Max cannot easily replicate. Net read: monitor Max's ARM trajectory in UCAN specifically — if it stabilizes or rises, the price war stays international. If it drops further in UCAN, Netflix's pricing power is being directly tested.",
     color: MAX,
   },
   {
@@ -517,13 +517,30 @@ function RevenueTab() {
 function ARMTab() {
   return (
     <div>
+      {/* Process note — analytical decisions */}
+      <div style={{ background: "#F0F4FF", border: "1px solid #C7D2FE", borderRadius: 8, padding: "14px 18px", marginBottom: 20, fontSize: 12, color: "#3730A3", lineHeight: 1.7 }}>
+        <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 13 }}>Analytical Decisions — Why ARM?</div>
+        <p style={{ margin: "0 0 8px" }}>
+          The first cut of this analysis used subscriber count as the primary forecast driver — the most obvious metric. But plotting Netflix's quarterly net adds alongside revenue immediately showed the problem: net adds are volatile (from 1.75M in Q1'23 to 19M in Q4'24), while revenue growth has been remarkably smooth. The variance in subscribers was noise; the signal was in monetization.
+        </p>
+        <p style={{ margin: "0 0 8px" }}>
+          ARM — Average Revenue per Membership — showed a consistent upward trend (+~4% blended CAGR) driven by ad-tier rollout, international price normalization, and UCAN hikes. That stability made it a far better forecast anchor than net adds. The model was rebuilt as ARM × subscribers, with net adds as a secondary driver for subscriber count projection.
+        </p>
+        <p style={{ margin: 0 }}>
+          <strong>Amazon required a judgment call.</strong> Its ARM initially appeared highest in the dataset (~$18/mo), which looked like a data error. Tracing it back, the number is correct — but it comes from the full Subscription Services segment, which bundles Prime shipping, Music, and Audible. Including Amazon in a pure-play ARM comparison would overstate its streaming monetization and distort the peer ranking. It is shown with a prominent caveat and dashed line rather than removed, because the bundle premium is itself analytically interesting.
+        </p>
+      </div>
+
       <SectionCard title="Average Revenue per Membership — Monthly ($/mo)">
         <p style={{ fontSize: 12, color: MUTED, margin: "0 0 4px" }}>
           ARM = Quarterly Revenue ÷ (3 × Avg Paid Members). Disney ARM includes Hulu blended into DTC segment.
         </p>
-        <p style={{ fontSize: 12, color: "#D97706", margin: "0 0 16px" }}>
+        <p style={{ fontSize: 12, color: "#D97706", margin: "0 0 8px" }}>
           ⚠ Disney Q3'23 ARM jump reflects Hotstar reclassification (fewer members, similar revenue base) — not a real price increase.
         </p>
+        <div style={{ background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#92400E" }}>
+          <strong>⚠ Amazon ARM is not comparable to other services.</strong> It is calculated from the full <em>Subscription Services</em> segment (Prime shipping + Prime Video + Prime Music + Audible) — not video-only revenue. Amazon's ARM will always appear elevated due to bundling; it does not reflect what members pay for streaming alone.
+        </div>
         <ResponsiveContainer width="100%" height={340}>
           <LineChart data={armQ} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
             <CartesianGrid {...gridProps} />
