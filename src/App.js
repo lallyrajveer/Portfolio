@@ -129,6 +129,142 @@ function CategoryPill({ cat }) {
   );
 }
 
+// ── Netflix Integrated Workflow Diagram ──────────────────────
+const WORKFLOW_NODES = [
+  {
+    id:    "netflix-streaming-analysis",
+    step:  "01",
+    role:  "Foundation",
+    title: "Competitive Analysis",
+    desc:  "5-service KPI benchmarks across Netflix, Amazon Prime, Disney+, Max, and Paramount+ — subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025.",
+    tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
+  },
+  {
+    id:    "netflix-revenue-forecast",
+    step:  "02",
+    role:  "Model",
+    title: "Revenue Forecast",
+    desc:  "Driver-based ARM × net adds model. Subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, sensitivity tornado, and EBITDA margin sensitivity.",
+    tags:  ["Bear / Base / Bull", "Sensitivity analysis", "EBITDA tab"],
+  },
+  {
+    id:    "netflix-board-report",
+    step:  "03",
+    role:  "Output",
+    title: "Board Report",
+    desc:  "Exec-ready board pack: FY2025 KPIs, competitive positioning, five strategic priorities for FY2026–27, and a financial outlook table live-synced to the forecast.",
+    tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
+  },
+];
+
+const CONNECTOR_LABELS = [
+  { top: "Competitive ARM & churn", bottom: "inform model assumptions" },
+  { top: "Scenario selector", bottom: "syncs financial outlook live" },
+];
+
+function NetflixWorkflow() {
+  const [hovered, setHovered] = useState(null);
+  return (
+    <section style={{ background: "#060E1A", padding: "64px 56px", borderTop: "1px solid rgba(201,168,76,0.10)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Case Study</span>
+          </div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
+            One Integrated FP&A Workflow
+          </h2>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, fontFamily: "'Outfit', sans-serif" }}>
+            Three connected projects — competitive data feeds the model; the model drives the board presentation.
+          </p>
+        </div>
+
+        {/* Flow */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 112px 1fr 112px 1fr", alignItems: "stretch" }}>
+
+          {WORKFLOW_NODES.map((node, i) => (
+            <div key={node.id} style={{ display: "contents" }}>
+              {/* Card */}
+              <div
+                onClick={() => window.open(`#/project/${node.id}`, "_blank")}
+                onMouseEnter={() => setHovered(node.id)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  background: hovered === node.id ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${hovered === node.id ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.08)"}`,
+                  borderRadius: 10,
+                  padding: "24px 22px",
+                  cursor: "pointer",
+                  transition: "all 0.18s",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                {/* Step badge + role */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 26, height: 26, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ color: "#fff", fontWeight: 900, fontSize: 11 }}>{node.step}</span>
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#C9A84C" }}>{node.role}</span>
+                </div>
+
+                {/* Title */}
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "#fff", marginBottom: 10 }}>
+                  {node.title}
+                </div>
+
+                {/* Description */}
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.65, marginBottom: 18, flex: 1 }}>
+                  {node.desc}
+                </div>
+
+                {/* Tags */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                  {node.tags.map(t => (
+                    <span key={t} style={{ fontSize: 10, color: "#C9A84C", border: "1px solid rgba(201,168,76,0.28)", borderRadius: 20, padding: "2px 9px", fontFamily: "'Outfit', sans-serif" }}>{t}</span>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
+                  Open project →
+                </div>
+              </div>
+
+              {/* Connector (between cards only) */}
+              {i < WORKFLOW_NODES.length - 1 && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+                  {/* Arrow line */}
+                  <div style={{ width: "100%", display: "flex", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.3)" }} />
+                    <div style={{ color: "#C9A84C", fontSize: 16, lineHeight: 1, marginLeft: 2 }}>▶</div>
+                  </div>
+                  {/* Label */}
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center", lineHeight: 1.5, fontFamily: "'Outfit', sans-serif" }}>
+                    {CONNECTOR_LABELS[i].top}<br />{CONNECTOR_LABELS[i].bottom}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+        </div>
+
+        {/* Bottom note */}
+        <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "'Outfit', sans-serif" }}>
+          Scenario selected in the Revenue Forecast updates the Board Report financial outlook in real time via shared React Context.
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
 // ── Project Modal (live preview) ─────────────────────────────
 
 // ── Project Card ─────────────────────────────────────────────
@@ -1010,6 +1146,9 @@ export default function App() {
           </div>
         </section>
       )}
+
+      {/* ── NETFLIX WORKFLOW ── */}
+      <NetflixWorkflow />
 
       {/* ── ALL PROJECTS ── */}
       <section id="projects" style={{ padding: "96px 56px", background: "#fff" }}>
