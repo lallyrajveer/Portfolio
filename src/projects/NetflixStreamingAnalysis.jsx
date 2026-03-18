@@ -9,7 +9,8 @@ import {
 const NETFLIX = "#E50914";
 const DISNEY  = "#113CCF";
 const MAX     = "#8B5CF6";
-const AMAZON  = "#FF9900";
+const AMAZON    = "#FF9900";
+const PARAMOUNT = "#0064FF";
 const DARK    = "#0B1628";
 const MUTED   = "#6B7280";
 const GRID    = "#E5E7EB";
@@ -23,91 +24,96 @@ const LIGHT   = "#F8F9FA";
 //   Amazon revenue = Subscription Services segment (Prime + Music + Audible — not video-only).
 //   Amazon ARM overstates pure video ARM due to bundled non-video services.
 //   Amazon net adds and subscribers are analyst estimates.
+// Paramount+ DTC includes Paramount+ (with Showtime from mid-2023) + Pluto TV ad revenue.
+//   Q2'24 sub decline: planned South Korea hard-bundle exit. Q2'25 decline: expiring intl deal.
+//   Skydance Media acquired Paramount Global in late 2024; reporting structure unchanged through FY2025.
 const subsQ = [
-  { q: "Q1'23", Netflix: 232.5, Disney: 157.8, Max:  97.6, Amazon: 202 },
-  { q: "Q2'23", Netflix: 238.4, Disney: 146.1, Max:  95.8, Amazon: 205 },
-  { q: "Q3'23", Netflix: 247.2, Disney: 112.6, Max:  95.1, Amazon: 207 },
-  { q: "Q4'23", Netflix: 260.3, Disney: 111.3, Max:  97.7, Amazon: 210 },
-  { q: "Q1'24", Netflix: 269.6, Disney: 117.6, Max:  99.6, Amazon: 212 },
-  { q: "Q2'24", Netflix: 277.7, Disney: 118.3, Max: 103.3, Amazon: 215 },
-  { q: "Q3'24", Netflix: 282.7, Disney: 122.7, Max: 110.5, Amazon: 218 },
-  { q: "Q4'24", Netflix: 301.6, Disney: 124.6, Max: 116.9, Amazon: 220 },
-  { q: "Q1'25", Netflix: 310.0, Disney: 126.4, Max: 122.3, Amazon: 222 },
-  { q: "Q2'25", Netflix: 320.0, Disney: 128.0, Max: 125.7, Amazon: 225 },
-  { q: "Q3'25", Netflix: 325.0, Disney: 132.0, Max: 128.0, Amazon: 228 },
-  { q: "Q4'25", Netflix: 332.0, Disney: 135.0, Max: 131.6, Amazon: 230 },
+  { q: "Q1'23", Netflix: 232.5, Disney: 157.8, Max:  97.6, Amazon: 202, Paramount:  60.0 },
+  { q: "Q2'23", Netflix: 238.4, Disney: 146.1, Max:  95.8, Amazon: 205, Paramount:  61.0 },
+  { q: "Q3'23", Netflix: 247.2, Disney: 112.6, Max:  95.1, Amazon: 207, Paramount:  63.0 },
+  { q: "Q4'23", Netflix: 260.3, Disney: 111.3, Max:  97.7, Amazon: 210, Paramount:  67.5 },
+  { q: "Q1'24", Netflix: 269.6, Disney: 117.6, Max:  99.6, Amazon: 212, Paramount:  71.2 },
+  { q: "Q2'24", Netflix: 277.7, Disney: 118.3, Max: 103.3, Amazon: 215, Paramount:  68.4 },
+  { q: "Q3'24", Netflix: 282.7, Disney: 122.7, Max: 110.5, Amazon: 218, Paramount:  72.0 },
+  { q: "Q4'24", Netflix: 301.6, Disney: 124.6, Max: 116.9, Amazon: 220, Paramount:  77.5 },
+  { q: "Q1'25", Netflix: 310.0, Disney: 126.4, Max: 122.3, Amazon: 222, Paramount:  79.0 },
+  { q: "Q2'25", Netflix: 320.0, Disney: 128.0, Max: 125.7, Amazon: 225, Paramount:  77.7 },
+  { q: "Q3'25", Netflix: 325.0, Disney: 132.0, Max: 128.0, Amazon: 228, Paramount:  79.1 },
+  { q: "Q4'25", Netflix: 332.0, Disney: 135.0, Max: 131.6, Amazon: 230, Paramount:  78.9 },
 ];
 
 const netAddsQ = [
-  { q: "Q1'23", Netflix:  1.75, Disney:  -4.0, Max:  1.8, Amazon: 2 },
-  { q: "Q2'23", Netflix:  5.90, Disney: -11.7, Max: -1.8, Amazon: 3 },
-  { q: "Q3'23", Netflix:  8.76, Disney: -33.5, Max: -0.7, Amazon: 2 },
-  { q: "Q4'23", Netflix: 13.12, Disney:  -1.3, Max:  2.6, Amazon: 3 },
-  { q: "Q1'24", Netflix:  9.33, Disney:   6.3, Max:  1.9, Amazon: 2 },
-  { q: "Q2'24", Netflix:  8.05, Disney:   0.7, Max:  3.7, Amazon: 3 },
-  { q: "Q3'24", Netflix:  5.07, Disney:   4.4, Max:  7.2, Amazon: 3 },
-  { q: "Q4'24", Netflix: 19.00, Disney:   1.9, Max:  6.4, Amazon: 2 },
-  { q: "Q1'25", Netflix:  8.40, Disney:   1.8, Max:  5.4, Amazon: 2 },
-  { q: "Q2'25", Netflix: 10.00, Disney:   1.6, Max:  3.4, Amazon: 3 },
-  { q: "Q3'25", Netflix:  5.00, Disney:   4.0, Max:  2.3, Amazon: 3 },
-  { q: "Q4'25", Netflix:  7.00, Disney:   3.0, Max:  3.6, Amazon: 2 },
+  { q: "Q1'23", Netflix:  1.75, Disney:  -4.0, Max:  1.8, Amazon: 2, Paramount:  4.1 },
+  { q: "Q2'23", Netflix:  5.90, Disney: -11.7, Max: -1.8, Amazon: 3, Paramount:  1.0 },
+  { q: "Q3'23", Netflix:  8.76, Disney: -33.5, Max: -0.7, Amazon: 2, Paramount:  2.0 },
+  { q: "Q4'23", Netflix: 13.12, Disney:  -1.3, Max:  2.6, Amazon: 3, Paramount:  4.5 },
+  { q: "Q1'24", Netflix:  9.33, Disney:   6.3, Max:  1.9, Amazon: 2, Paramount:  3.7 },
+  { q: "Q2'24", Netflix:  8.05, Disney:   0.7, Max:  3.7, Amazon: 3, Paramount: -2.8 },
+  { q: "Q3'24", Netflix:  5.07, Disney:   4.4, Max:  7.2, Amazon: 3, Paramount:  3.6 },
+  { q: "Q4'24", Netflix: 19.00, Disney:   1.9, Max:  6.4, Amazon: 2, Paramount:  5.5 },
+  { q: "Q1'25", Netflix:  8.40, Disney:   1.8, Max:  5.4, Amazon: 2, Paramount:  1.5 },
+  { q: "Q2'25", Netflix: 10.00, Disney:   1.6, Max:  3.4, Amazon: 3, Paramount: -1.3 },
+  { q: "Q3'25", Netflix:  5.00, Disney:   4.0, Max:  2.3, Amazon: 3, Paramount:  1.4 },
+  { q: "Q4'25", Netflix:  7.00, Disney:   3.0, Max:  3.6, Amazon: 2, Paramount: -0.2 },
 ];
 
 const revenueQ = [
-  { q: "Q1'23", Netflix:  8.16, Disney: 2.64, Max: 2.40, Amazon:  9.51 },
-  { q: "Q2'23", Netflix:  8.19, Disney: 2.67, Max: 2.40, Amazon:  9.89 },
-  { q: "Q3'23", Netflix:  8.54, Disney: 2.50, Max: 2.44, Amazon: 10.17 },
-  { q: "Q4'23", Netflix:  8.83, Disney: 2.40, Max: 2.50, Amazon: 10.74 },
-  { q: "Q1'24", Netflix:  9.37, Disney: 2.64, Max: 2.50, Amazon: 10.72 },
-  { q: "Q2'24", Netflix:  9.56, Disney: 2.67, Max: 2.55, Amazon: 10.91 },
-  { q: "Q3'24", Netflix:  9.83, Disney: 2.69, Max: 2.60, Amazon: 11.28 },
-  { q: "Q4'24", Netflix: 10.25, Disney: 2.82, Max: 2.65, Amazon: 11.57 },
-  { q: "Q1'25", Netflix: 10.54, Disney: 2.90, Max: 2.70, Amazon: 11.71 },
-  { q: "Q2'25", Netflix: 11.08, Disney: 2.95, Max: 2.80, Amazon: 11.95 },
-  { q: "Q3'25", Netflix: 11.51, Disney: 3.00, Max: 2.75, Amazon: 12.20 },
-  { q: "Q4'25", Netflix: 12.05, Disney: 3.05, Max: 2.80, Amazon: 12.49 },
+  { q: "Q1'23", Netflix:  8.16, Disney: 2.64, Max: 2.40, Amazon:  9.51, Paramount: 1.55 },
+  { q: "Q2'23", Netflix:  8.19, Disney: 2.67, Max: 2.40, Amazon:  9.89, Paramount: 1.60 },
+  { q: "Q3'23", Netflix:  8.54, Disney: 2.50, Max: 2.44, Amazon: 10.17, Paramount: 1.68 },
+  { q: "Q4'23", Netflix:  8.83, Disney: 2.40, Max: 2.50, Amazon: 10.74, Paramount: 1.87 },
+  { q: "Q1'24", Netflix:  9.37, Disney: 2.64, Max: 2.50, Amazon: 10.72, Paramount: 1.87 },
+  { q: "Q2'24", Netflix:  9.56, Disney: 2.67, Max: 2.55, Amazon: 10.91, Paramount: 1.88 },
+  { q: "Q3'24", Netflix:  9.83, Disney: 2.69, Max: 2.60, Amazon: 11.28, Paramount: 1.86 },
+  { q: "Q4'24", Netflix: 10.25, Disney: 2.82, Max: 2.65, Amazon: 11.57, Paramount: 2.01 },
+  { q: "Q1'25", Netflix: 10.54, Disney: 2.90, Max: 2.70, Amazon: 11.71, Paramount: 2.04 },
+  { q: "Q2'25", Netflix: 11.08, Disney: 2.95, Max: 2.80, Amazon: 11.95, Paramount: 2.10 },
+  { q: "Q3'25", Netflix: 11.51, Disney: 3.00, Max: 2.75, Amazon: 12.20, Paramount: 2.17 },
+  { q: "Q4'25", Netflix: 12.05, Disney: 3.05, Max: 2.80, Amazon: 12.49, Paramount: 2.21 },
 ];
 
 const revenueA = [
-  { year: "FY2022", Netflix: 31.6, Disney:  9.0, Max:  9.4, Amazon: 35.2 },
-  { year: "FY2023", Netflix: 33.7, Disney: 10.2, Max:  9.7, Amazon: 40.3 },
-  { year: "FY2024", Netflix: 39.0, Disney: 10.8, Max: 10.3, Amazon: 44.5 },
-  { year: "FY2025", Netflix: 45.2, Disney: 11.9, Max: 11.1, Amazon: 48.4 },
+  { year: "FY2022", Netflix: 31.6, Disney:  9.0, Max:  9.4, Amazon: 35.2, Paramount: 4.9 },
+  { year: "FY2023", Netflix: 33.7, Disney: 10.2, Max:  9.7, Amazon: 40.3, Paramount: 6.7 },
+  { year: "FY2024", Netflix: 39.0, Disney: 10.8, Max: 10.3, Amazon: 44.5, Paramount: 7.6 },
+  { year: "FY2025", Netflix: 45.2, Disney: 11.9, Max: 11.1, Amazon: 48.4, Paramount: 8.5 },
 ];
 
-// Monthly churn rate (%) — third-party analyst estimates (Antenna/YipitData).
+// Monthly churn rate (%) — third-party analyst estimates (Antenna/YipitData/Sci-Tech Today).
 // None of these companies officially report churn.
 // Amazon Prime churn is exceptionally low due to bundled shipping/music/other benefits.
+// Paramount+ Q3'24 confirmed at 4.94% (Sci-Tech Today); Q1'25 improved ~130bps YoY per Paramount earnings.
 const churnQ = [
-  { q: "Q1'23", Netflix: 2.40, Disney: 3.50, Max: 3.20, Amazon: 0.70 },
-  { q: "Q2'23", Netflix: 2.30, Disney: 3.80, Max: 3.50, Amazon: 0.70 },
-  { q: "Q3'23", Netflix: 2.20, Disney: 4.00, Max: 3.30, Amazon: 0.60 },
-  { q: "Q4'23", Netflix: 1.90, Disney: 3.20, Max: 3.00, Amazon: 0.60 },
-  { q: "Q1'24", Netflix: 2.10, Disney: 2.80, Max: 2.80, Amazon: 0.60 },
-  { q: "Q2'24", Netflix: 2.00, Disney: 2.70, Max: 2.60, Amazon: 0.60 },
-  { q: "Q3'24", Netflix: 2.30, Disney: 2.50, Max: 2.40, Amazon: 0.50 },
-  { q: "Q4'24", Netflix: 1.80, Disney: 2.40, Max: 2.20, Amazon: 0.50 },
-  { q: "Q1'25", Netflix: 2.00, Disney: 2.30, Max: 2.00, Amazon: 0.50 },
-  { q: "Q2'25", Netflix: 2.10, Disney: 2.20, Max: 2.10, Amazon: 0.50 },
-  { q: "Q3'25", Netflix: 2.00, Disney: 2.10, Max: 2.00, Amazon: 0.50 },
-  { q: "Q4'25", Netflix: 1.90, Disney: 2.00, Max: 1.90, Amazon: 0.50 },
+  { q: "Q1'23", Netflix: 2.40, Disney: 3.50, Max: 3.20, Amazon: 0.70, Paramount: 5.20 },
+  { q: "Q2'23", Netflix: 2.30, Disney: 3.80, Max: 3.50, Amazon: 0.70, Paramount: 5.30 },
+  { q: "Q3'23", Netflix: 2.20, Disney: 4.00, Max: 3.30, Amazon: 0.60, Paramount: 5.00 },
+  { q: "Q4'23", Netflix: 1.90, Disney: 3.20, Max: 3.00, Amazon: 0.60, Paramount: 4.70 },
+  { q: "Q1'24", Netflix: 2.10, Disney: 2.80, Max: 2.80, Amazon: 0.60, Paramount: 4.90 },
+  { q: "Q2'24", Netflix: 2.00, Disney: 2.70, Max: 2.60, Amazon: 0.60, Paramount: 5.20 },
+  { q: "Q3'24", Netflix: 2.30, Disney: 2.50, Max: 2.40, Amazon: 0.50, Paramount: 4.94 },
+  { q: "Q4'24", Netflix: 1.80, Disney: 2.40, Max: 2.20, Amazon: 0.50, Paramount: 4.50 },
+  { q: "Q1'25", Netflix: 2.00, Disney: 2.30, Max: 2.00, Amazon: 0.50, Paramount: 3.60 },
+  { q: "Q2'25", Netflix: 2.10, Disney: 2.20, Max: 2.10, Amazon: 0.50, Paramount: 3.80 },
+  { q: "Q3'25", Netflix: 2.00, Disney: 2.10, Max: 2.00, Amazon: 0.50, Paramount: 3.40 },
+  { q: "Q4'25", Netflix: 1.90, Disney: 2.00, Max: 1.90, Amazon: 0.50, Paramount: 3.20 },
 ];
 
 // ARM = quarterly revenue / (3 × avg memberships). Disney ARM includes Hulu blended.
 // Amazon ARM derived from Subscription Services revenue — overstates pure video ARM.
+// Paramount ARM derived from total DTC segment revenue (Paramount+ + Pluto TV ad revenue).
 const armQ = [
-  { q: "Q1'23", Netflix: 11.73, Disney: 5.51, Max: 8.27, Amazon: 15.77 },
-  { q: "Q2'23", Netflix: 11.60, Disney: 5.86, Max: 8.27, Amazon: 16.20 },
-  { q: "Q3'23", Netflix: 11.72, Disney: 6.44, Max: 8.52, Amazon: 16.46 },
-  { q: "Q4'23", Netflix: 11.60, Disney: 7.15, Max: 8.64, Amazon: 17.17 },
-  { q: "Q1'24", Netflix: 11.79, Disney: 7.69, Max: 8.46, Amazon: 16.94 },
-  { q: "Q2'24", Netflix: 11.64, Disney: 7.55, Max: 8.38, Amazon: 17.03 },
-  { q: "Q3'24", Netflix: 11.68, Disney: 7.44, Max: 8.11, Amazon: 17.37 },
-  { q: "Q4'24", Netflix: 11.69, Disney: 7.60, Max: 7.77, Amazon: 17.61 },
-  { q: "Q1'25", Netflix: 11.49, Disney: 7.70, Max: 7.53, Amazon: 17.66 },
-  { q: "Q2'25", Netflix: 11.72, Disney: 7.73, Max: 7.53, Amazon: 17.82 },
-  { q: "Q3'25", Netflix: 11.90, Disney: 7.69, Max: 7.23, Amazon: 17.95 },
-  { q: "Q4'25", Netflix: 12.23, Disney: 7.49, Max: 7.19, Amazon: 18.18 },
+  { q: "Q1'23", Netflix: 11.73, Disney: 5.51, Max: 8.27, Amazon: 15.77, Paramount: 8.91 },
+  { q: "Q2'23", Netflix: 11.60, Disney: 5.86, Max: 8.27, Amazon: 16.20, Paramount: 8.82 },
+  { q: "Q3'23", Netflix: 11.72, Disney: 6.44, Max: 8.52, Amazon: 16.46, Paramount: 9.03 },
+  { q: "Q4'23", Netflix: 11.60, Disney: 7.15, Max: 8.64, Amazon: 17.17, Paramount: 9.55 },
+  { q: "Q1'24", Netflix: 11.79, Disney: 7.69, Max: 8.46, Amazon: 16.94, Paramount: 8.99 },
+  { q: "Q2'24", Netflix: 11.64, Disney: 7.55, Max: 8.38, Amazon: 17.03, Paramount: 8.98 },
+  { q: "Q3'24", Netflix: 11.68, Disney: 7.44, Max: 8.11, Amazon: 17.37, Paramount: 8.83 },
+  { q: "Q4'24", Netflix: 11.69, Disney: 7.60, Max: 7.77, Amazon: 17.61, Paramount: 8.96 },
+  { q: "Q1'25", Netflix: 11.49, Disney: 7.70, Max: 7.53, Amazon: 17.66, Paramount: 8.69 },
+  { q: "Q2'25", Netflix: 11.72, Disney: 7.73, Max: 7.53, Amazon: 17.82, Paramount: 8.93 },
+  { q: "Q3'25", Netflix: 11.90, Disney: 7.69, Max: 7.23, Amazon: 17.95, Paramount: 9.23 },
+  { q: "Q4'25", Netflix: 12.23, Disney: 7.49, Max: 7.19, Amazon: 18.18, Paramount: 9.32 },
 ];
 
 const kpiCards = [
@@ -143,6 +149,11 @@ const insights = [
     body: "Amazon Prime's ~230M global members make it the largest subscriber base, but video is bundled with shipping and other services. This drives industry-low churn (~0.5%/mo) and high ARM — though both metrics reflect the full Prime bundle, not video alone.",
     color: AMAZON,
   },
+  {
+    title: "Paramount+: fastest-improving churn story",
+    body: "Paramount+ reduced monthly churn from ~5.2% in 2023 to ~3.2% by Q4'25 — the largest churn improvement among peers. The Showtime content integration, Skydance acquisition, and sports rights (NFL, UEFA) are stabilizing the subscriber base despite periodic distribution deal lapses.",
+    color: PARAMOUNT,
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -161,12 +172,13 @@ function ChurnTab() {
       </div>
 
       {/* Summary cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 20 }}>
         {[
-          { name: "Netflix", color: NETFLIX, val: latest.Netflix, note: "Price increases Q3'24 uptick; ad-tier improves retention long-term" },
-          { name: "Disney+", color: DISNEY,  val: latest.Disney,  note: "Improved from ~4% highs in 2023 as content investment stabilized" },
-          { name: "Max",     color: MAX,     val: latest.Max,     note: "Declining steadily as bundling with Disney+ reduces churn pressure" },
-          { name: "Amazon*", color: AMAZON,  val: latest.Amazon,  note: "Industry-low churn driven by Prime shipping/music bundle lock-in" },
+          { name: "Netflix",     color: NETFLIX,    val: latest.Netflix,    note: "Ad-tier growth improving long-term retention; PW crackdown drove near-term improvement" },
+          { name: "Disney+",     color: DISNEY,     val: latest.Disney,     note: "Improved from ~4% highs in 2023 as content investment stabilized" },
+          { name: "Max",         color: MAX,        val: latest.Max,        note: "Declining steadily as bundling with Disney+ reduces churn pressure" },
+          { name: "Amazon*",     color: AMAZON,     val: latest.Amazon,     note: "Industry-low churn driven by Prime shipping/music bundle lock-in" },
+          { name: "Paramount+",  color: PARAMOUNT,  val: latest.Paramount,  note: "Largest churn improvement among peers — down from ~5.2% in 2023" },
         ].map(s => (
           <div key={s.name} style={{ background: "#fff", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${s.color}` }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: s.color, marginBottom: 6 }}>{s.name}</div>
@@ -185,15 +197,16 @@ function ChurnTab() {
           <LineChart data={churnQ} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
             <CartesianGrid {...gridProps} />
             <XAxis dataKey="q" tick={axisStyle} />
-            <YAxis tick={axisStyle} tickFormatter={v => `${v}%`} domain={[0, 4.5]} width={44} />
+            <YAxis tick={axisStyle} tickFormatter={v => `${v}%`} domain={[0, 6]} width={44} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <ReferenceLine x="Q3'23" stroke={DISNEY} strokeDasharray="4 2" strokeWidth={1}
               label={{ value: "PW sharing crackdown", position: "top", fontSize: 10, fill: DISNEY }} />
-            <Line dataKey="Netflix" stroke={NETFLIX} strokeWidth={2.5} dot={false} />
-            <Line dataKey="Disney"  stroke={DISNEY}  strokeWidth={2}   dot={false} />
-            <Line dataKey="Max"     stroke={MAX}      strokeWidth={2}   dot={false} />
-            <Line dataKey="Amazon"  stroke={AMAZON}   strokeWidth={2}   dot={false} strokeDasharray="5 3" />
+            <Line dataKey="Netflix"   stroke={NETFLIX}   strokeWidth={2.5} dot={false} />
+            <Line dataKey="Paramount" stroke={PARAMOUNT} strokeWidth={2}   dot={false} strokeDasharray="3 2" />
+            <Line dataKey="Disney"    stroke={DISNEY}    strokeWidth={2}   dot={false} />
+            <Line dataKey="Max"       stroke={MAX}       strokeWidth={2}   dot={false} />
+            <Line dataKey="Amazon"    stroke={AMAZON}    strokeWidth={2}   dot={false} strokeDasharray="5 3" />
           </LineChart>
         </ResponsiveContainer>
         <p style={{ fontSize: 11, color: "#D97706", margin: "8px 0 0" }}>* Amazon Prime churn is analyst-estimated; reflects full Prime membership, not video-only cancellations.</p>
@@ -204,7 +217,7 @@ function ChurnTab() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Quarter","Netflix","Disney+","Max","Amazon*","NF–DIS Gap","NF–MAX Gap"].map((h, i) => (
+                {["Quarter","Netflix","Disney+","Max","Amazon*","Paramount+","NF–DIS Gap","NF–MAX Gap","NF–PAR Gap"].map((h, i) => (
                   <th key={h} style={{ padding: "7px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: "#0B1628", fontWeight: 600, borderBottom: "2px solid #E50914", fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
@@ -217,8 +230,10 @@ function ChurnTab() {
                   <td style={{ padding: "7px 12px", textAlign: "center", color: DISNEY }}>{row.Disney.toFixed(1)}%</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: MAX }}>{row.Max.toFixed(1)}%</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: AMAZON }}>{row.Amazon.toFixed(1)}%</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: PARAMOUNT }}>{row.Paramount.toFixed(2)}%</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: "#6B7280" }}>{(row.Netflix - row.Disney).toFixed(1)}pp</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: "#6B7280" }}>{(row.Netflix - row.Max).toFixed(1)}pp</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: "#6B7280" }}>{(row.Netflix - row.Paramount).toFixed(2)}pp</td>
                 </tr>
               ))}
             </tbody>
@@ -268,18 +283,19 @@ function OverviewTab() {
     <div>
       {/* Leader Board */}
       <SectionCard title="Q4 2025 — At a Glance">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 24 }}>
           {[
-            { name: "Netflix",       color: NETFLIX, subs: latest.Netflix, rev: latestRev.Netflix },
-            { name: "Amazon Prime*", color: AMAZON,  subs: latest.Amazon,  rev: latestRev.Amazon  },
-            { name: "Disney+",       color: DISNEY,  subs: latest.Disney,  rev: latestRev.Disney  },
-            { name: "Max",           color: MAX,      subs: latest.Max,     rev: latestRev.Max     },
+            { name: "Netflix",        color: NETFLIX,    subs: latest.Netflix,    rev: latestRev.Netflix    },
+            { name: "Amazon Prime*",  color: AMAZON,     subs: latest.Amazon,     rev: latestRev.Amazon     },
+            { name: "Disney+",        color: DISNEY,     subs: latest.Disney,     rev: latestRev.Disney     },
+            { name: "Max",            color: MAX,        subs: latest.Max,        rev: latestRev.Max        },
+            { name: "Paramount+",     color: PARAMOUNT,  subs: latest.Paramount,  rev: latestRev.Paramount  },
           ].map(s => (
-            <div key={s.name} style={{ border: `2px solid ${s.color}`, borderRadius: 10, padding: "18px 16px" }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: s.color, marginBottom: 8 }}>{s.name}</div>
-              <div style={{ fontSize: 26, fontWeight: 800, color: DARK, lineHeight: 1 }}>{s.subs.toFixed(0)}M</div>
-              <div style={{ fontSize: 11, color: MUTED, marginTop: 3, marginBottom: 12 }}>paid members</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: DARK }}>${s.rev.toFixed(2)}B</div>
+            <div key={s.name} style={{ border: `2px solid ${s.color}`, borderRadius: 10, padding: "14px 12px" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: s.color, marginBottom: 8 }}>{s.name}</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: DARK, lineHeight: 1 }}>{s.subs.toFixed(0)}M</div>
+              <div style={{ fontSize: 11, color: MUTED, marginTop: 3, marginBottom: 10 }}>paid members</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: DARK }}>${s.rev.toFixed(2)}B</div>
               <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>quarterly revenue</div>
             </div>
           ))}
@@ -289,10 +305,11 @@ function OverviewTab() {
         <div style={{ marginBottom: 8 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: MUTED, marginBottom: 10, textTransform: "uppercase", letterSpacing: 1 }}>Paid Members (M) — Q4 2025</div>
           {[
-            { name: "Netflix",       val: latest.Netflix, color: NETFLIX },
-            { name: "Amazon Prime*", val: latest.Amazon,  color: AMAZON  },
-            { name: "Disney+",       val: latest.Disney,  color: DISNEY  },
-            { name: "Max",           val: latest.Max,      color: MAX     },
+            { name: "Netflix",        val: latest.Netflix,    color: NETFLIX    },
+            { name: "Amazon Prime*",  val: latest.Amazon,     color: AMAZON     },
+            { name: "Disney+",        val: latest.Disney,     color: DISNEY     },
+            { name: "Max",            val: latest.Max,        color: MAX        },
+            { name: "Paramount+",     val: latest.Paramount,  color: PARAMOUNT  },
           ].map(s => (
             <div key={s.name} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: DARK, marginBottom: 3 }}>
@@ -337,13 +354,14 @@ function SubscribersTab() {
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <ReferenceLine x="Q3'23" stroke={DISNEY} strokeDasharray="4 2" strokeWidth={1} label={{ value: "Hotstar split", position: "top", fontSize: 10, fill: DISNEY }} />
-            <Line dataKey="Netflix" stroke={NETFLIX} strokeWidth={2.5} dot={false} />
-            <Line dataKey="Amazon"  stroke={AMAZON}  strokeWidth={2}   dot={false} strokeDasharray="5 3" />
-            <Line dataKey="Disney"  stroke={DISNEY}  strokeWidth={2}   dot={false} />
-            <Line dataKey="Max"     stroke={MAX}      strokeWidth={2}   dot={false} />
+            <Line dataKey="Netflix"    stroke={NETFLIX}    strokeWidth={2.5} dot={false} />
+            <Line dataKey="Amazon"     stroke={AMAZON}     strokeWidth={2}   dot={false} strokeDasharray="5 3" />
+            <Line dataKey="Disney"     stroke={DISNEY}     strokeWidth={2}   dot={false} />
+            <Line dataKey="Max"        stroke={MAX}        strokeWidth={2}   dot={false} />
+            <Line dataKey="Paramount"  stroke={PARAMOUNT}  strokeWidth={2}   dot={false} strokeDasharray="3 2" />
           </LineChart>
         </ResponsiveContainer>
-        <p style={{ fontSize: 11, color: "#D97706", margin: "10px 0 0" }}>* Amazon = global Prime membership estimates. Amazon last confirmed 200M members in April 2021; subsequent figures are analyst estimates.</p>
+        <p style={{ fontSize: 11, color: "#D97706", margin: "10px 0 0" }}>* Amazon = global Prime membership estimates. Amazon last confirmed 200M members in April 2021; subsequent figures are analyst estimates. Paramount+ DTC includes Pluto TV revenue.</p>
       </SectionCard>
 
       <SectionCard title="Net Membership Adds — Quarterly (M)">
@@ -358,10 +376,11 @@ function SubscribersTab() {
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <ReferenceLine y={0} stroke={DARK} strokeWidth={1} />
-            <Bar dataKey="Netflix" fill={NETFLIX} radius={[2,2,0,0]} maxBarSize={14} />
-            <Bar dataKey="Amazon"  fill={AMAZON}  radius={[2,2,0,0]} maxBarSize={14} />
-            <Bar dataKey="Disney"  fill={DISNEY}  radius={[2,2,0,0]} maxBarSize={14} />
-            <Bar dataKey="Max"     fill={MAX}      radius={[2,2,0,0]} maxBarSize={14} />
+            <Bar dataKey="Netflix"   fill={NETFLIX}   radius={[2,2,0,0]} maxBarSize={12} />
+            <Bar dataKey="Amazon"    fill={AMAZON}    radius={[2,2,0,0]} maxBarSize={12} />
+            <Bar dataKey="Disney"    fill={DISNEY}    radius={[2,2,0,0]} maxBarSize={12} />
+            <Bar dataKey="Max"       fill={MAX}       radius={[2,2,0,0]} maxBarSize={12} />
+            <Bar dataKey="Paramount" fill={PARAMOUNT} radius={[2,2,0,0]} maxBarSize={12} />
           </BarChart>
         </ResponsiveContainer>
       </SectionCard>
@@ -372,7 +391,7 @@ function SubscribersTab() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Quarter", "Netflix", "Amazon*", "Disney+", "Max", "NF Adds", "AMZ Adds", "DIS Adds", "MAX Adds"].map((h, i) => (
+                {["Quarter", "Netflix", "Amazon*", "Disney+", "Max", "Paramount+", "NF Adds", "AMZ Adds", "DIS Adds", "MAX Adds", "PAR Adds"].map((h, i) => (
                   <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: DARK, fontWeight: 600, borderBottom: `2px solid ${NETFLIX}`, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
@@ -387,10 +406,12 @@ function SubscribersTab() {
                     <td style={{ padding: "7px 12px", textAlign: "center", color: AMAZON }}>{row.Amazon.toFixed(0)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: DISNEY }}>{row.Disney.toFixed(1)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: MAX }}>{row.Max.toFixed(1)}</td>
+                    <td style={{ padding: "7px 12px", textAlign: "center", color: PARAMOUNT }}>{row.Paramount.toFixed(1)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: na.Netflix >= 0 ? "#16A34A" : "#DC2626", fontWeight: 600 }}>{na.Netflix >= 0 ? "+" : ""}{na.Netflix.toFixed(2)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: "#16A34A" }}>+{na.Amazon.toFixed(0)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: na.Disney >= 0 ? "#16A34A" : "#DC2626" }}>{na.Disney >= 0 ? "+" : ""}{na.Disney.toFixed(1)}</td>
                     <td style={{ padding: "7px 12px", textAlign: "center", color: na.Max >= 0 ? "#16A34A" : "#DC2626" }}>{na.Max >= 0 ? "+" : ""}{na.Max.toFixed(1)}</td>
+                    <td style={{ padding: "7px 12px", textAlign: "center", color: na.Paramount >= 0 ? "#16A34A" : "#DC2626" }}>{na.Paramount >= 0 ? "+" : ""}{na.Paramount.toFixed(1)}</td>
                   </tr>
                 );
               })}
@@ -410,7 +431,7 @@ function RevenueTab() {
     <div>
       <SectionCard title="Annual Revenue Comparison ($B)">
         <p style={{ fontSize: 12, color: MUTED, margin: "0 0 16px" }}>
-          Netflix FY2025 revenue of $45.2B is 3.8× Disney+ DTC ($11.9B) and 4.1× Max ($11.1B)
+          Netflix FY2025 revenue of $45.2B is 3.8× Disney+ DTC ($11.9B) and 5.3× Paramount+ DTC ($8.5B)
         </p>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={revenueA} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
@@ -419,15 +440,16 @@ function RevenueTab() {
             <YAxis tick={axisStyle} tickFormatter={v => `$${v}B`} width={54} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Bar dataKey="Netflix" fill={NETFLIX} radius={[3,3,0,0]} maxBarSize={26} />
-            <Bar dataKey="Amazon"  fill={AMAZON}  radius={[3,3,0,0]} maxBarSize={26} />
-            <Bar dataKey="Disney"  fill={DISNEY}  radius={[3,3,0,0]} maxBarSize={26} />
-            <Bar dataKey="Max"     fill={MAX}      radius={[3,3,0,0]} maxBarSize={26} />
+            <Bar dataKey="Netflix"   fill={NETFLIX}   radius={[3,3,0,0]} maxBarSize={22} />
+            <Bar dataKey="Amazon"    fill={AMAZON}    radius={[3,3,0,0]} maxBarSize={22} />
+            <Bar dataKey="Disney"    fill={DISNEY}    radius={[3,3,0,0]} maxBarSize={22} />
+            <Bar dataKey="Max"       fill={MAX}       radius={[3,3,0,0]} maxBarSize={22} />
+            <Bar dataKey="Paramount" fill={PARAMOUNT} radius={[3,3,0,0]} maxBarSize={22} />
           </BarChart>
         </ResponsiveContainer>
       </SectionCard>
 
-      <SectionCard title="Quarterly Revenue — All Three Services ($B)">
+      <SectionCard title="Quarterly Revenue — All Services ($B)">
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={revenueQ} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
             <CartesianGrid {...gridProps} />
@@ -435,10 +457,11 @@ function RevenueTab() {
             <YAxis tick={axisStyle} tickFormatter={v => `$${v}B`} width={54} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Line dataKey="Netflix" stroke={NETFLIX} strokeWidth={2.5} dot={false} />
-            <Line dataKey="Amazon"  stroke={AMAZON}  strokeWidth={2}   dot={false} strokeDasharray="5 3" />
-            <Line dataKey="Disney"  stroke={DISNEY}  strokeWidth={2}   dot={false} />
-            <Line dataKey="Max"     stroke={MAX}      strokeWidth={2}   dot={false} />
+            <Line dataKey="Netflix"   stroke={NETFLIX}   strokeWidth={2.5} dot={false} />
+            <Line dataKey="Amazon"    stroke={AMAZON}    strokeWidth={2}   dot={false} strokeDasharray="5 3" />
+            <Line dataKey="Disney"    stroke={DISNEY}    strokeWidth={2}   dot={false} />
+            <Line dataKey="Max"       stroke={MAX}       strokeWidth={2}   dot={false} />
+            <Line dataKey="Paramount" stroke={PARAMOUNT} strokeWidth={2}   dot={false} strokeDasharray="3 2" />
           </LineChart>
         </ResponsiveContainer>
         <p style={{ fontSize: 11, color: "#D97706", margin: "8px 0 0" }}>* Amazon = Subscription Services segment (Prime + Music + Audible). Not video-only revenue.</p>
@@ -450,7 +473,7 @@ function RevenueTab() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Year", "Netflix", "YoY %", "Amazon*", "YoY %", "Disney+ DTC", "YoY %", "Max DTC", "YoY %"].map((h, i) => (
+                {["Year", "Netflix", "YoY %", "Amazon*", "YoY %", "Disney+ DTC", "YoY %", "Max DTC", "YoY %", "Paramount+†", "YoY %"].map((h, i) => (
                   <th key={h} style={{ padding: "9px 14px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: DARK, fontWeight: 600, borderBottom: `2px solid ${NETFLIX}` }}>{h}</th>
                 ))}
               </tr>
@@ -458,10 +481,11 @@ function RevenueTab() {
             <tbody>
               {revenueA.map((row, ri) => {
                 const prev = ri > 0 ? revenueA[ri - 1] : null;
-                const nfYoY  = prev ? (((row.Netflix - prev.Netflix) / prev.Netflix) * 100).toFixed(1) : null;
-                const amzYoY = prev ? (((row.Amazon  - prev.Amazon)  / prev.Amazon)  * 100).toFixed(1) : null;
-                const disYoY = prev ? (((row.Disney  - prev.Disney)  / prev.Disney)  * 100).toFixed(1) : null;
-                const maxYoY = prev ? (((row.Max     - prev.Max)     / prev.Max)     * 100).toFixed(1) : null;
+                const nfYoY  = prev ? (((row.Netflix    - prev.Netflix)    / prev.Netflix)    * 100).toFixed(1) : null;
+                const amzYoY = prev ? (((row.Amazon     - prev.Amazon)     / prev.Amazon)     * 100).toFixed(1) : null;
+                const disYoY = prev ? (((row.Disney     - prev.Disney)     / prev.Disney)     * 100).toFixed(1) : null;
+                const maxYoY = prev ? (((row.Max        - prev.Max)        / prev.Max)        * 100).toFixed(1) : null;
+                const parYoY = prev ? (((row.Paramount  - prev.Paramount)  / prev.Paramount)  * 100).toFixed(1) : null;
                 const yoyStyle = (v) => ({ color: v && +v >= 0 ? "#16A34A" : "#DC2626", fontWeight: 600 });
                 return (
                   <tr key={row.year} style={{ background: ri % 2 === 0 ? "#FAFAFA" : "#fff" }}>
@@ -474,6 +498,8 @@ function RevenueTab() {
                     <td style={{ padding: "9px 14px", textAlign: "center", ...yoyStyle(disYoY) }}>{disYoY ? `+${disYoY}%` : "—"}</td>
                     <td style={{ padding: "9px 14px", textAlign: "center", color: MAX }}>${row.Max.toFixed(1)}B</td>
                     <td style={{ padding: "9px 14px", textAlign: "center", ...yoyStyle(maxYoY) }}>{maxYoY ? `+${maxYoY}%` : "—"}</td>
+                    <td style={{ padding: "9px 14px", textAlign: "center", color: PARAMOUNT }}>${row.Paramount.toFixed(1)}B</td>
+                    <td style={{ padding: "9px 14px", textAlign: "center", ...yoyStyle(parYoY) }}>{parYoY ? `+${parYoY}%` : "—"}</td>
                   </tr>
                 );
               })}
@@ -506,32 +532,29 @@ function ARMTab() {
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: 12 }} />
             <ReferenceLine x="Q3'23" stroke={DISNEY} strokeDasharray="4 2" strokeWidth={1} label={{ value: "Hotstar split", position: "top", fontSize: 10, fill: DISNEY }} />
-            <Line dataKey="Netflix" stroke={NETFLIX} strokeWidth={2.5} dot={false} />
-            <Line dataKey="Amazon"  stroke={AMAZON}  strokeWidth={2}   dot={false} strokeDasharray="5 3" />
-            <Line dataKey="Disney"  stroke={DISNEY}  strokeWidth={2}   dot={false} />
-            <Line dataKey="Max"     stroke={MAX}      strokeWidth={2}   dot={false} />
+            <Line dataKey="Netflix"   stroke={NETFLIX}   strokeWidth={2.5} dot={false} />
+            <Line dataKey="Amazon"    stroke={AMAZON}    strokeWidth={2}   dot={false} strokeDasharray="5 3" />
+            <Line dataKey="Paramount" stroke={PARAMOUNT} strokeWidth={2}   dot={false} strokeDasharray="3 2" />
+            <Line dataKey="Disney"    stroke={DISNEY}    strokeWidth={2}   dot={false} />
+            <Line dataKey="Max"       stroke={MAX}       strokeWidth={2}   dot={false} />
           </LineChart>
         </ResponsiveContainer>
-        <p style={{ fontSize: 11, color: "#D97706", margin: "8px 0 0" }}>* Amazon ARM derived from Subscription Services revenue (Prime + Music + Audible) — overstates pure video ARM.</p>
+        <p style={{ fontSize: 11, color: "#D97706", margin: "8px 0 0" }}>* Amazon ARM from Subscription Services (Prime + Music + Audible) — not video-only. † Paramount ARM from total DTC segment (Paramount+ + Pluto TV ad revenue) — not subscription-only.</p>
       </SectionCard>
 
       {/* ARM Gap analysis */}
       <SectionCard title="ARM Gap Analysis — Netflix Premium vs Peers">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
           {[
-            { label: "Netflix vs Disney+ ARM Gap", val: (12.23 - 7.49).toFixed(2), pct: (((12.23 - 7.49) / 7.49) * 100).toFixed(0), color: DISNEY },
-            { label: "Netflix vs Max ARM Gap",     val: (12.23 - 7.19).toFixed(2), pct: (((12.23 - 7.19) / 7.19) * 100).toFixed(0), color: MAX },
-            { label: "Amazon* vs Netflix ARM Gap", val: (18.18 - 12.23).toFixed(2), pct: (((18.18 - 12.23) / 12.23) * 100).toFixed(0), color: AMAZON, note: true },
+            { label: "Netflix vs Disney+ Gap", val: (12.23 - 7.49).toFixed(2), pct: (((12.23 - 7.49) / 7.49) * 100).toFixed(0), note: <>Netflix is <strong style={{ color: NETFLIX }}>+{(((12.23-7.49)/7.49)*100).toFixed(0)}%</strong> higher per member/mo</> },
+            { label: "Netflix vs Max Gap",     val: (12.23 - 7.19).toFixed(2), pct: (((12.23 - 7.19) / 7.19) * 100).toFixed(0), note: <>Netflix is <strong style={{ color: NETFLIX }}>+{(((12.23-7.19)/7.19)*100).toFixed(0)}%</strong> higher per member/mo</> },
+            { label: "Netflix vs Paramount+ Gap", val: (12.23 - 9.32).toFixed(2), pct: (((12.23 - 9.32) / 9.32) * 100).toFixed(0), note: <>Netflix is <strong style={{ color: NETFLIX }}>+{(((12.23-9.32)/9.32)*100).toFixed(0)}%</strong> higher — Paramount incl. Pluto TV</> },
+            { label: "Amazon* vs Netflix Gap", val: (18.18 - 12.23).toFixed(2), pct: (((18.18 - 12.23) / 12.23) * 100).toFixed(0), note: <><strong style={{ color: AMAZON }}>Amazon</strong> is +{(((18.18-12.23)/12.23)*100).toFixed(0)}% higher — full Prime bundle, not video-only</> },
           ].map(g => (
-            <div key={g.label} style={{ background: LIGHT, borderRadius: 8, padding: "16px 18px", border: `1px solid ${GRID}` }}>
+            <div key={g.label} style={{ background: LIGHT, borderRadius: 8, padding: "14px 16px", border: `1px solid ${GRID}` }}>
               <div style={{ fontSize: 11, color: MUTED, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>{g.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: DARK }}>+${g.val}</div>
-              <div style={{ fontSize: 13, color: MUTED, marginTop: 4 }}>
-                {g.note
-                  ? <><strong style={{ color: AMAZON }}>Amazon</strong> is +{g.pct}% higher — reflects full Prime bundle, not video-only</>
-                  : <>Netflix is <strong style={{ color: NETFLIX }}>+{g.pct}%</strong> higher per member per month</>
-                }
-              </div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: DARK }}>+${g.val}</div>
+              <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{g.note}</div>
             </div>
           ))}
         </div>
@@ -539,7 +562,7 @@ function ARMTab() {
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
             <thead>
               <tr>
-                {["Quarter", "Netflix ARM", "Amazon* ARM", "Disney ARM", "Max ARM", "NF–DIS Gap", "NF–MAX Gap"].map((h, i) => (
+                {["Quarter", "Netflix ARM", "Amazon* ARM", "Paramount†", "Disney ARM", "Max ARM", "NF–DIS Gap", "NF–MAX Gap", "NF–PAR Gap"].map((h, i) => (
                   <th key={h} style={{ padding: "7px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: DARK, fontWeight: 600, borderBottom: `2px solid ${NETFLIX}`, fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
@@ -550,10 +573,12 @@ function ARMTab() {
                   <td style={{ padding: "7px 12px", fontWeight: 600, color: DARK }}>{row.q}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: NETFLIX, fontWeight: 700 }}>${row.Netflix.toFixed(2)}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: AMAZON }}>${row.Amazon.toFixed(2)}</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: PARAMOUNT }}>${row.Paramount.toFixed(2)}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: DISNEY }}>${row.Disney.toFixed(2)}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: MAX }}>${row.Max.toFixed(2)}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: DARK }}>+${(row.Netflix - row.Disney).toFixed(2)}</td>
                   <td style={{ padding: "7px 12px", textAlign: "center", color: DARK }}>+${(row.Netflix - row.Max).toFixed(2)}</td>
+                  <td style={{ padding: "7px 12px", textAlign: "center", color: DARK }}>+${(row.Netflix - row.Paramount).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -634,11 +659,12 @@ export default function NetflixStreamingAnalysis() {
       {/* Footer */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 28px" }}>
         <p style={{ fontSize: 11, color: MUTED, borderTop: `1px solid ${GRID}`, paddingTop: 14, lineHeight: 1.6 }}>
-          Sources: Netflix shareholder letters Q1 2023–Q4 2025; Disney earnings reports (FQ calendar-aligned); WBD/Max earnings releases; Amazon annual reports (Subscription Services segment).
+          Sources: Netflix shareholder letters Q1 2023–Q4 2025; Disney earnings reports (FQ calendar-aligned); WBD/Max earnings releases; Amazon annual reports (Subscription Services segment); Paramount Global / Skydance earnings releases Q1 2023–Q4 2025.
           Disney+ subscribers = Core (excl. Hotstar). Disney ARM includes Hulu blended into DTC segment. Netflix stopped reporting paid memberships after Q1 2025; Q2–Q4 2025 are Ampere Analysis estimates.
           ARM calculated as: Quarterly Revenue ÷ (3 × Avg Paid Members).
           * Amazon Prime data: Amazon last officially confirmed 200M members in April 2021; subscriber and net-add figures are analyst estimates (Antenna / YipitData / MoffettNathanson).
           Amazon revenue = Subscription Services segment (Prime shipping + Prime Video + Music + Audible) — not video-only. Amazon ARM and churn reflect the full Prime bundle and are not directly comparable to video-only streaming metrics.
+          † Paramount+ revenue = total DTC segment including Pluto TV advertising revenue. ARM reflects blended DTC, not subscription-only. Churn estimates from Sci-Tech Today / Antenna; Paramount confirmed ~130bps YoY improvement in Q1 2025. Paramount+ merged Showtime content in mid-2023; acquired by Skydance Media late 2024.
         </p>
       </div>
     </div>
