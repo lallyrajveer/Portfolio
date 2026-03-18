@@ -8,6 +8,7 @@ const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));
 
 export const projects = [
+  /* Verizon projects — hidden locally
   {
     id: "telecom-analysis",
     title: "U.S. Wireless Competitive Analysis — Postpaid Phone",
@@ -41,6 +42,7 @@ export const projects = [
     featured: true,
     component: VerizonBoardReport,
   },
+  */
   {
     id: "netflix-streaming-analysis",
     title: "Global Streaming Competitive Analysis — Netflix vs. Disney+ vs. Max",
