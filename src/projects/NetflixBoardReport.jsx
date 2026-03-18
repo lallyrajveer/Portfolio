@@ -98,56 +98,6 @@ function KPISection() {
   );
 }
 
-function CompetitiveContext() {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-      {/* Subscriber Comparison */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: NAVY, margin: "0 0 16px" }}>
-          Q4 2025 Paid Members (M)
-        </h4>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={subsCompData} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 60 }}>
-            <CartesianGrid stroke={GRID} strokeDasharray="3 3" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 11, fill: MUTED }} tickFormatter={v => `${v}M`} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: NAVY, fontWeight: 600 }} width={58} />
-            <Tooltip formatter={v => [`${v.toFixed(0)}M`, "Paid Members"]} />
-            <Bar dataKey="subs" radius={[0, 4, 4, 0]} maxBarSize={28}>
-              {subsCompData.map((s, i) => <Cell key={i} fill={s.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-        <p style={{ fontSize: 11, color: MUTED, margin: "10px 0 0", lineHeight: 1.5 }}>
-          Netflix's 332M members is 2.5× Disney+ (135M) and 2.5× Max (132M). Password-sharing crackdown added ~42M net members in FY2024 alone.
-        </p>
-      </div>
-
-      {/* Net Adds Trend */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: NAVY, margin: "0 0 16px" }}>
-          Netflix Annual Net Adds (M)
-        </h4>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={netAddsData} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
-            <CartesianGrid stroke={GRID} strokeDasharray="3 3" />
-            <XAxis dataKey="year" tick={{ fontSize: 11, fill: MUTED }} />
-            <YAxis tick={{ fontSize: 11, fill: MUTED }} tickFormatter={v => `${v}M`} width={42} />
-            <Tooltip formatter={v => [`+${v.toFixed(1)}M`, "Net Adds"]} />
-            <Bar dataKey="adds" fill={NF} radius={[4, 4, 0, 0]} maxBarSize={40}>
-              {netAddsData.map((d, i) => (
-                <Cell key={i} fill={d.adds >= 30 ? NF : "#F87171"} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-        <p style={{ fontSize: 11, color: MUTED, margin: "10px 0 0", lineHeight: 1.5 }}>
-          FY2023 (+29.5M) and FY2024 (+41.5M) represent historic growth driven by password-sharing crackdown and ad tier launch.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function StrategicPriorities() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
