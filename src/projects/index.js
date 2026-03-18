@@ -1,8 +1,5 @@
 import { lazy } from "react";
 
-const TelecomAnalysis         = lazy(() => import("./TelecomAnalysis.jsx"));
-const WirelessRevenueForecast = lazy(() => import("./WirelessRevenueForecast.jsx"));
-const VerizonBoardReport      = lazy(() => import("./VerizonBoardReport.jsx"));
 const NetflixStreamingAnalysis = lazy(() => import("./NetflixStreamingAnalysis.jsx"));
 const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx"));
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));

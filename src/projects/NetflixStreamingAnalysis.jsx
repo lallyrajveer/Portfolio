@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
-  LineChart, Line, BarChart, Bar, ComposedChart, Area,
+  LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  ReferenceLine, Cell, Legend,
+  ReferenceLine, Legend,
 } from "recharts";
 
 /* ─── Colors ────────────────────────────────────────────────────────────── */

@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useNetflix } from "./NetflixContext.js";
-import { SCENARIOS, BASE_CHURN, getScenarioMetrics } from "./NetflixShared.js";
+import { SCENARIOS, getScenarioMetrics } from "./NetflixShared.js";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
 const NF    = "#E50914";
@@ -26,11 +26,6 @@ const subsCompData = [
   { name: "Max",     subs: 131.6, color: "#8B5CF6" },
 ];
 
-const revCompData = [
-  { year: "FY2023", Netflix: 33.7, Disney: 10.2, Max: 9.7  },
-  { year: "FY2024", Netflix: 39.0, Disney: 10.8, Max: 10.3 },
-  { year: "FY2025", Netflix: 45.2, Disney: 11.9, Max: 11.1 },
-];
 
 const netAddsData = [
   { year: "FY2022", adds: 8.9  },
