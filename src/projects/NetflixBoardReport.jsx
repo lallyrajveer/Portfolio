@@ -276,9 +276,6 @@ export default function NetflixBoardReport() {
         <SectionHeading title="KPI Snapshot — FY2025" />
         <KPISection />
 
-        <SectionHeading title="Competitive Context" />
-        <CompetitiveContext />
-
         <SectionHeading title="Strategic Priorities — FY2026–27" />
         <StrategicPriorities />
 
