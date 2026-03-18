@@ -1,4 +1,3 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useNetflix } from "./NetflixContext.js";
 import { SCENARIOS, getScenarioMetrics } from "./NetflixShared.js";
 
@@ -18,20 +17,6 @@ const kpiCards = [
   { label: "FY2025 Revenue",     value: "$45.2B", sub: "Full Year",     change: "+16% YoY",     up: true },
   { label: "Operating Margin",   value: "29%",    sub: "FY2025",        change: "+2pts YoY",    up: true },
   { label: "Global ARM",         value: "$12.23", sub: "per month",     change: "+4.6% YoY",    up: true },
-];
-
-const subsCompData = [
-  { name: "Netflix", subs: 332, color: NF },
-  { name: "Disney+", subs: 135, color: "#113CCF" },
-  { name: "Max",     subs: 131.6, color: "#8B5CF6" },
-];
-
-
-const netAddsData = [
-  { year: "FY2022", adds: 8.9  },
-  { year: "FY2023", adds: 29.5 },
-  { year: "FY2024", adds: 41.5 },
-  { year: "FY2025", adds: 30.4 },
 ];
 
 const priorities = [
