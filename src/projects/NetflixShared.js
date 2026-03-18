@@ -27,10 +27,15 @@ export const START = { subs: 332.0, arm: 12.23, rev: 12.05 };
 // Base monthly churn — used as reference point for churn delta calculations
 export const BASE_CHURN = 2.3;
 
+// ARM growth rationale:
+//   UCAN price hikes averaged ~7% in 2024; global ARM diluted by faster international growth at
+//   lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales.
+//   Blended global ARM growth: Bear 1% (price fatigue, intl mix headwind),
+//   Base 3% (continued hikes + ad-tier maturation), Bull 5% (strong pricing + CPM upside).
 export const SCENARIOS = {
-  bear: { netAdds: 3.0,  armGrowth: 0.5, churn: 2.8 },
-  base: { netAdds: 6.0,  armGrowth: 1.5, churn: 2.3 },
-  bull: { netAdds: 11.0, armGrowth: 2.5, churn: 1.8 },
+  bear: { netAdds: 3.0,  armGrowth: 1.0, churn: 2.8 },
+  base: { netAdds: 6.0,  armGrowth: 3.0, churn: 2.3 },
+  bull: { netAdds: 11.0, armGrowth: 5.0, churn: 1.8 },
 };
 
 export const QUARTERS = [
@@ -40,12 +45,23 @@ export const QUARTERS = [
 
 /**
  * Build a quarterly forecast from given drivers.
- * @param {number} startSubs       - starting paid memberships (M)
- * @param {number} startARM        - starting ARM ($/mo)
- * @param {number} netAddsPerQ     - gross-net membership adds per quarter (M) at base churn
- * @param {number} armGrowthAnnual - annual ARM growth rate (%)
- * @param {number} churnPct        - monthly churn rate (%)
- * @param {string[]} quarters      - quarter labels
+ *
+ * netAddsPerQ is the TARGET NET adds per quarter — i.e., the number that appears in the
+ * subscriber count change. Churn rate determines how many gross subscribers must be acquired
+ * to achieve that net number; it is a cost driver (CAC), not a revenue driver.
+ *
+ * Mechanics per quarter:
+ *   churnLosses = churnPct/100 × beginSubs × 3   (members lost over 3 months)
+ *   grossAdds   = netAddsPerQ + churnLosses        (subscribers that must join)
+ *   endSubs     = beginSubs + netAddsPerQ           (actual ending count)
+ *   revenue     = avgSubs × ARM × 3 / 1000         ($B)
+ *
+ * @param {number}   startSubs       - starting paid memberships (M)
+ * @param {number}   startARM        - starting ARM ($/mo)
+ * @param {number}   netAddsPerQ     - target net membership adds per quarter (M)
+ * @param {number}   armGrowthAnnual - annual ARM growth rate (%)
+ * @param {number}   churnPct        - monthly churn rate (%)
+ * @param {string[]} quarters        - quarter labels
  */
 export function buildForecast(startSubs, startARM, netAddsPerQ, armGrowthAnnual, churnPct, quarters) {
   const results = [];
@@ -53,15 +69,22 @@ export function buildForecast(startSubs, startARM, netAddsPerQ, armGrowthAnnual,
   let arm  = startARM;
 
   for (const q of quarters) {
-    const beginSubs = subs;
-    // Higher churn than base erodes net adds; lower churn boosts them
-    const churnAdj = ((churnPct - BASE_CHURN) / 100) * beginSubs * 3;
-    const effectiveNetAdds = netAddsPerQ - churnAdj;
-    const endSubs  = +(beginSubs + effectiveNetAdds).toFixed(1);
-    const avgSubs  = (beginSubs + endSubs) / 2;
-    arm = arm * (1 + armGrowthAnnual / 400); // quarterly compounding
+    const beginSubs    = subs;
+    // Gross churn: members lost over the quarter (churn% per month × 3 months)
+    const churnLosses  = +(churnPct / 100 * beginSubs * 3).toFixed(1);
+    // Gross adds: new subscribers needed to land the target net adds
+    const grossAdds    = +(netAddsPerQ + churnLosses).toFixed(1);
+    // Subscriber count: net adds drive the ending balance
+    const endSubs      = +(beginSubs + netAddsPerQ).toFixed(1);
+    const avgSubs      = (beginSubs + endSubs) / 2;
+    // ARM: quarterly compounding of annual growth rate
+    arm = arm * (1 + armGrowthAnnual / 400);
     const revenue = +(avgSubs * arm * 3 / 1000).toFixed(2);
-    results.push({ period: q, subs: endSubs, arm: +arm.toFixed(2), revenue });
+    results.push({
+      period: q, beginSubs, endSubs: +endSubs.toFixed(1),
+      subs: endSubs, arm: +arm.toFixed(2), revenue,
+      grossAdds, churnLosses, netAdds: +netAddsPerQ.toFixed(1),
+    });
     subs = endSubs;
   }
   return results;
