@@ -131,7 +131,7 @@ function ScenarioTab() {
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#7C3AED" }}>Custom Drivers</div>
             <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Each driver ramps linearly from Start (Q1'26) to End (Q4'27)</div>
           </div>
-          <button onClick={() => setCustomDrivers({ netAddsStart: 29.0, netAddsEnd: 31.0, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
+          <button onClick={() => setCustomDrivers({ netAddsStart: 28.9, netAddsEnd: 31.1, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
             Reset to Market Consensus
           </button>
         </div>

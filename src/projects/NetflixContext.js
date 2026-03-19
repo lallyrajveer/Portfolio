@@ -4,13 +4,15 @@ const LS_SCENARIO = "netflix_scenario";
 const LS_DRIVERS  = "netflix_custom_drivers";
 
 // Bump this version any time DEFAULT_DRIVERS values change — forces a localStorage reset
-const DRIVERS_VERSION = 3;
+const DRIVERS_VERSION = 4;
 
 // Custom scenario uses fixed gross adds — defaults are market-consensus estimates
-// Gross adds 29→31M/Q calibrated to produce same net adds as Consensus scenario (7→9M/Q at 2.2→1.9% churn)
+// Gross adds 28.9→31.1M/Q: exact calibration to produce same net adds as Consensus (7→9M/Q at 2.2→1.9% churn)
+//   grossAddsStart = 7.0 + (2.2/100 × 332 × 3) = 28.912 ≈ 28.9
+//   grossAddsEnd   = 9.0 + (1.9/100 × 387 × 3) = 31.059 ≈ 31.1  (387M = Q4'27 beginSubs under consensus)
 // ARM growth 3.0→5.0%/yr: conservative start (EM mix dilution), accelerates as ad-tier CPM scales
 // Churn 2.2→1.9%/mo: modest improvement from sports content, ad-tier price floor, deeper slate
-const DEFAULT_DRIVERS = { _v: DRIVERS_VERSION, netAddsStart: 29.0, netAddsEnd: 31.0, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 };
+const DEFAULT_DRIVERS = { _v: DRIVERS_VERSION, netAddsStart: 28.9, netAddsEnd: 31.1, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 };
 
 function migrateDrivers(d) {
   if (!d) return null;
