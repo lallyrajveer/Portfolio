@@ -49,10 +49,7 @@ function ScenarioTab() {
   const fy27 = { bear: +getFY(bear,2027).toFixed(2), consensus: +getFY(consensus,2027).toFixed(2), bull: +getFY(bull,2027).toFixed(2), custom: +getFY(custom,2027).toFixed(2) };
 
   const mechForecast = allForecasts[mechKey];
-  const mechSc       = SCENARIOS[mechKey];
-  const mechChurn    = mechKey === "custom"
-    ? (customDrivers.churnStart + customDrivers.churnEnd) / 2
-    : (mechSc.churnStart + mechSc.churnEnd) / 2;
+
 
   const customDriversDisplay = { ...customDrivers };
 
