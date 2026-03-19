@@ -145,7 +145,7 @@ const WORKFLOW_NODES = [
     role:  "Model",
     title: "Revenue Forecast",
     desc:  "ARM × net adds driver model with subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, and a sensitivity analysis. Churn is modeled as a cost driver (CAC), not a revenue driver — a deliberate choice explained in the sensitivity tab because Netflix's guidance targets net adds, not gross.",
-    tags:  ["Bear / Base / Bull", "Sensitivity analysis"],
+    tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
     id:    "netflix-board-report",

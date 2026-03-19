@@ -32,12 +32,18 @@ export const BASE_CHURN = 2.3;
 //   lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales.
 //   ARM growth ramps over the forecast as ad-tier inventory matures and pricing cycles compound.
 //   Bear 0.5→1.5% (avg 1%): early-period price fatigue before modest recovery.
-//   Base 2.0→4.0% (avg 3%): gradual acceleration as ad-tier CPM scales.
+//   Consensus 3.0→5.0% (avg 4%): Wall Street consensus — ad-tier CPM scales, UCAN hike cycle resumes late 2026.
 //   Bull 3.5→6.5% (avg 5%): strong pricing + rapid CPM maturation by FY2027.
+//
+// Churn rationale:
+//   Churn ramps linearly across 8 quarters — direction reflects the competitive/content backdrop.
+//   Bear 2.6→3.0% (avg 2.8%): escalating competition + price hike fatigue erodes retention.
+//   Consensus 2.2→1.9% (avg 2.05%): modest improvement from sports habit loops, ad-tier price floor, deeper slate.
+//   Bull 2.1→1.5% (avg 1.8%): strong must-watch slate drives materially better retention by FY2027.
 export const SCENARIOS = {
-  bear: { netAddsStart: 2.0, netAddsEnd:  4.0, armGrowthStart: 0.5, armGrowthEnd: 1.5, churn: 2.8 },
-  base: { netAddsStart: 4.0, netAddsEnd:  8.0, armGrowthStart: 2.0, armGrowthEnd: 4.0, churn: 2.3 },
-  bull: { netAddsStart: 8.0, netAddsEnd: 14.0, armGrowthStart: 3.5, armGrowthEnd: 6.5, churn: 1.8 },
+  bear:      { netAddsStart: 2.0, netAddsEnd:  4.0, armGrowthStart: 0.5, armGrowthEnd: 1.5, churnStart: 2.6, churnEnd: 3.0 },
+  consensus: { netAddsStart: 7.0, netAddsEnd:  9.0, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 },
+  bull:      { netAddsStart: 8.0, netAddsEnd: 14.0, armGrowthStart: 3.5, armGrowthEnd: 6.5, churnStart: 2.1, churnEnd: 1.5 },
 };
 
 export const QUARTERS = [
@@ -62,34 +68,46 @@ export const QUARTERS = [
  * @param {number}   startARM        - starting ARM ($/mo)
  * @param {number}   netAddsPerQ     - target net membership adds per quarter (M)
  * @param {number}   armGrowthAnnual - annual ARM growth rate (%)
- * @param {number}   churnPct        - monthly churn rate (%)
+ * @param {number}   churnPct        - starting monthly churn rate (%)
  * @param {string[]} quarters        - quarter labels
+ * @param {number}   netAddsEnd      - ending net adds (or gross adds) per quarter (ramps linearly)
+ * @param {number}   armGrowthEnd    - ending annual ARM growth rate (ramps linearly)
+ * @param {number}   churnEnd        - ending monthly churn rate (ramps linearly from churnPct)
+ * @param {boolean}  useGrossAdds    - if true, netAddsStart/End are gross adds; churn reduces them
+ *                                     to net adds which then drive subscriber count and revenue.
+ *                                     if false (default), netAddsStart/End are fixed net add targets;
+ *                                     churn only affects gross adds (CAC), not revenue.
  */
-export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual, churnPct, quarters, netAddsEnd = netAddsStart, armGrowthEnd = armGrowthAnnual) {
+export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual, churnPct, quarters, netAddsEnd = netAddsStart, armGrowthEnd = armGrowthAnnual, churnEnd = churnPct, useGrossAdds = false) {
   const results = [];
   let subs = startSubs;
   let arm  = startARM;
   const n = quarters.length;
 
   for (let qi = 0; qi < n; qi++) {
-    const q = quarters[qi];
-    const netAddsPerQ   = n > 1 ? netAddsStart + (netAddsEnd - netAddsStart) * qi / (n - 1) : netAddsStart;
-    const armGrowthQ    = n > 1 ? armGrowthAnnual + (armGrowthEnd - armGrowthAnnual) * qi / (n - 1) : armGrowthAnnual;
-    const beginSubs     = subs;
-    // Gross churn: members lost over the quarter (churn% per month × 3 months)
-    const churnLosses   = +(churnPct / 100 * beginSubs * 3).toFixed(1);
-    // Gross adds: new subscribers needed to land the target net adds
-    const grossAdds     = +(netAddsPerQ + churnLosses).toFixed(1);
-    // Subscriber count: net adds drive the ending balance
-    const endSubs       = +(beginSubs + netAddsPerQ).toFixed(1);
-    const avgSubs       = (beginSubs + endSubs) / 2;
+    const q           = quarters[qi];
+    const addsInput   = n > 1 ? netAddsStart + (netAddsEnd - netAddsStart) * qi / (n - 1) : netAddsStart;
+    const armGrowthQ  = n > 1 ? armGrowthAnnual + (armGrowthEnd - armGrowthAnnual) * qi / (n - 1) : armGrowthAnnual;
+    const churnQ      = n > 1 ? churnPct + (churnEnd - churnPct) * qi / (n - 1) : churnPct;
+    const beginSubs   = subs;
+    // Churn losses: members lost over the quarter (churn% per month × 3 months)
+    const churnLosses = +(churnQ / 100 * beginSubs * 3).toFixed(1);
+
+    // Fixed gross adds: churn eats into gross adds → net adds float → revenue responds to churn
+    // Fixed net adds:   churn only affects gross adds needed (CAC) → revenue is churn-independent
+    const grossAdds   = useGrossAdds ? addsInput                              : +(addsInput + churnLosses).toFixed(1);
+    const netAdds     = useGrossAdds ? +(addsInput - churnLosses).toFixed(1)  : addsInput;
+
+    const endSubs   = +(beginSubs + netAdds).toFixed(1);
+    const avgSubs   = (beginSubs + endSubs) / 2;
     // ARM: quarterly compounding of interpolated annual growth rate
     arm = arm * (1 + armGrowthQ / 400);
     const revenue = +(avgSubs * arm * 3 / 1000).toFixed(2);
     results.push({
       period: q, beginSubs, endSubs: +endSubs.toFixed(1),
       subs: endSubs, arm: +arm.toFixed(2), revenue,
-      grossAdds, churnLosses, netAdds: +netAddsPerQ.toFixed(1),
+      grossAdds: +grossAdds.toFixed(1), churnLosses, netAdds: +netAdds.toFixed(1),
+      churn: +churnQ.toFixed(2),
     });
     subs = endSubs;
   }
@@ -98,7 +116,7 @@ export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual
 
 export function getForecast(scenarioKey) {
   const sc = SCENARIOS[scenarioKey];
-  return buildForecast(START.subs, START.arm, sc.netAddsStart, sc.armGrowthStart, sc.churn, QUARTERS, sc.netAddsEnd, sc.armGrowthEnd);
+  return buildForecast(START.subs, START.arm, sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS, sc.netAddsEnd, sc.armGrowthEnd, sc.churnEnd);
 }
 
 export function getFY(forecast, year) {
@@ -107,27 +125,30 @@ export function getFY(forecast, year) {
 }
 
 /** Compute board-report metrics from any set of drivers. */
-export function getScenarioMetrics(drivers) {
-  const netAddsStart    = drivers.netAddsStart    ?? drivers.netAdds;
-  const netAddsEnd      = drivers.netAddsEnd      ?? drivers.netAdds;
-  const armGrowthStart  = drivers.armGrowthStart  ?? drivers.armGrowth;
-  const armGrowthEnd    = drivers.armGrowthEnd    ?? drivers.armGrowth;
+export function getScenarioMetrics(drivers, useGrossAdds = false) {
+  const netAddsStart   = drivers.netAddsStart   ?? drivers.netAdds;
+  const netAddsEnd     = drivers.netAddsEnd     ?? drivers.netAdds;
+  const armGrowthStart = drivers.armGrowthStart ?? drivers.armGrowth;
+  const armGrowthEnd   = drivers.armGrowthEnd   ?? drivers.armGrowth;
+  const churnStart     = drivers.churnStart     ?? drivers.churn ?? BASE_CHURN;
+  const churnEnd       = drivers.churnEnd       ?? drivers.churn ?? BASE_CHURN;
   const forecast = buildForecast(
     START.subs, START.arm,
-    netAddsStart, armGrowthStart, drivers.churn ?? BASE_CHURN, QUARTERS, netAddsEnd, armGrowthEnd
+    netAddsStart, armGrowthStart, churnStart, QUARTERS, netAddsEnd, armGrowthEnd, churnEnd, useGrossAdds
   );
   const fy26q = forecast.slice(0, 4);
   const fy27q = forecast.slice(4, 8);
-  const avgARM = (qs) => +(qs.reduce((s, q) => s + q.arm, 0) / qs.length).toFixed(2);
-  const sumRev = (qs) => +(qs.reduce((s, q) => s + q.revenue, 0)).toFixed(1);
+  const avgARM   = (qs) => +(qs.reduce((s, q) => s + q.arm,   0) / qs.length).toFixed(2);
+  const avgChurn = (qs) => +(qs.reduce((s, q) => s + q.churn, 0) / qs.length).toFixed(2);
+  const sumRev   = (qs) => +(qs.reduce((s, q) => s + q.revenue, 0)).toFixed(1);
 
   return {
     netAdds26: +fy26q.reduce((s, q) => s + q.netAdds, 0).toFixed(0),
     netAdds27: +fy27q.reduce((s, q) => s + q.netAdds, 0).toFixed(0),
     arm26:     avgARM(fy26q),
     arm27:     avgARM(fy27q),
-    churn26:   drivers.churn ?? BASE_CHURN,
-    churn27:   drivers.churn ?? BASE_CHURN,
+    churn26:   avgChurn(fy26q),
+    churn27:   avgChurn(fy27q),
     subs26:    forecast[3].subs,
     subs27:    forecast[7].subs,
     rev26:     sumRev(fy26q),

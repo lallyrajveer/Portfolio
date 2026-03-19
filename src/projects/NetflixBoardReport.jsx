@@ -8,8 +8,8 @@ const MUTED = "#6B7280";
 const GRID  = "#E5E7EB";
 const LIGHT = "#F8F9FA";
 
-const SCENARIO_COLORS = { bear: "#DC2626", base: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
-const SCENARIO_LABELS = { bear: "Bear",    base: "Base",    bull: "Bull",    custom: "Custom" };
+const SCENARIO_COLORS = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
+const SCENARIO_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull",  custom: "Custom" };
 
 /* ─── Static Board Data ──────────────────────────────────────── */
 const kpiCards = [
@@ -126,11 +126,11 @@ function FinancialOutlook() {
   const { scenario, customDrivers } = useNetflix();
   const isCustom = scenario === "custom";
   const drivers  = isCustom
-    ? { ...SCENARIOS.base, ...customDrivers, netAddsStart: customDrivers.netAdds, netAddsEnd: customDrivers.netAdds, armGrowthStart: customDrivers.armGrowth, armGrowthEnd: customDrivers.armGrowth }
-    : SCENARIOS[scenario] ?? SCENARIOS.base;
-  const m        = getScenarioMetrics(drivers);
+    ? { ...SCENARIOS.consensus, ...customDrivers }
+    : SCENARIOS[scenario] ?? SCENARIOS.consensus;
+  const m        = getScenarioMetrics(drivers, isCustom);
   const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.base;
-  const label    = SCENARIO_LABELS[scenario] ?? "Base";
+  const label    = SCENARIO_LABELS[scenario] ?? "Consensus";
 
   const rows = [
     { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,        fy27: `+${m.netAdds27}M`,        baseline: "+30M",   target: "+35M"   },
@@ -186,12 +186,12 @@ function FinancialOutlook() {
       <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
         {scenario === "custom" && (
           <div style={{ background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
-            <strong>Board view: Custom scenario.</strong> This table reflects preparer-defined assumptions — not the named Bear, Base, or Bull cases. Custom was selected to reflect a scenario where net adds ramp gradually from a conservative Q1 entry point while ARM grows at the Base rate of 3%/yr. If the board should see Base case numbers, switch the scenario in the Revenue Forecast tab.
+            <strong>Board view: Custom scenario.</strong> This table reflects preparer-defined assumptions — not the named Bear, Consensus, or Bull cases. Custom was selected to reflect a scenario where gross adds and churn jointly drive subscriber count and revenue. If the board should see Consensus case numbers, switch the scenario in the Revenue Forecast tab.
           </div>
         )}
-        {scenario === "base" && (
+        {scenario === "consensus" && (
           <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-            <strong>Board view: Base scenario.</strong> Assumes 4→8M quarterly net adds ramping over the forecast period and 3%/yr ARM growth — consistent with Netflix's demonstrated pricing trajectory and analyst consensus for a steady-state growth environment.
+            <strong>Board view: Consensus scenario.</strong> Assumes 7→9M quarterly net adds and 3.0→5.0%/yr ARM growth — aligned with Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Churn improves modestly from 2.2% to 1.9% as sports content and ad-tier pricing floor reduce cancellations.
           </div>
         )}
         {(scenario === "bear" || scenario === "bull") && (

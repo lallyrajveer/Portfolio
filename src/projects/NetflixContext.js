@@ -3,7 +3,21 @@ import { createContext, useContext, useState, useEffect } from "react";
 const LS_SCENARIO = "netflix_scenario";
 const LS_DRIVERS  = "netflix_custom_drivers";
 
-const DEFAULT_DRIVERS = { netAdds: 6.0, armGrowth: 3.0, churn: 2.3 };
+// Bump this version any time DEFAULT_DRIVERS values change — forces a localStorage reset
+const DRIVERS_VERSION = 3;
+
+// Custom scenario uses fixed gross adds — defaults are market-consensus estimates
+// Gross adds 29→31M/Q calibrated to produce same net adds as Consensus scenario (7→9M/Q at 2.2→1.9% churn)
+// ARM growth 3.0→5.0%/yr: conservative start (EM mix dilution), accelerates as ad-tier CPM scales
+// Churn 2.2→1.9%/mo: modest improvement from sports content, ad-tier price floor, deeper slate
+const DEFAULT_DRIVERS = { _v: DRIVERS_VERSION, netAddsStart: 29.0, netAddsEnd: 31.0, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 };
+
+function migrateDrivers(d) {
+  if (!d) return null;
+  // Reset whenever the version doesn't match — catches all stale shapes
+  if (d._v !== DRIVERS_VERSION) return null;
+  return d;
+}
 
 function readLS(key, fallback) {
   try {
@@ -17,8 +31,8 @@ function readLS(key, fallback) {
 export const NetflixContext = createContext(null);
 
 export function NetflixProvider({ children }) {
-  const [scenario, _setScenario] = useState(() => readLS(LS_SCENARIO, "base"));
-  const [customDrivers, _setCustomDrivers] = useState(() => readLS(LS_DRIVERS, DEFAULT_DRIVERS));
+  const [scenario, _setScenario] = useState(() => readLS(LS_SCENARIO, "consensus"));
+  const [customDrivers, _setCustomDrivers] = useState(() => migrateDrivers(readLS(LS_DRIVERS, DEFAULT_DRIVERS)) ?? DEFAULT_DRIVERS);
 
   const setScenario = (val) => {
     _setScenario(val);
@@ -28,7 +42,7 @@ export function NetflixProvider({ children }) {
   const setCustomDrivers = (updater) => {
     _setCustomDrivers(prev => {
       const next = typeof updater === "function" ? updater(prev) : updater;
-      localStorage.setItem(LS_DRIVERS, JSON.stringify(next));
+      localStorage.setItem(LS_DRIVERS, JSON.stringify({ _v: DRIVERS_VERSION, ...next }));
       return next;
     });
   };
