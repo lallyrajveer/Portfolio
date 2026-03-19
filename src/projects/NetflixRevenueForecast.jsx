@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Line, BarChart, Bar, ComposedChart,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   ReferenceLine, Cell,
 } from "recharts";
@@ -22,7 +22,6 @@ const C = {
 
 const axisStyle = { fontSize: 11, fill: C.tick };
 const gridProps  = { stroke: C.grid, strokeDasharray: "3 3" };
-const fmtRev     = v => v != null ? `$${v.toFixed(2)}B` : "—";
 
 const SLIDER_CONFIG = [
   { key: "netAdds",   label: "Gross Adds/Q",  startKey: "netAddsStart",   endKey: "netAddsEnd",   min: 5,   max: 55,  step: 0.5, fmt: v => `+${v.toFixed(1)}M`   },
@@ -49,26 +48,6 @@ function ScenarioTab() {
   const fy26 = { bear: +getFY(bear,2026).toFixed(2), consensus: +getFY(consensus,2026).toFixed(2), bull: +getFY(bull,2026).toFixed(2), custom: +getFY(custom,2026).toFixed(2) };
   const fy27 = { bear: +getFY(bear,2027).toFixed(2), consensus: +getFY(consensus,2027).toFixed(2), bull: +getFY(bull,2027).toFixed(2), custom: +getFY(custom,2027).toFixed(2) };
 
-  const histData = HISTORICAL.map(h => ({ period: h.period, actual: h.rev, bear_v: null, cons_v: null, bull_v: null, custom_v: null }));
-  const lastActual = HISTORICAL[HISTORICAL.length - 1].rev;
-  const lastHistPatched = { ...histData[histData.length - 1], bear_v: lastActual, cons_v: lastActual, bull_v: lastActual, custom_v: lastActual };
-  const foreData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_v: bear[i].revenue, cons_v: consensus[i].revenue, bull_v: bull[i].revenue, custom_v: custom[i].revenue }));
-  const chartData = [...histData.slice(0, -1), lastHistPatched, ...foreData];
-
-  // ARM trajectory chart data
-  const lastHistARM = HISTORICAL[HISTORICAL.length - 1].arm;
-  const armHistData = HISTORICAL.map(h => ({ period: h.period, actual: h.arm, bear_a: null, cons_a: null, bull_a: null, custom_a: null }));
-  const armLastHist = { ...armHistData[armHistData.length - 1], bear_a: lastHistARM, cons_a: lastHistARM, bull_a: lastHistARM, custom_a: lastHistARM };
-  const armForeData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_a: bear[i].arm, cons_a: consensus[i].arm, bull_a: bull[i].arm, custom_a: custom[i].arm }));
-  const armChartData = [...armHistData.slice(0, -1), armLastHist, ...armForeData];
-
-  // Subscriber trajectory chart data
-  const lastHistSubs = HISTORICAL[HISTORICAL.length - 1].subs;
-  const subsHistData = HISTORICAL.map(h => ({ period: h.period, actual: h.subs, bear_s: null, cons_s: null, bull_s: null, custom_s: null }));
-  const subsLastHist = { ...subsHistData[subsHistData.length - 1], bear_s: lastHistSubs, cons_s: lastHistSubs, bull_s: lastHistSubs, custom_s: lastHistSubs };
-  const subsForeData = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_s: bear[i].subs, cons_s: consensus[i].subs, bull_s: bull[i].subs, custom_s: custom[i].subs }));
-  const subsChartData = [...subsHistData.slice(0, -1), subsLastHist, ...subsForeData];
-
   const mechForecast = allForecasts[mechKey];
   const mechSc       = SCENARIOS[mechKey];
   const mechChurn    = mechKey === "custom"
@@ -79,6 +58,11 @@ function ScenarioTab() {
 
   return (
     <div>
+      {/* Section heading */}
+      <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, color: C.navy, margin: "0 0 16px", fontWeight: 600 }}>
+        Scenario Assumptions &amp; Implied Revenue
+      </h3>
+
       {/* Executive Deck sync — small secondary row */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Executive Deck to:</span>
@@ -139,10 +123,10 @@ function ScenarioTab() {
         ))}
       </div>
 
-      {/* Custom sliders — always visible */}
-      <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "10px 20px 6px", marginBottom: 4, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
-        <strong>Bear / Base / Bull</strong> are fixed research scenarios with preset assumptions — they represent named market views and cannot be edited.{" "}
-        <strong>Custom</strong> is your own working scenario: adjust the sliders below to test any combination of drivers. The Custom line updates all three charts in real time. Sync the Executive Deck to Custom when you want the financial outlook table to reflect your specific assumptions rather than a named case.
+      {/* Custom sliders */}
+      <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, padding: "10px 16px", marginBottom: 8, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
+        <strong>Bear / Consensus / Bull</strong> are fixed research scenarios — named market views that cannot be edited.{" "}
+        <strong>Custom</strong> uses fixed gross adds: adjust the sliders to test any driver combination. Sync the Executive Deck to Custom when you want the financial outlook to reflect your specific assumptions rather than a named case.
       </div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
@@ -184,185 +168,11 @@ function ScenarioTab() {
         </div>
       </div>
 
-      {/* Market consensus context */}
-      <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "14px 18px", marginBottom: 16, fontFamily: "'Outfit', sans-serif" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "#5B21B6", marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Market Consensus Assumptions</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-          {[
-            {
-              label: "Gross Adds  29→31M/Q",
-              color: "#7C3AED",
-              points: [
-                "Implies ~28–30M FY2026 net adds — mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs, Jan–Mar 2025).",
-                "Password-sharing tailwind largely exhausted after the 2024 blowout quarter (19M net adds). Ad-tier and international underpenetration (MENA, SEA, LatAm) are the primary growth engines.",
-                "Sports content (NFL Christmas, WWE Raw) adds periodic acquisition spikes and reduces off-season churn.",
-              ],
-            },
-            {
-              label: "ARM Growth  3.0→5.0%/yr",
-              color: "#7C3AED",
-              points: [
-                "Conservative start: international growth in EM markets ($6–8/mo) dilutes global blended ARM; no UCAN price hike expected until late 2026 after Jan 2024 increase.",
-                "Accelerates through 2027 as ad-tier CPM monetisation matures — eMarketer estimates Netflix US ad revenue growing 40%+ YoY through 2026. Programmatic expansion and upfront deals improve yield per subscriber.",
-                "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth.",
-              ],
-            },
-            {
-              label: "Churn  2.2→1.9%/mo",
-              color: "#7C3AED",
-              points: [
-                "Starts at 2.2%: Q1 is seasonally the weakest retention quarter; heightened competition from Max's price-led EMEA expansion and Disney+ bundling.",
-                "Improves to 1.9% by Q4'27: sports content creates weekly viewing habits that suppress cancellations between content drops. Antenna data shows churn 30–40% lower in months with live sports.",
-                "Ad-tier ($7.99/mo) price floor prevents cancellations that would otherwise occur at $17.99 — subscribers downgrade rather than cancel. Structural floor on churn.",
-              ],
-            },
-          ].map(({ label, color, points }) => (
-            <div key={label}>
-              <div style={{ fontSize: 11, fontWeight: 700, color, marginBottom: 7 }}>{label}</div>
-              <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
-                {points.map((pt, i) => (
-                  <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 5 }}>{pt}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #DDD6FE", fontSize: 10, color: "#7C3AED" }}>
-          Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Antenna monthly churn data · Bloomberg Second Measure · Netflix Upfront 2024
-        </div>
-      </div>
-
-      {/* Chart — all 4 lines */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 20px" }}>
-          Netflix — Revenue Scenarios ($B)
-        </h3>
-        <ResponsiveContainer width="100%" height={340}>
-          <ComposedChart data={chartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
-            <CartesianGrid {...gridProps} />
-            <XAxis dataKey="period" tick={axisStyle} />
-            <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
-            <Tooltip formatter={(v, name) => [fmtRev(v), name]} />
-            <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
-            <Line dataKey="actual"   name="Historical" stroke={C.navy}       strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
-            <Line dataKey="bear_v"   name="Bear"       stroke={SC_COLORS.bear}   strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="cons_v"   name="Consensus"  stroke={SC_COLORS.consensus}   strokeWidth={2.5} dot={false} connectNulls />
-            <Line dataKey="bull_v"   name="Bull"       stroke={SC_COLORS.bull}   strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="custom_v" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}   dot={false} connectNulls strokeDasharray="5 3" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Subscriber trajectory chart */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 4px" }}>
-          Netflix — Paid Memberships (M)
-        </h3>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-          Subscriber growth across scenarios driven by net adds ramp. Bull ceiling reaches ~400M by Q4'27; Bear floor stays near 350M.
-        </p>
-        <ResponsiveContainer width="100%" height={280}>
-          <ComposedChart data={subsChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
-            <CartesianGrid {...gridProps} />
-            <XAxis dataKey="period" tick={axisStyle} />
-            <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
-            <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}M` : "—", name]} />
-            <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
-            <Line dataKey="actual"   name="Historical" stroke={C.navy}          strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
-            <Line dataKey="bear_s"   name="Bear"       stroke={SC_COLORS.bear}   strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="cons_s"   name="Consensus"  stroke={SC_COLORS.consensus}   strokeWidth={2.5} dot={false} connectNulls />
-            <Line dataKey="bull_s"   name="Bull"       stroke={SC_COLORS.bull}   strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="custom_s" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}   dot={false} connectNulls strokeDasharray="5 3" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* ARM trajectory chart */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 4px" }}>
-          Netflix — Forecasted ARM ($/mo)
-        </h3>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-          ARM ramps gradually as ad-tier CPM matures and pricing cycles compound. Historical = actuals; forecast lines show per-scenario trajectories.
-        </p>
-        <ResponsiveContainer width="100%" height={280}>
-          <ComposedChart data={armChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
-            <CartesianGrid {...gridProps} />
-            <XAxis dataKey="period" tick={axisStyle} />
-            <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
-            <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}/mo` : "—", name]} />
-            <ReferenceLine x="Q4'25" stroke={C.muted} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: C.muted }} />
-            <Line dataKey="actual"   name="Historical" stroke={C.navy}         strokeWidth={1.5} strokeDasharray="3 2" dot={false} connectNulls />
-            <Line dataKey="bear_a"   name="Bear"       stroke={SC_COLORS.bear}  strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="cons_a"   name="Consensus"  stroke={SC_COLORS.consensus}  strokeWidth={2.5} dot={false} connectNulls />
-            <Line dataKey="bull_a"   name="Bull"       stroke={SC_COLORS.bull}  strokeWidth={2}   dot={false} connectNulls />
-            <Line dataKey="custom_a" name="Custom"     stroke={SC_COLORS.custom} strokeWidth={2}  dot={false} connectNulls strokeDasharray="5 3" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Assumptions table — all 4 columns */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 14px" }}>
-          Scenario Assumptions & Implied Revenue
-        </h4>
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 7, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
-          <strong>ARM growth rationale:</strong> Netflix UCAN price hikes averaged ~7% in 2024 but global blended ARM is diluted by faster international growth at lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales — so ARM growth is expected to accelerate over the forecast as inventory matures. Base ramps 2→4%/yr (avg 3%); Bear 0.5→1.5% (price fatigue early, modest recovery); Bull 3.5→6.5% (ad-tier CPM matures faster, UCAN hikes continue). Custom scenario uses a flat rate.
-        </div>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
-            <thead>
-              <tr>
-                {["Driver","Bear","Consensus","Bull","Custom"].map((h, i) => (
-                  <th key={h} style={{ padding: "9px 14px", textAlign: i === 0 ? "left" : "center", background: i === 0 ? "#F4F5F8" : SC_COLORS[["bear","consensus","bull","custom"][i-1]], color: i === 0 ? C.navy : "#fff", fontWeight: 600, borderBottom: `2px solid ${i === 0 ? C.grid : SC_COLORS[["bear","consensus","bull","custom"][i-1]]}` }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Qtrly Net Adds (M)",
-                  `+${SCENARIOS.bear.netAddsStart}→${SCENARIOS.bear.netAddsEnd}M`,
-                  `+${SCENARIOS.consensus.netAddsStart}→${SCENARIOS.consensus.netAddsEnd}M`,
-                  `+${SCENARIOS.bull.netAddsStart}→${SCENARIOS.bull.netAddsEnd}M`,
-                  `+${customDriversDisplay.netAddsStart.toFixed(1)}→${customDriversDisplay.netAddsEnd.toFixed(1)}M (gross)`,
-                  v => v],
-                ["Annual ARM Growth (%)",
-                  `${SCENARIOS.bear.armGrowthStart}→${SCENARIOS.bear.armGrowthEnd}%`,
-                  `${SCENARIOS.consensus.armGrowthStart}→${SCENARIOS.consensus.armGrowthEnd}%`,
-                  `${SCENARIOS.bull.armGrowthStart}→${SCENARIOS.bull.armGrowthEnd}%`,
-                  `${customDriversDisplay.armGrowthStart.toFixed(1)}→${customDriversDisplay.armGrowthEnd.toFixed(1)}%`,
-                  v => v],
-                ["Monthly Churn Rate (%)",
-                  `${SCENARIOS.bear.churnStart}→${SCENARIOS.bear.churnEnd}%`,
-                  `${SCENARIOS.consensus.churnStart}→${SCENARIOS.consensus.churnEnd}%`,
-                  `${SCENARIOS.bull.churnStart}→${SCENARIOS.bull.churnEnd}%`,
-                  `${customDriversDisplay.churnStart.toFixed(1)}→${customDriversDisplay.churnEnd.toFixed(1)}%/mo`,
-                  v => v],
-                ["Implied FY2026E ($B)",     fy26.bear, fy26.consensus, fy26.bull, fy26.custom, v => `$${v.toFixed(1)}B`],
-                ["YoY vs FY2025 ($45.2B)",   fy26.bear-45.2, fy26.consensus-45.2, fy26.bull-45.2, fy26.custom-45.2, v => `${v>=0?"+":""}${((v/45.2)*100).toFixed(1)}%`],
-                ["Implied FY2027E ($B)",     fy27.bear, fy27.consensus, fy27.bull, fy27.custom, v => `$${v.toFixed(1)}B`],
-                ["YoY FY2027 vs FY2026",     fy27.bear-fy26.bear, fy27.consensus-fy26.consensus, fy27.bull-fy26.bull, fy27.custom-fy26.custom, v => `${v>=0?"+":""}${((v/fy26.consensus)*100).toFixed(1)}%`],
-              ].map(([label, bv, bsv, bulv, cv, fmt], ri) => {
-                const isYoY = label.startsWith("YoY");
-                return (
-                  <tr key={label} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
-                    <td style={{ padding: "9px 14px", color: isYoY ? C.tick : C.navy, fontWeight: isYoY ? 400 : 500, fontSize: isYoY ? 12 : 13, fontStyle: isYoY ? "italic" : "normal" }}>{label}</td>
-                    {[["bear",bv],["consensus",bsv],["bull",bulv],["custom",cv]].map(([k,v]) => (
-                      <td key={k} style={{ padding: "9px 14px", textAlign: "center", color: isYoY ? (v >= 0 ? "#16a34a" : "#dc2626") : SC_COLORS[k], fontWeight: isYoY ? 400 : 600 }}>{fmt(v)}</td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {/* Subscriber mechanics — per-scenario selector within section */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
           <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: 0 }}>
-            Subscriber Mechanics
+            Membership & Revenue Bridge
           </h4>
           <div style={{ display: "flex", gap: 6 }}>
             {["bear","consensus","bull","custom"].map(key => {
@@ -382,39 +192,128 @@ function ScenarioTab() {
         <p style={{ fontSize: 12, color: C.muted, margin: "0 0 14px" }}>
           {mechKey === "custom"
             ? "Custom uses fixed gross adds — churn reduces them to net adds, so higher churn directly lowers subscriber count and revenue."
-            : "Bear/Base/Bull use fixed net add targets — churn drives acquisition cost (gross adds needed), not revenue directly."}
+            : "Bear/Consensus/Bull use fixed net add targets — churn determines gross adds needed (acquisition cost) but does not affect subscriber count or revenue directly."}
         </p>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
-            <thead>
-              <tr>
-                {["Quarter","Begin Subs (M)","Gross Adds (M)","Churn Losses (M)","Net Adds (M)","End Subs (M)","ARM ($/mo)","Qtrly Rev ($B)"].map((h, i) => (
-                  <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${SC_COLORS[mechKey]}`, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mechForecast.map((row, ri) => (
-                <tr key={row.period} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
-                  <td style={{ padding: "8px 12px", fontWeight: 600, color: C.navy }}>{row.period}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>{row.beginSubs.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: "#16a34a", fontWeight: 600 }}>+{row.grossAdds.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: "#dc2626" }}>−{row.churnLosses.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: SC_COLORS[mechKey], fontWeight: 700 }}>+{row.netAdds.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy, fontWeight: 600 }}>{row.endSubs.toFixed(1)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: SC_COLORS[mechKey], fontWeight: 600 }}>${row.arm.toFixed(2)}</td>
-                  <td style={{ padding: "8px 12px", textAlign: "center", color: C.navy }}>${row.revenue.toFixed(2)}B</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {(() => {
+          // Build historical columns (derive beginSubs + grossAdds/churnLosses from available data)
+          const histCols = HISTORICAL.map((h, i) => {
+            const beginSubs   = +(i === 0 ? h.subs - h.netAdds : HISTORICAL[i - 1].subs).toFixed(1);
+            const avgSubs     = (beginSubs + h.subs) / 2;
+            const churnLosses = +(h.churn / 100 * avgSubs * 3).toFixed(1);
+            const grossAdds   = +(h.netAdds + churnLosses).toFixed(1);
+            return { period: h.period, isHist: true, beginSubs, grossAdds, churnLosses, netAdds: h.netAdds, endSubs: h.subs, arm: h.arm, revenue: h.rev, churn: h.churn };
+          });
+          const foreCols = mechForecast.map(r => ({ ...r, isHist: false }));
+          const allCols  = [...histCols, ...foreCols];
+
+          const metricRows = [
+            { label: "Begin Subs (M)",    key: "beginSubs",   fmt: v => v.toFixed(1),             color: C.tick   },
+            { label: "Gross Adds (M)",    key: "grossAdds",   fmt: v => `+${v.toFixed(1)}`,        color: "#16a34a" },
+            { label: "Churn Losses (M)",  key: "churnLosses", fmt: v => `−${v.toFixed(1)}`,        color: "#dc2626" },
+            { label: "Net Adds (M)",      key: "netAdds",     fmt: v => `+${v.toFixed(1)}`,        color: SC_COLORS[mechKey] },
+            { label: "End Subs (M)",      key: "endSubs",     fmt: v => v.toFixed(1),              color: C.navy   },
+            { label: "Churn Rate (%/mo)", key: "churn",       fmt: v => `${v.toFixed(2)}%`,        color: C.tick   },
+            { label: "ARM ($/mo)",        key: "arm",         fmt: v => `$${v.toFixed(2)}`,        color: SC_COLORS[mechKey] },
+            { label: "Qtrly Rev ($B)",    key: "revenue",     fmt: v => `$${v.toFixed(2)}B`,       color: C.navy   },
+          ];
+
+          const thStyle = (isHist, isFore) => ({
+            padding: "7px 10px", textAlign: "center", whiteSpace: "nowrap", fontSize: 11, fontWeight: 600,
+            background: isHist ? "#F4F5F8" : "#EEF2FF",
+            color: isHist ? C.tick : SC_COLORS[mechKey],
+            borderBottom: `2px solid ${isHist ? C.grid : SC_COLORS[mechKey]}`,
+            borderLeft: isFore === "first" ? `2px solid ${SC_COLORS[mechKey]}` : undefined,
+          });
+
+          return (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif", minWidth: "100%" }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: "7px 12px", textAlign: "left", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.grid}`, whiteSpace: "nowrap", fontSize: 11, position: "sticky", left: 0, zIndex: 1 }}>
+                      Metric
+                    </th>
+                    {allCols.map((col, ci) => (
+                      <th key={col.period} style={thStyle(col.isHist, !col.isHist && ci === histCols.length ? "first" : false)}>
+                        {col.period}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {metricRows.map((row, ri) => (
+                    <tr key={row.label} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
+                      <td style={{ padding: "7px 12px", fontWeight: 600, color: C.navy, whiteSpace: "nowrap", fontSize: 11, position: "sticky", left: 0, background: ri % 2 === 0 ? "#F8F9FA" : "#fff", zIndex: 1 }}>
+                        {row.label}
+                      </td>
+                      {allCols.map((col, ci) => (
+                        <td key={col.period} style={{
+                          padding: "7px 10px", textAlign: "center",
+                          color: col.isHist ? C.muted : row.color,
+                          fontWeight: col.isHist ? 400 : (row.key === "netAdds" || row.key === "revenue" ? 700 : 500),
+                          borderLeft: !col.isHist && ci === histCols.length ? `2px solid ${SC_COLORS[mechKey]}` : undefined,
+                          fontSize: 11,
+                        }}>
+                          {row.fmt(col[row.key])}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
         <p style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
-          Churn losses = {mechChurn.toFixed(1)}%/mo × Begin Subs × 3 months.
-          {mechKey === "custom"
-            ? " Net adds = Gross adds − Churn losses. End Subs = Begin Subs + Net adds."
-            : " Gross adds = Net adds + Churn losses. Higher churn inflates gross adds needed (CAC), not end subscriber count."}
+          Historical gross adds and churn losses are estimated from reported net adds, end-period subs, and third-party churn data (Antenna/YipitData).
+          Forecast: {mechKey === "custom"
+            ? "gross adds fixed; net adds = gross adds − churn losses."
+            : "net adds fixed; gross adds = net adds + churn losses (CAC driver only)."}
         </p>
+      </div>
+
+      {/* ── Context / Assumptions — bottom of page ── */}
+      <div style={{ marginTop: 32 }}>
+        <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "16px 18px", fontFamily: "'Outfit', sans-serif" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#5B21B6", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Market Consensus Assumptions</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {[
+              {
+                label: "Gross Adds  29→31M/Q",
+                points: [
+                  "Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Password-sharing tailwind largely exhausted; ad-tier and international growth (MENA, SEA, LatAm) are the primary engines.",
+                  "Sports content (NFL Christmas, WWE Raw) adds periodic acquisition spikes and reduces off-season churn.",
+                ],
+              },
+              {
+                label: "ARM Growth  3.0→5.0%/yr",
+                points: [
+                  "Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures — Bear 0.5→1.5%, Consensus 3.0→5.0%, Bull 3.5→6.5%.",
+                  "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp.",
+                ],
+              },
+              {
+                label: "Churn  2.2→1.9%/mo",
+                points: [
+                  "Starts at 2.2%: seasonal weakness + competition from Max and Disney+ bundling. Improves to 1.9% by Q4'27 as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).",
+                  "Ad-tier price floor ($7.99/mo) structurally reduces cancellations — subscribers downgrade rather than leave.",
+                ],
+              },
+            ].map(({ label, points }) => (
+              <div key={label}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", marginBottom: 7 }}>{label}</div>
+                <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
+                  {points.map((pt, i) => (
+                    <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 5 }}>{pt}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #DDD6FE", fontSize: 10, color: "#7C3AED" }}>
+            Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Antenna monthly churn data · Bloomberg Second Measure · Netflix Upfront 2024
+          </div>
+        </div>
       </div>
     </div>
   );

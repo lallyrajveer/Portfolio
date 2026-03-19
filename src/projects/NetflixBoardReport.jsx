@@ -1,5 +1,6 @@
 import { useNetflix } from "./NetflixContext.js";
-import { SCENARIOS, getScenarioMetrics } from "./NetflixShared.js";
+import { SCENARIOS, HISTORICAL, QUARTERS, getScenarioMetrics, getForecast, buildForecast, START } from "./NetflixShared.js";
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
 const NF    = "#E50914";
@@ -23,39 +24,179 @@ const priorities = [
   {
     title: "Ad-Supported Tier Monetization",
     impact: "+$2–3B by FY2027",
-    body: "Accelerate ad-tier membership growth as the entry-point offering. Expand programmatic inventory and CPM yield optimization globally. Target 40% of new sign-ups on ad tier by Q4 2026.",
+    bullets: [
+      "Accelerate ad-tier as the primary entry-point offering — target 40% of new sign-ups on ad tier by Q4 2026",
+      "Expand programmatic inventory and CPM yield optimization across UCAN and EMEA markets",
+      "Scale measurement partnerships (Nielsen, DoubleVerify) to capture premium brand budgets",
+    ],
     status: "In Progress",
     statusColor: "#D97706",
   },
   {
     title: "Live Events & Sports Rights",
     impact: "+$1.5B incremental rev",
-    body: "Capitalize on NFL Christmas games success and WWE Raw partnership. Pursue FIFA World Cup 2026 streaming rights and expand live sports catalog in key international markets to reduce churn.",
+    bullets: [
+      "Build on NFL Christmas games and WWE Raw to establish Netflix as a live destination",
+      "Pursue FIFA World Cup 2026 streaming rights — highest-reach live event globally",
+      "Expand live sports catalog in India and LatAm to anchor retention in high-churn markets",
+    ],
     status: "Strategic Priority",
     statusColor: NF,
   },
   {
     title: "Gaming & Interactive Content",
     impact: "Retention driver",
-    body: "Scale mobile gaming library from 100+ titles. Explore premium AAA releases and cloud gaming to create a distinct entertainment moat. Target 10M daily active players by FY2026.",
+    bullets: [
+      "Scale mobile gaming library from 100+ titles toward premium AAA releases",
+      "Explore cloud gaming to create a distinct entertainment moat vs. Disney+ and Max",
+      "Target 10M daily active players by FY2026 as the proof-of-concept threshold",
+    ],
     status: "In Progress",
     statusColor: "#D97706",
   },
   {
     title: "ARM Expansion via Pricing",
     impact: "+0.5–1.0% ARM/yr",
-    body: "Strategic price increases in under-monetized markets (UCAN, EMEA) supported by demonstrated content value. Shift mix toward Standard/Premium tiers with bundled benefits to justify increases.",
+    bullets: [
+      "Execute strategic price increases in under-monetized UCAN and EMEA markets",
+      "Shift subscriber mix toward Standard/Premium tiers with bundled benefits",
+      "Zero incremental content spend required — flows directly to operating income",
+    ],
     status: "Ongoing",
     statusColor: "#16A34A",
   },
   {
     title: "Global Market Penetration",
     impact: "+25–40M members",
-    body: "Accelerate growth in India, Southeast Asia, Middle East, and Africa through localized content investment and lower-priced mobile-only tiers. These markets represent Netflix's largest untapped runway.",
+    bullets: [
+      "Prioritize India, Southeast Asia, Middle East, and Africa — largest untapped runway",
+      "Deploy localized content investment and mobile-only tiers at sub-$5/mo price points",
+      "International growth dilutes ARM near-term but drives long-term pricing ladder opportunity",
+    ],
     status: "Expanding",
     statusColor: "#16A34A",
   },
 ];
+
+/* ─── Scenario Charts (moved from Revenue Forecast tab) ─────── */
+const axisStyle  = { fontSize: 11, fill: MUTED };
+const gridProps  = { stroke: GRID, strokeDasharray: "3 3" };
+
+function useScenariosData() {
+  const { customDrivers } = useNetflix();
+  const bear      = getForecast("bear");
+  const consensus = getForecast("consensus");
+  const bull      = getForecast("bull");
+  const custom    = buildForecast(
+    START.subs, START.arm,
+    customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart,
+    QUARTERS,
+    customDrivers.netAddsEnd, customDrivers.armGrowthEnd, customDrivers.churnEnd,
+    true
+  );
+
+  // Revenue
+  const histRev = HISTORICAL.map(h => ({ period: h.period, actual: h.rev, bear_v: null, cons_v: null, bull_v: null, custom_v: null }));
+  const lastRev  = HISTORICAL[HISTORICAL.length - 1].rev;
+  const lastRevP = { ...histRev[histRev.length - 1], bear_v: lastRev, cons_v: lastRev, bull_v: lastRev, custom_v: lastRev };
+  const foreRev  = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_v: bear[i].revenue, cons_v: consensus[i].revenue, bull_v: bull[i].revenue, custom_v: custom[i].revenue }));
+  const chartData = [...histRev.slice(0, -1), lastRevP, ...foreRev];
+
+  // Subs
+  const histSubs = HISTORICAL.map(h => ({ period: h.period, actual: h.subs, bear_s: null, cons_s: null, bull_s: null, custom_s: null }));
+  const lastSubs  = HISTORICAL[HISTORICAL.length - 1].subs;
+  const lastSubsP = { ...histSubs[histSubs.length - 1], bear_s: lastSubs, cons_s: lastSubs, bull_s: lastSubs, custom_s: lastSubs };
+  const foreSubs  = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_s: bear[i].subs, cons_s: consensus[i].subs, bull_s: bull[i].subs, custom_s: custom[i].subs }));
+  const subsChartData = [...histSubs.slice(0, -1), lastSubsP, ...foreSubs];
+
+  // ARM
+  const histARM = HISTORICAL.map(h => ({ period: h.period, actual: h.arm, bear_a: null, cons_a: null, bull_a: null, custom_a: null }));
+  const lastARM  = HISTORICAL[HISTORICAL.length - 1].arm;
+  const lastARMP = { ...histARM[histARM.length - 1], bear_a: lastARM, cons_a: lastARM, bull_a: lastARM, custom_a: lastARM };
+  const foreARM  = QUARTERS.map((q, i) => ({ period: q, actual: null, bear_a: bear[i].arm, cons_a: consensus[i].arm, bull_a: bull[i].arm, custom_a: custom[i].arm }));
+  const armChartData = [...histARM.slice(0, -1), lastARMP, ...foreARM];
+
+  return { chartData, subsChartData, armChartData };
+}
+
+const SC_LINES = [
+  { dataKey: "actual",   name: "Historical", stroke: "#94A3B8", width: 1.5, dash: "3 2" },
+  { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,      width: 2,   dash: null },
+  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus, width: 2.5, dash: null },
+  { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,      width: 2,   dash: null },
+  { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,    width: 2,   dash: "5 3" },
+];
+
+function RevenueScenariosChart() {
+  const { chartData } = useScenariosData();
+  return (
+    <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
+      <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 20px" }}>
+        Netflix — Revenue Scenarios ($B)
+      </h3>
+      <ResponsiveContainer width="100%" height={320}>
+        <ComposedChart data={chartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+          <CartesianGrid {...gridProps} />
+          <XAxis dataKey="period" tick={axisStyle} />
+          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
+          <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}B` : "—", name]} />
+          <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
+          {SC_LINES.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function MembershipChart() {
+  const { subsChartData } = useScenariosData();
+  const subLines = SC_LINES.map(l => ({ ...l, dataKey: l.dataKey.replace("_v","_s") }));
+  return (
+    <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
+      <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 4px" }}>
+        Netflix — Paid Memberships (M)
+      </h3>
+      <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
+        Subscriber growth across scenarios. Bull ceiling ~400M by Q4'27; Bear floor near 350M.
+      </p>
+      <ResponsiveContainer width="100%" height={260}>
+        <ComposedChart data={subsChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+          <CartesianGrid {...gridProps} />
+          <XAxis dataKey="period" tick={axisStyle} />
+          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
+          <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}M` : "—", name]} />
+          <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
+          {subLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function ARMChart() {
+  const { armChartData } = useScenariosData();
+  const armLines = SC_LINES.map(l => ({ ...l, dataKey: l.dataKey.replace("_v","_a") }));
+  return (
+    <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
+      <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 4px" }}>
+        Netflix — Forecasted ARM ($/mo)
+      </h3>
+      <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
+        ARM ramps gradually as ad-tier CPM matures and pricing cycles compound.
+      </p>
+      <ResponsiveContainer width="100%" height={260}>
+        <ComposedChart data={armChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+          <CartesianGrid {...gridProps} />
+          <XAxis dataKey="period" tick={axisStyle} />
+          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
+          <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}/mo` : "—", name]} />
+          <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
+          {armLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+        </ComposedChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
 
 /* ─── Sub-sections ───────────────────────────────────────────── */
 function SectionHeading({ title }) {
@@ -94,7 +235,9 @@ function StrategicPriorities() {
               <span style={{ fontSize: 10, fontWeight: 600, color: p.statusColor, background: `${p.statusColor}18`, padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap", marginLeft: 8, flexShrink: 0 }}>{p.status}</span>
             </div>
             <div style={{ fontSize: 12, fontWeight: 700, color: NF, marginBottom: 6 }}>{p.impact}</div>
-            <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.65 }}>{p.body}</div>
+            <ul style={{ fontSize: 12, color: MUTED, lineHeight: 1.65, margin: 0, paddingLeft: 16 }}>
+              {p.bullets.map((b, bi) => <li key={bi} style={{ marginBottom: 4 }}>{b}</li>)}
+            </ul>
           </div>
         ))}
       </div>
@@ -102,20 +245,19 @@ function StrategicPriorities() {
       {/* Recommendation */}
       <div style={{ background: "#0B1628", borderRadius: 10, padding: "20px 24px", border: "1px solid rgba(229,9,20,0.25)" }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Recommendation — Capital Allocation Priority</div>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 12px" }}>
-          If capital is constrained, <strong style={{ color: "#fff" }}>Ad-Tier Monetization should be funded first.</strong> The infrastructure is already built; the marginal cost of the next dollar of ad revenue is lower than for any other priority on this list. CPM yield optimization and programmatic expansion require execution, not new CapEx — the sensitivity model shows a +1% ARM improvement alone adds ~$0.5B to FY2026E revenue, and the ad tier is the fastest path to that lift.
-        </p>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 12px" }}>
-          <strong style={{ color: "#fff" }}>ARM Pricing ranks second</strong> because it is the only priority with zero incremental content spend — price increases in under-monetized UCAN and EMEA markets flow directly to operating income. The bear case risk (churn acceleration) is manageable given Netflix's demonstrated pricing power in prior cycles.
-        </p>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: "0 0 14px" }}>
-          Live Events and Global Penetration are high-conviction long-cycle investments where IRR depends heavily on rights costs and market entry timing — fund after the first two, not instead of them. Gaming remains a strategic optionality play; the revenue case is unproven and should be sized accordingly until daily active player data matures.
-        </p>
+        <ul style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 14px", paddingLeft: 20 }}>
+          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Fund Ad-Tier Monetization first.</strong> Infrastructure is built; marginal cost of next ad dollar is the lowest on this list. CPM yield + programmatic expansion require execution, not new CapEx.</li>
+          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>ARM Pricing second</strong> — zero incremental content spend; flows directly to operating income. Churn risk from price hikes is manageable given demonstrated pricing power in prior cycles.</li>
+          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Live Events and Global Penetration are long-cycle commitments</strong> — fund after the first two. IRR depends on rights costs and market entry timing; size positions accordingly.</li>
+          <li><strong style={{ color: "#fff" }}>Gaming is optionality, not a near-term line item</strong> — no revenue proof point at current scale. Protect ad-tier and ARM budgets before adding gaming CapEx.</li>
+        </ul>
         <div style={{ borderTop: "1px solid rgba(229,9,20,0.2)", paddingTop: 14 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>If content budget is cut 10% (~$1.5–2B)</div>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: 0 }}>
-            <strong style={{ color: "#fff" }}>Deprioritize Gaming and Live Events first.</strong> Gaming has no near-term revenue proof point — daily active player data is not yet at a scale that justifies incremental CapEx over ad-tier yield improvement. Live Events rights (sports, live programming) carry the largest upfront cash commitment with the longest payback period; in a constrained budget, deferring a rights renewal is lower-cost than cutting a content slate that is already amortizing. Ad-Tier Monetization and ARM Pricing require no incremental content spend and should be protected in any budget scenario. Global Penetration sits in the middle — localized content investment is more capital-efficient than sports rights, but it is the first to be right-sized (not eliminated) if constraints tighten.
-          </p>
+          <ul style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: 0, paddingLeft: 20 }}>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Deprioritize Gaming first</strong> — no near-term revenue proof point; daily active player data not yet at scale to justify CapEx over ad-tier yield improvement.</li>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Defer Live Events rights renewals second</strong> — largest upfront cash commitment and longest payback; deferring a rights renewal is lower-cost than cutting an amortizing content slate.</li>
+            <li><strong style={{ color: "#fff" }}>Protect Ad-Tier and ARM Pricing in every budget scenario</strong> — both require no incremental content spend. Right-size Global Penetration (don't eliminate) if constraints tighten further.</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -129,15 +271,15 @@ function FinancialOutlook() {
     ? { ...SCENARIOS.consensus, ...customDrivers }
     : SCENARIOS[scenario] ?? SCENARIOS.consensus;
   const m        = getScenarioMetrics(drivers, isCustom);
-  const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.base;
+  const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.consensus;
   const label    = SCENARIO_LABELS[scenario] ?? "Consensus";
 
   const rows = [
-    { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,        fy27: `+${m.netAdds27}M`,        baseline: "+30M",   target: "+35M"   },
-    { metric: "End-Period Paid Members (M)", fy26: `${m.subs26.toFixed(0)}M`, fy27: `${m.subs27.toFixed(0)}M`, baseline: "362M",   target: "380M"   },
-    { metric: "Avg ARM ($/month)",           fy26: `$${m.arm26}`,             fy27: `$${m.arm27}`,             baseline: "$12.50", target: "$12.80" },
-    { metric: "Monthly Churn Rate",          fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%`, baseline: "~1.9%", target: "<1.8%"  },
-    { metric: "Annual Revenue ($B)",         fy26: `$${m.rev26}B`,            fy27: `$${m.rev27}B`,            baseline: "$51B",   target: "$56B"   },
+    { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,         fy27: `+${m.netAdds27}M`         },
+    { metric: "End-Period Paid Members (M)", fy26: `${m.subs26.toFixed(0)}M`,  fy27: `${m.subs27.toFixed(0)}M`  },
+    { metric: "Avg ARM ($/month)",           fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
+    { metric: "Monthly Churn Rate",          fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%` },
+    { metric: "Annual Revenue ($B)",         fy26: `$${m.rev26}B`,             fy27: `$${m.rev27}B`             },
   ];
 
   return (
@@ -157,11 +299,9 @@ function FinancialOutlook() {
           <thead>
             <tr>
               {[
-                { label: "Metric",         bg: "#F4F5F8", color: NAVY },
-                { label: `FY2026E (${label})`, bg: col,  color: "#fff" },
-                { label: `FY2027E (${label})`, bg: col,  color: "#fff" },
-                { label: "FY2025 Baseline",    bg: NAVY, color: "#fff" },
-                { label: "Strategic Target",   bg: "#1E3A5F", color: "#fff" },
+                { label: "Metric",             bg: "#F4F5F8", color: NAVY  },
+                { label: `FY2026E (${label})`, bg: col,       color: "#fff" },
+                { label: `FY2027E (${label})`, bg: col,       color: "#fff" },
               ].map((h, i) => (
                 <th key={i} style={{ padding: "11px 16px", textAlign: i === 0 ? "left" : "center", background: h.bg, color: h.color, fontWeight: 600, borderBottom: `2px solid ${NF}`, whiteSpace: "nowrap" }}>
                   {h.label}
@@ -175,8 +315,6 @@ function FinancialOutlook() {
                 <td style={{ padding: "11px 16px", fontWeight: 600, color: NAVY }}>{row.metric}</td>
                 <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: col }}>{row.fy26}</td>
                 <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: col }}>{row.fy27}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", color: MUTED }}>{row.baseline}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", color: "#16A34A", fontWeight: 600 }}>{row.target}</td>
               </tr>
             ))}
           </tbody>
@@ -248,15 +386,24 @@ export default function NetflixBoardReport() {
         <SectionHeading title="KPI Snapshot — FY2025" />
         <KPISection />
 
+        <SectionHeading title="Revenue & Membership Trajectory" />
+        <RevenueScenariosChart />
+        <MembershipChart />
+        <ARMChart />
+
         <SectionHeading title="Strategic Priorities — FY2026–27" />
         <StrategicPriorities />
 
         <SectionHeading title="Analyst View" />
         <div style={{ background: "#fff", borderRadius: 10, padding: "22px 26px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}`, marginBottom: 8 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: MUTED, marginBottom: 10 }}>Preparer's Point of View</div>
-          <p style={{ fontSize: 14, color: NAVY, lineHeight: 1.8, margin: 0 }}>
-            Of the five priorities on this page, <strong>Ad-Supported Tier Monetization will generate the most shareholder value over the next three years</strong> — and it is not close. The core reason is structural: Netflix has already absorbed the cost of building ad-tier infrastructure, signed measurement partnerships, and trained the recommendation system on ad-tier engagement patterns. The next dollar of investment into CPM yield and programmatic fill rates earns a return that no other priority on this list can match, because the marginal cost of additional ad revenue approaches zero once inventory exists. Every other priority requires either large upfront rights spend (Live Events), unproven consumer behavior (Gaming), multi-year market entry cycles (Global Penetration), or execution risk from price elasticity (ARM Pricing). Ad-tier is the one lever Netflix can pull in FY2026 that will show up meaningfully in FY2026 operating income — not FY2028. The counterargument is that ad-tier success depends on advertiser demand and CPM rates that are partially outside Netflix's control; a macro advertising pullback would compress that upside faster than any of the other priorities. That risk is real and should be monitored. But on a risk-adjusted basis, ad-tier monetization is where I would concentrate capital if forced to choose one.
-          </p>
+          <ul style={{ fontSize: 13, color: NAVY, lineHeight: 1.8, margin: 0, paddingLeft: 20 }}>
+            <li style={{ marginBottom: 8 }}><strong>Ad-Tier is the highest-conviction capital allocation</strong> — Netflix has already absorbed infrastructure and measurement costs; the next dollar into CPM yield earns a return no other priority can match because marginal cost approaches zero once inventory exists.</li>
+            <li style={{ marginBottom: 8 }}><strong>ARM Pricing ranks second</strong> — zero incremental content spend required; price increases in under-monetized UCAN and EMEA flow directly to operating income, with manageable churn risk given Netflix's demonstrated pricing power.</li>
+            <li style={{ marginBottom: 8 }}><strong>Live Events and Global Penetration are high-conviction long-cycle investments</strong> — fund after the first two. IRR depends heavily on rights costs and market entry timing; capital committed here should be sized to the long payback horizon.</li>
+            <li style={{ marginBottom: 8 }}><strong>Gaming is strategic optionality, not a near-term revenue driver</strong> — daily active player data is not yet at scale to justify incremental CapEx over ad-tier yield improvement. Size accordingly until the data matures.</li>
+            <li><strong>Key risk to the bull case</strong>: ad-tier success depends on advertiser demand and CPM rates partially outside Netflix's control — a macro advertising pullback compresses this upside faster than any other priority. Monitor quarterly fill-rate and CPM trend data.</li>
+          </ul>
         </div>
 
         <SectionHeading title="Financial Outlook — FY2026–27E" />
