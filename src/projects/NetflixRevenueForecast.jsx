@@ -10,6 +10,67 @@ import {
 } from "./NetflixShared.js";
 import { useNetflix } from "./NetflixContext.js";
 
+/* ─── Dual-handle range slider ───────────────────────────────── */
+const DUAL_SLIDER_CSS = `
+  .nf-dual-range { position: relative; height: 20px; }
+  .nf-dual-range input[type=range] {
+    position: absolute; width: 100%; top: 50%; margin: 0;
+    height: 0; background: transparent; appearance: none; -webkit-appearance: none;
+    pointer-events: none;
+  }
+  .nf-dual-range input[type=range]::-webkit-slider-thumb {
+    appearance: none; -webkit-appearance: none; pointer-events: all; cursor: grab;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #7C3AED; border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(124,58,237,0.35);
+  }
+  .nf-dual-range input[type=range]:active::-webkit-slider-thumb { cursor: grabbing; }
+  .nf-dual-range input[type=range]::-moz-range-thumb {
+    pointer-events: all; cursor: grab;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #7C3AED; border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(124,58,237,0.35);
+  }
+`;
+if (typeof document !== "undefined" && !document.getElementById("nf-dual-range-style")) {
+  const s = document.createElement("style");
+  s.id = "nf-dual-range-style";
+  s.textContent = DUAL_SLIDER_CSS;
+  document.head.appendChild(s);
+}
+
+function DualRangeSlider({ min, max, step, startVal, endVal, onStartChange, onEndChange, fmt }) {
+  const pct   = v => ((v - min) / (max - min)) * 100;
+  const pLo   = pct(startVal);
+  const pHi   = pct(endVal);
+  // When handles are very close, give the lower-value thumb higher z-index so it stays grabbable
+  const zLo   = pLo >= pHi - 2 ? 5 : 3;
+  const zHi   = pLo >= pHi - 2 ? 3 : 5;
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <span style={{ fontSize: 10, color: "#6B7280" }}>Q1'26 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(startVal)}</strong></span>
+        <span style={{ fontSize: 10, color: "#7C3AED" }}>→</span>
+        <span style={{ fontSize: 10, color: "#6B7280" }}>Q4'27 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(endVal)}</strong></span>
+      </div>
+      <div className="nf-dual-range">
+        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", width: "100%", height: 4, background: "#E5E7EB", borderRadius: 2 }} />
+        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${pLo}%`, width: `${pHi - pLo}%`, height: 4, background: "#7C3AED", borderRadius: 2 }} />
+        <input type="range" min={min} max={max} step={step} value={startVal}
+          style={{ zIndex: zLo }}
+          onChange={e => onStartChange(Math.min(parseFloat(e.target.value), endVal - step))} />
+        <input type="range" min={min} max={max} step={step} value={endVal}
+          style={{ zIndex: zHi }}
+          onChange={e => onEndChange(Math.max(parseFloat(e.target.value), startVal + step))} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#9CA3AF", marginTop: 3 }}>
+        <span>{min}</span><span>{max}</span>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Colors ─────────────────────────────────────────────────── */
 const C = {
   NF:    "#E50914",
@@ -135,30 +196,20 @@ function ScenarioTab() {
             Reset to Market Consensus
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
           {SLIDER_CONFIG.map(cfg => {
             const startVal = customDrivers[cfg.startKey];
             const endVal   = customDrivers[cfg.endKey];
             return (
               <div key={cfg.key}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: C.navy }}>{cfg.label}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#7C3AED" }}>{cfg.fmt(startVal)} → {cfg.fmt(endVal)}</span>
-                </div>
-                {[{ label: "Start (Q1'26)", valKey: cfg.startKey, val: startVal }, { label: "End (Q4'27)", valKey: cfg.endKey, val: endVal }].map(row => (
-                  <div key={row.valKey} style={{ marginBottom: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                      <span style={{ fontSize: 10, color: C.muted }}>{row.label}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#7C3AED" }}>{cfg.fmt(row.val)}</span>
-                    </div>
-                    <input type="range" min={cfg.min} max={cfg.max} step={cfg.step} value={row.val}
-                      onChange={e => setCustomDrivers(prev => ({ ...prev, [row.valKey]: parseFloat(e.target.value) }))}
-                      style={{ width: "100%", accentColor: "#7C3AED", cursor: "pointer" }} />
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: C.muted }}>
-                      <span>{cfg.min}</span><span>{cfg.max}</span>
-                    </div>
-                  </div>
-                ))}
+                <div style={{ fontSize: 11, fontWeight: 600, color: C.navy, marginBottom: 10 }}>{cfg.label}</div>
+                <DualRangeSlider
+                  min={cfg.min} max={cfg.max} step={cfg.step}
+                  startVal={startVal} endVal={endVal}
+                  fmt={cfg.fmt}
+                  onStartChange={v => setCustomDrivers(prev => ({ ...prev, [cfg.startKey]: v }))}
+                  onEndChange={v   => setCustomDrivers(prev => ({ ...prev, [cfg.endKey]:   v }))}
+                />
               </div>
             );
           })}
@@ -215,7 +266,7 @@ function ScenarioTab() {
           ];
 
           const thStyle = (isHist, isFore) => ({
-            padding: "7px 10px", textAlign: "center", whiteSpace: "nowrap", fontSize: 11, fontWeight: 600,
+            padding: "5px 3px", textAlign: "center", fontSize: 10, fontWeight: 600,
             background: isHist ? "#F4F5F8" : "#EEF2FF",
             color: isHist ? C.tick : SC_COLORS[mechKey],
             borderBottom: `2px solid ${isHist ? C.grid : SC_COLORS[mechKey]}`,
@@ -223,11 +274,15 @@ function ScenarioTab() {
           });
 
           return (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif", minWidth: "100%" }}>
+            <div>
+              <table style={{ borderCollapse: "collapse", fontSize: 10, fontFamily: "'Outfit', sans-serif", width: "100%", tableLayout: "fixed" }}>
+                <colgroup>
+                  <col style={{ width: "110px" }} />
+                  {allCols.map(col => <col key={col.period} />)}
+                </colgroup>
                 <thead>
                   <tr>
-                    <th style={{ padding: "7px 12px", textAlign: "left", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.grid}`, whiteSpace: "nowrap", fontSize: 11, position: "sticky", left: 0, zIndex: 1 }}>
+                    <th style={{ padding: "5px 8px", textAlign: "left", background: "#F4F5F8", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.grid}`, fontSize: 10 }}>
                       Metric
                     </th>
                     {allCols.map((col, ci) => (
@@ -240,16 +295,16 @@ function ScenarioTab() {
                 <tbody>
                   {metricRows.map((row, ri) => (
                     <tr key={row.label} style={{ background: ri % 2 === 0 ? "#F8F9FA" : "#fff" }}>
-                      <td style={{ padding: "7px 12px", fontWeight: 600, color: C.navy, whiteSpace: "nowrap", fontSize: 11, position: "sticky", left: 0, background: ri % 2 === 0 ? "#F8F9FA" : "#fff", zIndex: 1 }}>
+                      <td style={{ padding: "5px 8px", fontWeight: 600, color: C.navy, fontSize: 10, whiteSpace: "nowrap" }}>
                         {row.label}
                       </td>
                       {allCols.map((col, ci) => (
                         <td key={col.period} style={{
-                          padding: "7px 10px", textAlign: "center",
+                          padding: "5px 3px", textAlign: "center",
                           color: col.isHist ? C.muted : row.color,
                           fontWeight: col.isHist ? 400 : (row.key === "netAdds" || row.key === "revenue" ? 700 : 500),
                           borderLeft: !col.isHist && ci === histCols.length ? `2px solid ${SC_COLORS[mechKey]}` : undefined,
-                          fontSize: 11,
+                          fontSize: 10,
                         }}>
                           {row.fmt(col[row.key])}
                         </td>
@@ -507,37 +562,49 @@ export default function NetflixRevenueForecast() {
   ];
 
   return (
-    <div style={{ fontFamily: "'Outfit', sans-serif", background: C.bg, minHeight: "100vh", padding: 24 }}>
+    <div style={{ fontFamily: "'Outfit', sans-serif", background: C.bg, minHeight: "100vh" }}>
 
       {/* Header */}
-      <div style={{ background: C.navy, borderRadius: 12, padding: "28px 28px 24px", marginBottom: 28 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-          <div style={{ width: 24, height: 24, background: C.NF, borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
+      <div style={{ background: C.navy, padding: "24px 40px", borderBottom: `3px solid ${C.NF}` }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <div style={{ width: 28, height: 28, background: C.NF, borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontWeight: 900, fontSize: 13 }}>N</span>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.NF }}>Revenue Forecast</span>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: C.NF }}>Revenue Forecast</span>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 6px" }}>
+            Netflix Revenue Forecast
+          </h1>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>
+            Driver-Based Model · Q1 2026–Q4 2027 · Starting from Q4 2025 Actuals ($12.05B / 332M members)
+          </p>
         </div>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "#fff", margin: "0 0 6px", fontWeight: 700 }}>
-          Netflix Revenue Forecast
-        </h1>
-        <p style={{ fontSize: 13, color: C.muted, margin: "0 0 22px" }}>
-          Driver-Based Model · Q1 2026–Q4 2027 | Starting from Q4 2025 Actuals ($12.05B / 332M members)
-        </p>
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+      </div>
+
+      {/* KPI Cards */}
+      <div style={{ background: "#fff", borderBottom: `1px solid ${C.grid}`, padding: "18px 40px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
           {[
-            { label: "Starting Revenue",   value: "$12.05B",              sub: "Q4 2025 actual" },
-            { label: "Starting Members",   value: "332M",                 sub: "paid memberships" },
-            { label: "Starting ARM",       value: "$12.23/mo",            sub: "global blended" },
-            { label: "Consensus FY2026E",   value: `$${consFY26.toFixed(1)}B`, sub: "consensus scenario" },
+            { label: "Starting Revenue",  value: "$12.05B",                   sub: "Q4 2025 actual",   trend: "Q4 2025" },
+            { label: "Starting Members",  value: "332M",                      sub: "paid memberships", trend: "Q4 2025" },
+            { label: "Starting ARM",      value: "$12.23/mo",                 sub: "global blended",   trend: "Q4 2025" },
+            { label: "Consensus FY2026E", value: `$${consFY26.toFixed(1)}B`,  sub: "consensus scenario", trend: "FY2026" },
           ].map(card => (
-            <div key={card.label} style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "14px 18px", flex: "1 1 140px", minWidth: 120 }}>
-              <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{card.label}</div>
-              <div style={{ fontSize: 21, fontWeight: 700, color: "#fff", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2 }}>{card.value}</div>
-              <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{card.sub}</div>
+            <div key={card.label} style={{ padding: "13px 16px", borderRadius: 10, background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${C.NF}` }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: C.tick, marginBottom: 4 }}>{card.label}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: C.navy, lineHeight: 1 }}>{card.value}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                <span style={{ fontSize: 11, color: C.tick }}>{card.sub}</span>
+                <span style={{ fontSize: 11, color: C.tick }}>{card.trend}</span>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Body */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 40px" }}>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
@@ -570,6 +637,8 @@ export default function NetflixRevenueForecast() {
           Forecasts are illustrative scenarios only, not financial guidance.
         </p>
       </div>
+
+      </div>{/* end body */}
     </div>
   );
 }
