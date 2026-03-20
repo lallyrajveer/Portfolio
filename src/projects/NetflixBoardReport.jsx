@@ -25,9 +25,9 @@ const priorities = [
     title: "Ad-Supported Tier Monetization",
     impact: "+$2–3B by FY2027",
     bullets: [
-      "Accelerate ad-tier as the primary entry-point offering — target 40% of new sign-ups on ad tier by Q4 2026",
-      "Expand programmatic inventory and CPM yield optimization across UCAN and EMEA markets",
-      "Scale measurement partnerships (Nielsen, DoubleVerify) to capture premium brand budgets",
+      "Target 40% of new sign-ups on ad tier by Q4'26",
+      "Expand CPM yield and programmatic inventory in UCAN and EMEA",
+      "Scale measurement partnerships to capture premium brand budgets",
     ],
     status: "In Progress",
     statusColor: "#D97706",
@@ -36,9 +36,9 @@ const priorities = [
     title: "Live Events & Sports Rights",
     impact: "+$1.5B incremental rev",
     bullets: [
-      "Build on NFL Christmas games and WWE Raw to establish Netflix as a live destination",
-      "Pursue FIFA World Cup 2026 streaming rights — highest-reach live event globally",
-      "Expand live sports catalog in India and LatAm to anchor retention in high-churn markets",
+      "Build on NFL/WWE Raw to establish Netflix as a live destination",
+      "Pursue FIFA World Cup 2026 streaming rights",
+      "Expand live sports in India and LatAm for retention",
     ],
     status: "Strategic Priority",
     statusColor: NF,
@@ -47,9 +47,9 @@ const priorities = [
     title: "Gaming & Interactive Content",
     impact: "Retention driver",
     bullets: [
-      "Scale mobile gaming library from 100+ titles toward premium AAA releases",
-      "Explore cloud gaming to create a distinct entertainment moat vs. Disney+ and Max",
-      "Target 10M daily active players by FY2026 as the proof-of-concept threshold",
+      "Scale from 100+ mobile titles toward premium AAA releases",
+      "Explore cloud gaming as a competitive moat vs. Disney+ and Max",
+      "Target 10M daily active players by FY2026",
     ],
     status: "In Progress",
     statusColor: "#D97706",
@@ -58,9 +58,9 @@ const priorities = [
     title: "ARM Expansion via Pricing",
     impact: "+0.5–1.0% ARM/yr",
     bullets: [
-      "Execute strategic price increases in under-monetized UCAN and EMEA markets",
-      "Shift subscriber mix toward Standard/Premium tiers with bundled benefits",
-      "Zero incremental content spend required — flows directly to operating income",
+      "Price increases in under-monetized UCAN and EMEA markets",
+      "Shift mix toward Standard/Premium tiers",
+      "Zero incremental content spend — flows directly to operating income",
     ],
     status: "Ongoing",
     statusColor: "#16A34A",
@@ -69,9 +69,9 @@ const priorities = [
     title: "Global Market Penetration",
     impact: "+25–40M members",
     bullets: [
-      "Prioritize India, Southeast Asia, Middle East, and Africa — largest untapped runway",
-      "Deploy localized content investment and mobile-only tiers at sub-$5/mo price points",
-      "International growth dilutes ARM near-term but drives long-term pricing ladder opportunity",
+      "Target India, SEA, Middle East, and Africa",
+      "Mobile-only tiers at sub-$5/mo",
+      "Near-term ARM dilution; long-term pricing ladder opportunity",
     ],
     status: "Expanding",
     statusColor: "#16A34A",
@@ -157,7 +157,7 @@ function MembershipChart() {
         Netflix — Paid Memberships (M)
       </h3>
       <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-        Subscriber growth across scenarios. Bull ceiling ~400M by Q4'27; Bear floor near 350M.
+        Bull ceiling ~400M by Q4'27; Bear floor near 350M.
       </p>
       <ResponsiveContainer width="100%" height={260}>
         <ComposedChart data={subsChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
@@ -182,7 +182,7 @@ function ARMChart() {
         Netflix — Forecasted ARM ($/mo)
       </h3>
       <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-        ARM ramps gradually as ad-tier CPM matures and pricing cycles compound.
+        Ramps as ad-tier CPM matures and pricing cycles compound.
       </p>
       <ResponsiveContainer width="100%" height={260}>
         <ComposedChart data={armChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
@@ -243,22 +243,14 @@ function StrategicPriorities() {
       </div>
 
       {/* Recommendation */}
-      <div style={{ background: "#0B1628", borderRadius: 10, padding: "20px 24px", border: "1px solid rgba(229,9,20,0.25)" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Recommendation — Capital Allocation Priority</div>
-        <ul style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.75, margin: "0 0 14px", paddingLeft: 20 }}>
-          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Fund Ad-Tier Monetization first.</strong> Infrastructure is built; marginal cost of next ad dollar is the lowest on this list. CPM yield + programmatic expansion require execution, not new CapEx.</li>
-          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>ARM Pricing second</strong> — zero incremental content spend; flows directly to operating income. Churn risk from price hikes is manageable given demonstrated pricing power in prior cycles.</li>
-          <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Live Events and Global Penetration are long-cycle commitments</strong> — fund after the first two. IRR depends on rights costs and market entry timing; size positions accordingly.</li>
-          <li><strong style={{ color: "#fff" }}>Gaming is optionality, not a near-term line item</strong> — no revenue proof point at current scale. Protect ad-tier and ARM budgets before adding gaming CapEx.</li>
-        </ul>
-        <div style={{ borderTop: "1px solid rgba(229,9,20,0.2)", paddingTop: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>If content budget is cut 10% (~$1.5–2B)</div>
-          <ul style={{ fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.75, margin: 0, paddingLeft: 20 }}>
-            <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Deprioritize Gaming first</strong> — no near-term revenue proof point; daily active player data not yet at scale to justify CapEx over ad-tier yield improvement.</li>
-            <li style={{ marginBottom: 8 }}><strong style={{ color: "#fff" }}>Defer Live Events rights renewals second</strong> — largest upfront cash commitment and longest payback; deferring a rights renewal is lower-cost than cutting an amortizing content slate.</li>
-            <li><strong style={{ color: "#fff" }}>Protect Ad-Tier and ARM Pricing in every budget scenario</strong> — both require no incremental content spend. Right-size Global Penetration (don't eliminate) if constraints tighten further.</li>
-          </ul>
-        </div>
+      <div style={{ background: "#0B1628", borderRadius: 10, padding: "18px 22px", border: "1px solid rgba(229,9,20,0.25)" }}>
+        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Capital Allocation Priority</div>
+        <ol style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
+          <li><strong style={{ color: "#fff" }}>Ad-Tier Monetization</strong> — infrastructure built; near-zero marginal cost on next ad dollar</li>
+          <li><strong style={{ color: "#fff" }}>ARM Pricing</strong> — no content spend; flows directly to operating income</li>
+          <li><strong style={{ color: "#fff" }}>Live Events + Global Penetration</strong> — long payback; fund after above two</li>
+          <li><strong style={{ color: "#fff" }}>Gaming</strong> — optionality; no revenue proof point at scale yet</li>
+        </ol>
       </div>
     </div>
   );
@@ -322,24 +314,8 @@ function FinancialOutlook() {
       </div>
 
       <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
-        {scenario === "custom" && (
-          <div style={{ background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#92400E", lineHeight: 1.6 }}>
-            <strong>Board view: Custom scenario.</strong> This table reflects preparer-defined assumptions — not the named Bear, Consensus, or Bull cases. Custom was selected to reflect a scenario where gross adds and churn jointly drive subscriber count and revenue. If the board should see Consensus case numbers, switch the scenario in the Revenue Forecast tab.
-          </div>
-        )}
-        {scenario === "consensus" && (
-          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: "#1E40AF", lineHeight: 1.6 }}>
-            <strong>Board view: Consensus scenario.</strong> Assumes 7→9M quarterly net adds and 3.0→5.0%/yr ARM growth — aligned with Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Churn improves modestly from 2.2% to 1.9% as sports content and ad-tier pricing floor reduce cancellations.
-          </div>
-        )}
-        {(scenario === "bear" || scenario === "bull") && (
-          <div style={{ background: "#F9FAFB", border: `1px solid ${GRID}`, borderRadius: 6, padding: "10px 14px", marginBottom: 10, fontSize: 12, color: MUTED, lineHeight: 1.6 }}>
-            <strong>Board view: {label} scenario.</strong> {scenario === "bear" ? "Stress-test case. Assumes pricing headwinds (1%/yr ARM growth) and elevated churn (2.8%/mo). Use this view to size downside risk, not as a planning baseline." : "Upside case. Assumes aggressive ad-tier CPM maturation (5%/yr ARM growth) and churn improvement (1.8%/mo). Use this view to frame the bull thesis, not as a commitment."}
-          </div>
-        )}
         <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.5 }}>
-          FY2026–27 values are driver-based model outputs. Change the scenario once in the Revenue Forecast — every number in this table updates automatically.
-          Strategic targets reflect company-stated ambitions and analyst consensus. Not financial guidance.
+          Driver-based model outputs. Change scenario in Revenue Forecast — numbers here update automatically. Not financial guidance.
         </p>
       </div>
     </div>
@@ -393,18 +369,6 @@ export default function NetflixBoardReport() {
 
         <SectionHeading title="Strategic Priorities — FY2026–27" />
         <StrategicPriorities />
-
-        <SectionHeading title="Analyst View" />
-        <div style={{ background: "#fff", borderRadius: 10, padding: "22px 26px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}`, marginBottom: 8 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: MUTED, marginBottom: 10 }}>Preparer's Point of View</div>
-          <ul style={{ fontSize: 13, color: NAVY, lineHeight: 1.8, margin: 0, paddingLeft: 20 }}>
-            <li style={{ marginBottom: 8 }}><strong>Ad-Tier is the highest-conviction capital allocation</strong> — Netflix has already absorbed infrastructure and measurement costs; the next dollar into CPM yield earns a return no other priority can match because marginal cost approaches zero once inventory exists.</li>
-            <li style={{ marginBottom: 8 }}><strong>ARM Pricing ranks second</strong> — zero incremental content spend required; price increases in under-monetized UCAN and EMEA flow directly to operating income, with manageable churn risk given Netflix's demonstrated pricing power.</li>
-            <li style={{ marginBottom: 8 }}><strong>Live Events and Global Penetration are high-conviction long-cycle investments</strong> — fund after the first two. IRR depends heavily on rights costs and market entry timing; capital committed here should be sized to the long payback horizon.</li>
-            <li style={{ marginBottom: 8 }}><strong>Gaming is strategic optionality, not a near-term revenue driver</strong> — daily active player data is not yet at scale to justify incremental CapEx over ad-tier yield improvement. Size accordingly until the data matures.</li>
-            <li><strong>Key risk to the bull case</strong>: ad-tier success depends on advertiser demand and CPM rates partially outside Netflix's control — a macro advertising pullback compresses this upside faster than any other priority. Monitor quarterly fill-rate and CPM trend data.</li>
-          </ul>
-        </div>
 
         <SectionHeading title="Financial Outlook — FY2026–27E" />
         <FinancialOutlook />

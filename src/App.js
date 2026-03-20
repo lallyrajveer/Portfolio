@@ -205,12 +205,11 @@ function NetflixWorkflow() {
                   flexDirection: "column",
                 }}
               >
-                {/* Step badge + role */}
+                {/* Step badge */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
                   <div style={{ width: 26, height: 26, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <span style={{ color: "#fff", fontWeight: 900, fontSize: 11 }}>{node.step}</span>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#C9A84C" }}>{node.role}</span>
                 </div>
 
                 {/* Title */}
