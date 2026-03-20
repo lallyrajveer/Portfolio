@@ -119,12 +119,25 @@ function useScenariosData() {
   return { chartData, subsChartData, armChartData };
 }
 
+// chartData = 11 hist + 1 connector + 8 forecast = 20 points
+const HIST_END_IDX = HISTORICAL.length - 1;          // 11 — last actual point
+const FORE_END_IDX = HISTORICAL.length + QUARTERS.length - 1; // 19 — last forecast point
+
+const makeEndLabel = (color, formatter, idx) => (props) => {
+  if (props.index !== idx || props.value == null) return null;
+  return (
+    <text x={props.x + 5} y={props.y + 4} fill={color} fontSize={10} fontWeight={700} fontFamily="'Outfit', sans-serif">
+      {formatter(props.value)}
+    </text>
+  );
+};
+
 const SC_LINES = [
-  { dataKey: "actual",   name: "Historical", stroke: "#94A3B8", width: 1.5, dash: "3 2" },
-  { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,      width: 2,   dash: null },
-  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus, width: 2.5, dash: null },
-  { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,      width: 2,   dash: null },
-  { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,    width: 2,   dash: "5 3" },
+  { dataKey: "actual",   name: "Historical", stroke: "#94A3B8", width: 1.5, dash: "3 2",  endIdx: HIST_END_IDX },
+  { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,      width: 2,   dash: null,    endIdx: FORE_END_IDX },
+  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus, width: 2.5, dash: null,    endIdx: FORE_END_IDX },
+  { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,      width: 2,   dash: null,    endIdx: FORE_END_IDX },
+  { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,    width: 2,   dash: "5 3",   endIdx: FORE_END_IDX },
 ];
 
 function RevenueScenariosChart() {
@@ -135,13 +148,13 @@ function RevenueScenariosChart() {
         Netflix — Revenue Scenarios ($B)
       </h3>
       <ResponsiveContainer width="100%" height={320}>
-        <ComposedChart data={chartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+        <ComposedChart data={chartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
           <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
           <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}B` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
-          {SC_LINES.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+          {SC_LINES.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `$${v.toFixed(1)}B`, l.endIdx)} />)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -160,13 +173,13 @@ function MembershipChart() {
         Bull ceiling ~400M by Q4'27; Bear floor near 350M.
       </p>
       <ResponsiveContainer width="100%" height={260}>
-        <ComposedChart data={subsChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+        <ComposedChart data={subsChartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
           <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
           <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}M` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
-          {subLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+          {subLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `${Math.round(v)}M`, l.endIdx)} />)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -185,13 +198,13 @@ function ARMChart() {
         Ramps as ad-tier CPM matures and pricing cycles compound.
       </p>
       <ResponsiveContainer width="100%" height={260}>
-        <ComposedChart data={armChartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
+        <ComposedChart data={armChartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
           <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
           <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}/mo` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
-          {armLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls />)}
+          {armLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `$${v.toFixed(2)}`, l.endIdx)} />)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -346,11 +359,6 @@ export default function NetflixBoardReport() {
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", margin: 0 }}>
                 FP&A Executive Deck · FY2025 Performance & FY2026–27 Strategic Outlook
               </p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: 1 }}>Prepared by</div>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 3, fontFamily: "'Cormorant Garamond', serif" }}>FP&A · Strategic Finance</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 3 }}>Q1 2026</div>
             </div>
           </div>
         </div>
