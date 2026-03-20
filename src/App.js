@@ -936,7 +936,7 @@ export default function App() {
             </div>
             {[
               "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of expertise in financial audit, accounting, planning, forecasting, and strategic analysis.",
-              "Currently, I'm a Financial Planning & Analysis Manager at Verizon, where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
+              "Currently, I'm a Financial Planning & Analysis Manager where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
               "I actively integrate AI into my workflow at every stage: automating recurring variance commentary that previously took a full day, compressing multi-scenario model builds from days to hours, and generating first-draft board narratives directly from data. The measurable result is more time on interpretation and less on production — which is where the actual finance value is.",
               "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I believe AI will play a key role in the future of FP&A, and I'm exploring how to leverage these tools to deliver better insights every day.",
             ].map((para, i) => (
