@@ -4,7 +4,7 @@
    Churn delta vs base adjusts effective quarterly net adds.
    ─────────────────────────────────────────────────────────────────────────── */
 
-// Monthly churn % — analyst estimates (Antenna/YipitData). None of these
+// Monthly churn %: analyst estimates (Antenna/YipitData). None of these
 // companies officially report churn; figures are third-party estimates.
 export const HISTORICAL = [
   { period: "Q1'23", rev: 8.16,  subs: 232.5, arm: 11.73, netAdds: 1.75,  churn: 2.40 },
@@ -24,7 +24,7 @@ export const HISTORICAL = [
 // Starting point: Q4 2025 actuals
 export const START = { subs: 332.0, arm: 12.23, rev: 12.05 };
 
-// Base monthly churn — used as reference point for churn delta calculations
+// Base monthly churn: used as reference point for churn delta calculations
 export const BASE_CHURN = 2.3;
 
 // ARM growth rationale:
@@ -32,11 +32,11 @@ export const BASE_CHURN = 2.3;
 //   lower price points. Ad-tier CPM monetization adds ~1–2pp annually as inventory scales.
 //   ARM growth ramps over the forecast as ad-tier inventory matures and pricing cycles compound.
 //   Bear 0.5→1.5% (avg 1%): early-period price fatigue before modest recovery.
-//   Consensus 3.0→5.0% (avg 4%): Wall Street consensus — ad-tier CPM scales, UCAN hike cycle resumes late 2026.
+//   Consensus 3.0→5.0% (avg 4%): Wall Street consensus, ad-tier CPM scales, UCAN hike cycle resumes late 2026.
 //   Bull 3.5→6.5% (avg 5%): strong pricing + rapid CPM maturation by FY2027.
 //
 // Churn rationale:
-//   Churn ramps linearly across 8 quarters — direction reflects the competitive/content backdrop.
+//   Churn ramps linearly across 8 quarters; direction reflects the competitive/content backdrop.
 //   Bear 2.6→3.0% (avg 2.8%): escalating competition + price hike fatigue erodes retention.
 //   Consensus 2.2→1.9% (avg 2.05%): modest improvement from sports habit loops, ad-tier price floor, deeper slate.
 //   Bull 2.1→1.5% (avg 1.8%): strong must-watch slate drives materially better retention by FY2027.
@@ -54,7 +54,7 @@ export const QUARTERS = [
 /**
  * Build a quarterly forecast from given drivers.
  *
- * netAddsPerQ is the TARGET NET adds per quarter — i.e., the number that appears in the
+ * netAddsPerQ is the TARGET NET adds per quarter, i.e., the number that appears in the
  * subscriber count change. Churn rate determines how many gross subscribers must be acquired
  * to achieve that net number; it is a cost driver (CAC), not a revenue driver.
  *

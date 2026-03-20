@@ -136,7 +136,7 @@ const WORKFLOW_NODES = [
     step:  "01",
     role:  "Foundation",
     title: "Streaming Market Analysis",
-    desc:  "5-service KPI benchmarks — subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025. The key finding: Netflix's blended ARM has grown more steadily (+4% CAGR) than its volatile quarterly net adds, which justified making ARM the primary forecast driver rather than subscriber count.",
+    desc:  "5-service KPI benchmarks: subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025. The key finding: Netflix's blended ARM has grown more steadily (+4% CAGR) than its volatile quarterly net adds, which justified making ARM the primary forecast driver rather than subscriber count.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
   {
@@ -144,7 +144,7 @@ const WORKFLOW_NODES = [
     step:  "02",
     role:  "Model",
     title: "Revenue Forecast",
-    desc:  "ARM × net adds driver model with subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, and a sensitivity analysis. Churn is modeled as a cost driver (CAC), not a revenue driver — a deliberate choice explained in the sensitivity tab because Netflix's guidance targets net adds, not gross.",
+    desc:  "ARM × net adds driver model with subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, and a sensitivity analysis. Churn is modeled as a cost driver (CAC), not a revenue driver, a deliberate choice explained in the sensitivity tab because Netflix's guidance targets net adds, not gross.",
     tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
@@ -152,7 +152,7 @@ const WORKFLOW_NODES = [
     step:  "03",
     role:  "Output",
     title: "Executive Deck",
-    desc:  "Exec-facing board pack: FY2025 KPIs, competitive positioning, and five strategic priorities for FY2026–27. The financial outlook table pulls live from the forecast model so scenario assumptions and board numbers stay consistent — a single source of truth instead of copy-pasted figures.",
+    desc:  "Exec-facing board pack: FY2025 KPIs, competitive positioning, and five strategic priorities for FY2026–27. The financial outlook table pulls live from the forecast model so scenario assumptions and board numbers stay consistent, serving as a single source of truth instead of copy-pasted figures.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
 ];
@@ -180,7 +180,7 @@ function NetflixWorkflow() {
             One Integrated FP&A Workflow
           </h2>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, fontFamily: "'Outfit', sans-serif" }}>
-            Three connected views — competitive data feeds the model; the model drives the board presentation.
+            Three connected views: competitive data feeds the model; the model drives the board presentation.
           </p>
         </div>
 
@@ -256,7 +256,7 @@ function NetflixWorkflow() {
 
         {/* Bottom note */}
         <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "'Outfit', sans-serif" }}>
-          Change the scenario once — every downstream number in the Executive Deck updates automatically.
+          Change the scenario once, and every downstream number in the Executive Deck updates automatically.
         </div>
 
       </div>
@@ -526,7 +526,7 @@ const EXPERIENCE_DATA = [
         heading: "Data, Systems & Process Improvement",
         items: [
           "Defined critical data requirements for the Business Intelligence team, optimizing planning, forecasting, and reporting processes, and conducting strategic business analysis with overlays and commentary to drive actionable insights.",
-          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units — reducing time spent by 60% and achieving a 90% increase in accuracy.",
+          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units, reducing time spent by 60% and achieving a 90% increase in accuracy.",
           "Directed the design and user-acceptance-testing of assigned financial models within the 1EPM planning tool to simplify, standardize, and automate planning and reporting, improving operational efficiency by up to 40%.",
         ],
       },
@@ -555,14 +555,14 @@ const EXPERIENCE_DATA = [
         heading: "Reconciliations",
         items: [
           "Reviewed and cleared 2 years of reconciling items across bank reconciliations and developed a process ensuring accuracy and completeness of financial records supporting ASCO's ~$200M+ total asset base.",
-          "Reconciled intercompany accounts across ASCO's affiliated entities — including the Association for Clinical Oncology and Conquer Cancer Foundation — ensuring accurate representation of transactions between consolidated entities.",
+          "Reconciled intercompany accounts across ASCO's affiliated entities, including the Association for Clinical Oncology and Conquer Cancer Foundation, ensuring accurate representation of transactions between consolidated entities.",
         ],
       },
       {
         heading: "Compliance & Regulatory Reporting",
         items: [
-          "Acquired data from various teams and completed Form 990 and Form 990-T in a timely manner — a critical compliance obligation for a tax-exempt organization with ~$148M in annual expenses and significant program service revenues (~86% of total revenue).",
-          "Prepared the Indirect Cost Rate proposal, utilizing comprehensive data analysis to support federal grant compliance — essential for an organization receiving federal grant funding and subject to single audit requirements.",
+          "Acquired data from various teams and completed Form 990 and Form 990-T in a timely manner, a critical compliance obligation for a tax-exempt organization with ~$148M in annual expenses and significant program service revenues (~86% of total revenue).",
+          "Prepared the Indirect Cost Rate proposal, utilizing comprehensive data analysis to support federal grant compliance, essential for an organization receiving federal grant funding and subject to single audit requirements.",
           "Prepared bank covenant tests, ensuring compliance with financial agreements and maintaining positive relationships with financial institutions supporting ASCO's balance sheet.",
         ],
       },
@@ -591,7 +591,7 @@ const EXPERIENCE_DATA = [
         heading: "Compliance & Controls",
         items: [
           "Maintained department compliance with internal controls, policies, and procedures for a large accelerated filer subject to PCAOB audit standards and Sarbanes-Oxley Section 404 requirements.",
-          "Conducted research and analysis of accounting treatment for complex transactions including acquisitions, restructuring charges, and pension obligations — including a $421.9M long-term pension liability as of year-end 2017.",
+          "Conducted research and analysis of accounting treatment for complex transactions including acquisitions, restructuring charges, and pension obligations, including a $421.9M long-term pension liability as of year-end 2017.",
         ],
       },
       {
@@ -937,7 +937,7 @@ export default function App() {
             {[
               "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of expertise in financial audit, accounting, planning, forecasting, and strategic analysis.",
               "Currently, I'm a Financial Planning & Analysis Manager where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
-              "I actively integrate AI into my workflow at every stage: automating recurring variance commentary that previously took a full day, compressing multi-scenario model builds from days to hours, and generating first-draft board narratives directly from data. The measurable result is more time on interpretation and less on production — which is where the actual finance value is.",
+              "I actively integrate AI into my workflow at every stage: automating recurring variance commentary that previously took a full day, compressing multi-scenario model builds from days to hours, and generating first-draft board narratives directly from data. The measurable result is more time on interpretation and less on production, which is where the actual finance value is.",
               "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I believe AI will play a key role in the future of FP&A, and I'm exploring how to leverage these tools to deliver better insights every day.",
             ].map((para, i) => (
               <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.85, marginBottom: 18 }}>{para}</p>
@@ -998,7 +998,7 @@ export default function App() {
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: 16 }}>Education</div>
                 <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "24px 28px" }}>
                   <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, color: "#fff", marginBottom: 4 }}>
-                    B.S. Business Administration — Accounting
+                    B.S. Business Administration: Accounting
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#C9A84C" }}>San Jose State University</div>
                 </div>

@@ -5,10 +5,10 @@ const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));
 
 export const projects = [
-  /* Verizon projects — hidden locally
+  /* Verizon projects, hidden locally
   {
     id: "telecom-analysis",
-    title: "U.S. Wireless Competitive Analysis — Postpaid Phone",
+    title: "U.S. Wireless Competitive Analysis: Postpaid Phone",
     category: "Competitive Analysis",
     description:
       "Postpaid phone comparative analysis of Verizon, T-Mobile, and AT&T across key wireless KPIs: service revenue, subscribers, net adds, churn, and ARPU. Identifies market leaders and strategic trends from Q1 2023 through Q4 2024.",
@@ -19,10 +19,10 @@ export const projects = [
   },
   {
     id: "wireless-forecast",
-    title: "Verizon Wireless Revenue Forecast — Postpaid Phone",
+    title: "Verizon Wireless Revenue Forecast: Postpaid Phone",
     category: "Forecasting",
     description:
-      "Driver-based postpaid phone revenue forecast for Verizon through FY2027. Projects revenue from three core drivers — quarterly net adds, monthly ARPU growth, and churn rate — across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and an interactive custom scenario builder.",
+      "Driver-based postpaid phone revenue forecast for Verizon through FY2027. Projects revenue from three core drivers: quarterly net adds, monthly ARPU growth, and churn rate, across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and an interactive custom scenario builder.",
     date: "Q1 2026",
     tags: ["forecast", "wireless", "Verizon", "scenario analysis", "sensitivity", "driver-based"],
     featured: true,
@@ -30,7 +30,7 @@ export const projects = [
   },
   {
     id: "verizon-board-report",
-    title: "Verizon Wireless Strategy — Board Report",
+    title: "Verizon Wireless Strategy: Board Report",
     category: "Board Reporting",
     description:
       "Board-level competitive strategy report prepared from a Verizon FP&A perspective. Presents FY2025 competitive findings across revenue, subscribers, ARPU, and churn, and proposes five strategic recommendations to sustain wireless market leadership through FY2027.",
@@ -42,7 +42,7 @@ export const projects = [
   */
   {
     id: "netflix-streaming-analysis",
-    title: "Global Streaming Competitive Analysis — Top 5 Services",
+    title: "Global Streaming Competitive Analysis: Top 5 Services",
     category: "Streaming Market Analysis",
     description:
       "Comparative streaming KPI analysis of Netflix, Amazon Prime Video, Disney+, Max, and Paramount+ across paid memberships, revenue, net adds, ARM, and churn. Tracks Q1 2023 through Q4 2025, including Netflix's password-sharing crackdown, Disney's Hotstar reclassification, and Amazon's bundling moat.",
@@ -53,10 +53,10 @@ export const projects = [
   },
   {
     id: "netflix-revenue-forecast",
-    title: "Netflix Revenue Forecast — ARM-Based Model",
+    title: "Netflix Revenue Forecast: ARM-Based Model",
     category: "Forecasting",
     description:
-      "Driver-based revenue forecast for Netflix through FY2027, projecting from two key levers — quarterly net membership adds and annual ARM growth — across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and a custom scenario builder synced to the Executive Deck.",
+      "Driver-based revenue forecast for Netflix through FY2027, projecting from two key levers: quarterly net membership adds and annual ARM growth, across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and a custom scenario builder synced to the Executive Deck.",
     date: "Q1 2026",
     tags: ["forecast", "Netflix", "streaming", "scenario analysis", "ARM", "driver-based"],
     featured: true,
@@ -64,7 +64,7 @@ export const projects = [
   },
   {
     id: "netflix-board-report",
-    title: "Netflix Streaming Strategy — Executive Deck",
+    title: "Netflix Streaming Strategy: Executive Deck",
     category: "Board Reporting",
     description:
       "Exec-facing strategic deck from a Netflix FP&A perspective. Presents FY2025 competitive KPIs, competitive context vs. Disney+ and Max, five strategic priorities for FY2026–27, and a financial outlook table live-synced to the Netflix Revenue Forecast scenario selector.",

@@ -198,7 +198,7 @@ const insights = [
   {
     title: "Revenue: Verizon Leads, But T-Mobile Is Closing Fast",
     borderColor: C.VZ,
-    body: "Verizon's $83.7B in FY2025 wireless service revenue holds the top spot, but T-Mobile ($71.2B, +7.7% YoY) is closing the gap rapidly—growing nearly 3× faster than AT&T (+2.7%) and faster than Verizon (+5.8%). Over the 2022–2025 period, Verizon grew revenue by $9.2B while T-Mobile grew by $10.0B. The lead is narrowing structurally as T-Mobile's subscriber scale compounds.",
+    body: "Verizon's $83.7B in FY2025 wireless service revenue holds the top spot, but T-Mobile ($71.2B, +7.7% YoY) is closing the gap rapidly, growing nearly 3× faster than AT&T (+2.7%) and faster than Verizon (+5.8%). Over the 2022–2025 period, Verizon grew revenue by $9.2B while T-Mobile grew by $10.0B. The lead is narrowing structurally as T-Mobile's subscriber scale compounds.",
   },
   {
     title: "Subscribers: T-Mobile Surpassed Verizon in 2024",
@@ -213,7 +213,7 @@ const insights = [
   {
     title: "ARPU: Verizon's Premium Holds, T-Mobile Gaining",
     borderColor: C.VZ,
-    body: "Verizon led FY2025 ARPU at $57.60, followed by AT&T ($56.70) and T-Mobile ($50.36). AT&T's Q2 2025 ARPU of $57.04 briefly neared Verizon's. The most notable trend: T-Mobile's +2.2% YoY ARPU growth outpaced both Verizon (+1.2%) and AT&T (+0.2%), as T-Mobile customers migrate to higher-value premium tiers—narrowing the $7.24 gap vs. Verizon.",
+    body: "Verizon led FY2025 ARPU at $57.60, followed by AT&T ($56.70) and T-Mobile ($50.36). AT&T's Q2 2025 ARPU of $57.04 briefly neared Verizon's. The most notable trend: T-Mobile's +2.2% YoY ARPU growth outpaced both Verizon (+1.2%) and AT&T (+0.2%), as T-Mobile customers migrate to higher-value premium tiers, narrowing the $7.24 gap vs. Verizon.",
   },
 ];
 
@@ -310,7 +310,7 @@ export default function TelecomAnalysis() {
               marginBottom: 6,
             }}
           >
-            U.S. Wireless Competitive Analysis — Postpaid Phone
+            U.S. Wireless Competitive Analysis: Postpaid Phone
           </div>
           <div
             style={{
@@ -320,7 +320,7 @@ export default function TelecomAnalysis() {
               fontWeight: 400,
             }}
           >
-            Verizon · T-Mobile · AT&amp;T — Postpaid Phone KPIs · Q1 2023–Q4 2025
+            Verizon · T-Mobile · AT&amp;T: Postpaid Phone KPIs · Q1 2023–Q4 2025
           </div>
           {/* Legend badges */}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
@@ -753,7 +753,7 @@ export default function TelecomAnalysis() {
 
         {/* ── Leadership Analysis ───────────────────────────── */}
         <SectionWrap>
-          <h2 style={s.sectionHeading}>Competitive Scorecard — Who's Leading &amp; Why</h2>
+          <h2 style={s.sectionHeading}>Competitive Scorecard: Who's Leading &amp; Why</h2>
           <div
             style={{
               display: "grid",
@@ -825,7 +825,7 @@ export default function TelecomAnalysis() {
               }}
             >
               2025 was a year of recovery and realignment. Verizon staged a strong comeback in Q4
-              2025 with 616K net adds—its highest quarterly result since 2019—signaling that its
+              2025 with 616K net adds, its highest quarterly result since 2019, signaling that its
               network investments and promotional strategy are finally bearing fruit. T-Mobile
               continued its subscriber dominance with 3.3M net adds in FY2025, and its +11.7%
               revenue growth was far ahead of peers. AT&amp;T maintained consistent growth and the

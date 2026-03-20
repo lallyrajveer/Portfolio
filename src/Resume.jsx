@@ -144,7 +144,7 @@ const experience = [
         heading: "Data, Systems & Process Improvement",
         items: [
           "Defined critical data requirements for the Business Intelligence team, optimizing planning, forecasting, and reporting processes, and conducting strategic business analysis with overlays and commentary to drive actionable insights.",
-          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units — reducing time spent by 60% and achieving a 90% increase in accuracy.",
+          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units, reducing time spent by 60% and achieving a 90% increase in accuracy.",
           "Directed the design and user-acceptance-testing of assigned financial models within the 1EPM planning tool to simplify, standardize, and automate planning and reporting, improving operational efficiency by up to 40%.",
         ],
       },
@@ -232,7 +232,7 @@ export default function Resume({ onBack }) {
   const resumeRef = useRef(null);
 
   useEffect(() => {
-    document.title = "Resume — Rajveer Sidhu";
+    document.title = "Resume: Rajveer Sidhu";
     return () => { document.title = "Rajveer Sidhu | FP&A Portfolio"; };
   }, []);
 
@@ -255,10 +255,10 @@ export default function Resume({ onBack }) {
     <>
       <style>{styles}</style>
 
-      {/* Toolbar — hidden on print */}
+      {/* Toolbar, hidden on print */}
       <div className="no-print" style={{ background: DARK, padding: "14px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ color: "#fff", fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600 }}>
-          Rajveer <span style={{ color: GOLD }}>Sidhu</span> — Resume
+          Rajveer <span style={{ color: GOLD }}>Sidhu</span>: Resume
         </span>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <button

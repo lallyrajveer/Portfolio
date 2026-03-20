@@ -25,7 +25,7 @@ const gridProps = { stroke: C.grid, strokeDasharray: "3 3" };
 const fmtRev = v => (v != null ? `$${v.toFixed(2)}B` : "—");
 
 /* ════════════════════════════════════════════════════════════════════════════
-   TAB 1 — SCENARIO FORECAST
+   TAB 1: SCENARIO FORECAST
    ════════════════════════════════════════════════════════════════════════════ */
 function ScenarioTab() {
   const { scenario, setScenario } = useWireless();
@@ -101,14 +101,14 @@ function ScenarioTab() {
           background: "#F0FDF4", padding: "3px 10px", borderRadius: 20,
           border: "1px solid #bbf7d0",
         }}>
-          ⟳ Live — Board Report will reflect this scenario
+          ⟳ Live. Board Report will reflect this scenario
         </span>
       </div>
 
       {/* Chart */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(11,22,40,0.07)", marginBottom: 20 }}>
         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 20px" }}>
-          Verizon — Bear / Base / Bull Scenarios ($B)
+          Verizon: Bear / Base / Bull Scenarios ($B)
         </h3>
         <ResponsiveContainer width="100%" height={340}>
           <ComposedChart data={chartData} margin={{ top: 8, right: 24, bottom: 4, left: 8 }}>
@@ -182,7 +182,7 @@ function ScenarioTab() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   TAB 2 — SENSITIVITY ANALYSIS
+   TAB 2: SENSITIVITY ANALYSIS
    ════════════════════════════════════════════════════════════════════════════ */
 function SensitivityTab() {
   const sc = SCENARIOS.base;
@@ -219,7 +219,7 @@ function SensitivityTab() {
     <div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(11,22,40,0.07)", marginBottom: 20 }}>
         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 6px" }}>
-          Verizon — FY2026E Revenue Sensitivity
+          Verizon: FY2026E Revenue Sensitivity
         </h3>
         <p style={{ fontSize: 12, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
           Impact of ±5% / ±10% driver changes on FY2026E annual revenue vs. Base ($B)
@@ -294,7 +294,7 @@ function SensitivityTab() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   TAB 3 — CUSTOM SCENARIO
+   TAB 3: CUSTOM SCENARIO
    ════════════════════════════════════════════════════════════════════════════ */
 const SLIDER_CONFIG = {
   netAdds:    { min: -200,  max: 400,  step: 25,   unit: "K/qtr", label: "Net Adds" },
@@ -335,7 +335,7 @@ function CustomTab() {
 
   return (
     <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-      {/* Left Panel — Sliders */}
+      {/* Left Panel: Sliders */}
       <div style={{ flex: "0 0 300px", minWidth: 260 }}>
         <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(11,22,40,0.07)", overflow: "hidden" }}>
           <div style={{ background: C.VZ, padding: "12px 16px" }}>
@@ -377,11 +377,11 @@ function CustomTab() {
         </div>
       </div>
 
-      {/* Right Panel — Chart + Impact Card */}
+      {/* Right Panel: Chart + Impact Card */}
       <div style={{ flex: 1, minWidth: 320 }}>
         <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(11,22,40,0.07)", marginBottom: 16 }}>
           <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, color: C.navy, margin: "0 0 6px" }}>Custom vs Base Scenario</h3>
-          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 16px", fontFamily: "'Outfit', sans-serif" }}>— Custom &nbsp;&nbsp; - - Base</p>
+          <p style={{ fontSize: 11, color: C.muted, margin: "0 0 16px", fontFamily: "'Outfit', sans-serif" }}>Custom &nbsp;&nbsp; - - Base</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData} margin={{ top: 4, right: 20, bottom: 4, left: 8 }}>
               <CartesianGrid {...gridProps} />

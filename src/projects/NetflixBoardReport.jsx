@@ -60,7 +60,7 @@ const priorities = [
     bullets: [
       "Price increases in under-monetized UCAN and EMEA markets",
       "Shift mix toward Standard/Premium tiers",
-      "Zero incremental content spend — flows directly to operating income",
+      "Zero incremental content spend, flows directly to operating income",
     ],
     status: "Ongoing",
     statusColor: "#16A34A",
@@ -120,8 +120,8 @@ function useScenariosData() {
 }
 
 // chartData = 11 hist + 1 connector + 8 forecast = 20 points
-const HIST_END_IDX = HISTORICAL.length - 1;          // 11 — last actual point
-const FORE_END_IDX = HISTORICAL.length + QUARTERS.length - 1; // 19 — last forecast point
+const HIST_END_IDX = HISTORICAL.length - 1;          // 11: last actual point
+const FORE_END_IDX = HISTORICAL.length + QUARTERS.length - 1; // 19: last forecast point
 
 const makeEndLabel = (color, formatter, idx) => (props) => {
   if (props.index !== idx || props.value == null) return null;
@@ -145,7 +145,7 @@ function RevenueScenariosChart() {
   return (
     <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
       <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 20px" }}>
-        Netflix — Revenue Scenarios ($B)
+        Netflix: Revenue Scenarios ($B)
       </h3>
       <ResponsiveContainer width="100%" height={320}>
         <ComposedChart data={chartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
@@ -167,7 +167,7 @@ function MembershipChart() {
   return (
     <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
       <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 4px" }}>
-        Netflix — Paid Memberships (M)
+        Netflix: Paid Memberships (M)
       </h3>
       <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
         Bull ceiling ~400M by Q4'27; Bear floor near 350M.
@@ -192,7 +192,7 @@ function ARMChart() {
   return (
     <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 16 }}>
       <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: NAVY, margin: "0 0 4px" }}>
-        Netflix — Forecasted ARM ($/mo)
+        Netflix: Forecasted ARM ($/mo)
       </h3>
       <p style={{ fontSize: 12, color: MUTED, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
         Ramps as ad-tier CPM matures and pricing cycles compound.
@@ -259,10 +259,10 @@ function StrategicPriorities() {
       <div style={{ background: "#0B1628", borderRadius: 10, padding: "18px 22px", border: "1px solid rgba(229,9,20,0.25)" }}>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Capital Allocation Priority</div>
         <ol style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
-          <li><strong style={{ color: "#fff" }}>Ad-Tier Monetization</strong> — infrastructure built; near-zero marginal cost on next ad dollar</li>
-          <li><strong style={{ color: "#fff" }}>ARM Pricing</strong> — no content spend; flows directly to operating income</li>
-          <li><strong style={{ color: "#fff" }}>Live Events + Global Penetration</strong> — long payback; fund after above two</li>
-          <li><strong style={{ color: "#fff" }}>Gaming</strong> — optionality; no revenue proof point at scale yet</li>
+          <li><strong style={{ color: "#fff" }}>Ad-Tier Monetization:</strong> infrastructure built; near-zero marginal cost on next ad dollar</li>
+          <li><strong style={{ color: "#fff" }}>ARM Pricing:</strong> no content spend; flows directly to operating income</li>
+          <li><strong style={{ color: "#fff" }}>Live Events + Global Penetration:</strong> long payback; fund after above two</li>
+          <li><strong style={{ color: "#fff" }}>Gaming:</strong> optionality; no revenue proof point at scale yet</li>
         </ol>
       </div>
     </div>
@@ -292,7 +292,7 @@ function FinancialOutlook() {
       {/* Sync Badge */}
       <div style={{ background: LIGHT, padding: "10px 20px", borderBottom: `1px solid ${GRID}`, display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0", fontWeight: 600 }}>
-          ⟳ Live — synced from Netflix Revenue Forecast
+          ⟳ Live, synced from Netflix Revenue Forecast
         </span>
         <span style={{ fontSize: 12, color: MUTED }}>
           Active: <strong style={{ color: col }}>{label} Scenario</strong>
@@ -328,7 +328,7 @@ function FinancialOutlook() {
 
       <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
         <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.5 }}>
-          Driver-based model outputs. Change scenario in Revenue Forecast — numbers here update automatically. Not financial guidance.
+          Driver-based model outputs. Change scenario in Revenue Forecast; numbers here update automatically. Not financial guidance.
         </p>
       </div>
     </div>
@@ -367,7 +367,7 @@ export default function NetflixBoardReport() {
       {/* Body */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 48px" }}>
 
-        <SectionHeading title="KPI Snapshot — FY2025" />
+        <SectionHeading title="KPI Snapshot: FY2025" />
         <KPISection />
 
         <SectionHeading title="Revenue & Membership Trajectory" />
@@ -375,10 +375,10 @@ export default function NetflixBoardReport() {
         <MembershipChart />
         <ARMChart />
 
-        <SectionHeading title="Strategic Priorities — FY2026–27" />
+        <SectionHeading title="Strategic Priorities: FY2026–27" />
         <StrategicPriorities />
 
-        <SectionHeading title="Financial Outlook — FY2026–27E" />
+        <SectionHeading title="Financial Outlook: FY2026–27E" />
         <FinancialOutlook />
 
       </div>

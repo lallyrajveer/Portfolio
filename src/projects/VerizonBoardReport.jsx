@@ -37,7 +37,7 @@ function Header() {
   return (
     <div style={{ background: C.red, padding: "36px 40px" }}>
       <div style={{ fontSize: 10, color: "rgba(255,255,255,0.55)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 10, fontFamily: "'Outfit', sans-serif" }}>
-        Verizon — Internal Board Report
+        Verizon: Internal Board Report
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, color: "#fff", fontWeight: 700, marginBottom: 8 }}>
         Wireless Competitive Strategy
@@ -46,7 +46,7 @@ function Header() {
         FY2025 Performance Review &amp; Strategic Priorities for FY2026–FY2027
       </div>
       <div style={{ fontSize: 12, color: "#fff", opacity: 0.55, fontFamily: "'Outfit', sans-serif" }}>
-        Prepared by: FP&amp;A — Wireless Strategy | March 2026
+        Prepared by: FP&amp;A, Wireless Strategy | March 2026
       </div>
     </div>
   );
@@ -154,7 +154,7 @@ const priorities = [
   {
     id: "P1",
     title: "Sustain Net Add Momentum",
-    body: "Build on Q4 2025's +616K result — the strongest quarterly performance since 2019 — by codifying the acquisition playbook and targeting competitor switchers in underserved markets. Every +100K incremental quarterly net adds generates ~$69M in annualized postpaid phone revenue at current ARPU.",
+    body: "Build on Q4 2025's +616K result, the strongest quarterly performance since 2019, by codifying the acquisition playbook and targeting competitor switchers in underserved markets. Every +100K incremental quarterly net adds generates ~$69M in annualized postpaid phone revenue at current ARPU.",
     impact: "+$200–280M incremental revenue potential by FY2027",
   },
   {
@@ -172,7 +172,7 @@ const priorities = [
   {
     id: "P4",
     title: "Protect Enterprise Wireless",
-    body: "Verizon's business wireless segment generates higher ARPU and 30–40% lower churn than consumer — making it a structurally superior revenue base. T-Mobile is actively targeting mid-market enterprises; counter with private 5G solutions and dedicated B2B retention programs.",
+    body: "Verizon's business wireless segment generates higher ARPU and 30–40% lower churn than consumer, making it a structurally superior revenue base. T-Mobile is actively targeting mid-market enterprises; counter with private 5G solutions and dedicated B2B retention programs.",
     impact: "Structural churn advantage; higher ARPU than consumer",
   },
   {
@@ -295,7 +295,7 @@ function FinancialOutlook() {
           {scenarioLabel}
         </span>
         <span style={{ fontSize: 11, color: "#16a34a", fontFamily: "'Outfit', sans-serif", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>
-          ⟳ Live — synced from Wireless Revenue Forecast
+          ⟳ Live, synced from Wireless Revenue Forecast
         </span>
       </div>
 
@@ -354,10 +354,10 @@ function Footer() {
   return (
     <div style={{ background: C.navy, padding: "16px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: "'Outfit', sans-serif" }}>
-        Source: Company earnings releases Q1 2023–Q4 2025. Internal illustrative scenarios — not guidance.
+        Source: Company earnings releases Q1 2023–Q4 2025. Internal illustrative scenarios, not guidance.
       </span>
       <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontFamily: "'Outfit', sans-serif", textAlign: "right" }}>
-        Verizon FP&amp;A — Wireless Strategy | March 2026 | CONFIDENTIAL
+        Verizon FP&amp;A, Wireless Strategy | March 2026 | CONFIDENTIAL
       </span>
     </div>
   );

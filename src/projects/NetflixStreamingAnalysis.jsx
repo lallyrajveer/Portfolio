@@ -464,7 +464,7 @@ export default function NetflixStreamingAnalysis() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 12 }}>
                 {[
                   { name: "Netflix", color: NETFLIX, rows: [
-                    { label: "Subscribers", value: "Public filings through Q1'25. Q2–Q4'25 are Ampere Analysis estimates — Netflix stopped disclosing paid memberships after Q1'25." },
+                    { label: "Subscribers", value: "Public filings through Q1'25. Q2–Q4'25 are Ampere Analysis estimates; Netflix stopped disclosing paid memberships after Q1'25." },
                     { label: "Revenue", value: "Public (10-Q / 10-K)." },
                     { label: "ARM", value: "Calculated. Derivable from public data; not directly reported." },
                     { label: "Churn", value: "Not officially disclosed. Estimates from Antenna / YipitData credit card transaction panels. Treat as directional." },
@@ -491,7 +491,7 @@ export default function NetflixStreamingAnalysis() {
                     { label: "Subscribers", value: "Public (earnings releases)." },
                     { label: "Revenue", value: "Public, but DTC segment includes Pluto TV ad revenue. Not pure SVOD." },
                     { label: "ARM", value: "Calculated. Slightly inflated by Pluto TV ad revenue in the segment." },
-                    { label: "Churn", value: "Estimates from Antenna / Sci-Tech Today. Highest churn among peers historically (~5%+), but showing the largest improvement — down to ~3.2% by Q4'25 driven by Showtime integration and sports rights." },
+                    { label: "Churn", value: "Estimates from Antenna / Sci-Tech Today. Highest churn among peers historically (~5%+), but showing the largest improvement, down to ~3.2% by Q4'25 driven by Showtime integration and sports rights." },
                   ]},
                 ].map(c => (
                   <div key={c.name} style={{ background: "#fff", borderRadius: 8, padding: "12px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${c.color}` }}>

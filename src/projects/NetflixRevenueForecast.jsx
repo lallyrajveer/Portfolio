@@ -91,7 +91,7 @@ const SLIDER_CONFIG = [
 ];
 
 /* ══════════════════════════════════════════════════════════════
-   TAB 1 — SCENARIO FORECAST
+   TAB 1: SCENARIO FORECAST
    ══════════════════════════════════════════════════════════════ */
 const SC_COLORS = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
 const SC_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull", custom: "Custom" };
@@ -121,7 +121,7 @@ function ScenarioTab() {
         Scenario Assumptions &amp; Implied Revenue
       </h3>
 
-      {/* Executive Deck sync — small secondary row */}
+      {/* Executive Deck sync, small secondary row */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Executive Deck to:</span>
         {["bear","consensus","bull","custom"].map(key => {
@@ -183,7 +183,7 @@ function ScenarioTab() {
 
       {/* Custom sliders */}
       <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, padding: "10px 16px", marginBottom: 8, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
-        <strong>Bear / Consensus / Bull</strong> are fixed research scenarios — named market views that cannot be edited.{" "}
+        <strong>Bear / Consensus / Bull</strong> are fixed research scenarios, named market views that cannot be edited.{" "}
         <strong>Custom</strong> uses fixed gross adds: adjust the sliders to test any driver combination. Sync the Executive Deck to Custom when you want the financial outlook to reflect your specific assumptions rather than a named case.
       </div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
@@ -216,7 +216,7 @@ function ScenarioTab() {
         </div>
       </div>
 
-      {/* Subscriber mechanics — per-scenario selector within section */}
+      {/* Subscriber mechanics, per-scenario selector within section */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
           <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: 0 }}>
@@ -239,8 +239,8 @@ function ScenarioTab() {
         </div>
         <p style={{ fontSize: 12, color: C.muted, margin: "0 0 14px" }}>
           {mechKey === "custom"
-            ? "Custom uses fixed gross adds — churn reduces them to net adds, so higher churn directly lowers subscriber count and revenue."
-            : "Bear/Consensus/Bull use fixed net add targets — churn determines gross adds needed (acquisition cost) but does not affect subscriber count or revenue directly."}
+            ? "Custom uses fixed gross adds; churn reduces them to net adds, so higher churn directly lowers subscriber count and revenue."
+            : "Bear/Consensus/Bull use fixed net add targets; churn determines gross adds needed (acquisition cost) but does not affect subscriber count or revenue directly."}
         </p>
         {(() => {
           // Build historical columns (derive beginSubs + grossAdds/churnLosses from available data)
@@ -324,7 +324,7 @@ function ScenarioTab() {
         </p>
       </div>
 
-      {/* ── Context / Assumptions — bottom of page ── */}
+      {/* Context / Assumptions, bottom of page */}
       <div style={{ marginTop: 32 }}>
         <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "16px 18px", fontFamily: "'Outfit', sans-serif" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: "#5B21B6", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Market Consensus Assumptions</div>
@@ -340,7 +340,7 @@ function ScenarioTab() {
               {
                 label: "ARM Growth  3.0→5.0%/yr",
                 points: [
-                  "Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures — Bear 0.5→1.5%, Consensus 3.0→5.0%, Bull 3.5→6.5%.",
+                  "Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures: Bear 0.5→1.5%, Consensus 3.0→5.0%, Bull 3.5→6.5%.",
                   "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp.",
                 ],
               },
@@ -348,7 +348,7 @@ function ScenarioTab() {
                 label: "Churn  2.2→1.9%/mo",
                 points: [
                   "Starts at 2.2%: seasonal weakness + competition from Max and Disney+ bundling. Improves to 1.9% by Q4'27 as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).",
-                  "Ad-tier price floor ($7.99/mo) structurally reduces cancellations — subscribers downgrade rather than leave.",
+                  "Ad-tier price floor ($7.99/mo) structurally reduces cancellations; subscribers downgrade rather than leave.",
                 ],
               },
             ].map(({ label, points }) => (
@@ -372,7 +372,7 @@ function ScenarioTab() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TAB 2 — SENSITIVITY ANALYSIS
+   TAB 2: SENSITIVITY ANALYSIS
    ══════════════════════════════════════════════════════════════ */
 function SensitivityTab() {
   const sc = SCENARIOS.consensus;
@@ -413,7 +413,7 @@ function SensitivityTab() {
   // Churn uses its own base so delta comparison is apples-to-apples within the fixed-gross-adds model
   const churnSensBaseResult = computeRevChurnSensitivity(baseChurn);
 
-  // Absolute test ranges — economically meaningful stress tests, not ±% of the rate
+  // Absolute test ranges: economically meaningful stress tests, not ±% of the rate
   const drivers = [
     {
       label: "Net Adds/Q", key: "netAdds", baseVal: baseNetAdds,
@@ -474,10 +474,10 @@ function SensitivityTab() {
     <div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 6px" }}>
-          Netflix — FY2026E Revenue Sensitivity
+          Netflix: FY2026E Revenue Sensitivity
         </h3>
         <p style={{ fontSize: 12, color: C.muted, margin: "0 0 4px", fontFamily: "'Outfit', sans-serif" }}>
-          Absolute stress-test ranges per driver vs. Base case — FY2026E revenue delta ($B)
+          Absolute stress-test ranges per driver vs. Base case: FY2026E revenue delta ($B)
         </p>
         <p style={{ fontSize: 11, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
           Churn: gross adds held fixed at base level; higher churn reduces net adds and revenue. Net Adds & ARM Growth: all other drivers held at base.

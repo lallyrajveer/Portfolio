@@ -3,10 +3,10 @@ import { createContext, useContext, useState, useEffect } from "react";
 const LS_SCENARIO = "netflix_scenario";
 const LS_DRIVERS  = "netflix_custom_drivers";
 
-// Bump this version any time DEFAULT_DRIVERS values change — forces a localStorage reset
+// Bump this version any time DEFAULT_DRIVERS values change; forces a localStorage reset
 const DRIVERS_VERSION = 4;
 
-// Custom scenario uses fixed gross adds — defaults are market-consensus estimates
+// Custom scenario uses fixed gross adds; defaults are market-consensus estimates
 // Gross adds 28.9→31.1M/Q: exact calibration to produce same net adds as Consensus (7→9M/Q at 2.2→1.9% churn)
 //   grossAddsStart = 7.0 + (2.2/100 × 332 × 3) = 28.912 ≈ 28.9
 //   grossAddsEnd   = 9.0 + (1.9/100 × 387 × 3) = 31.059 ≈ 31.1  (387M = Q4'27 beginSubs under consensus)
@@ -16,7 +16,7 @@ const DEFAULT_DRIVERS = { _v: DRIVERS_VERSION, netAddsStart: 28.9, netAddsEnd: 3
 
 function migrateDrivers(d) {
   if (!d) return null;
-  // Reset whenever the version doesn't match — catches all stale shapes
+  // Reset whenever the version doesn't match; catches all stale shapes
   if (d._v !== DRIVERS_VERSION) return null;
   return d;
 }
