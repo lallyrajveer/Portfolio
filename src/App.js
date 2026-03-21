@@ -136,7 +136,7 @@ const WORKFLOW_NODES = [
     step:  "01",
     role:  "Foundation",
     title: "Streaming Market Analysis",
-    desc:  "Benchmarks Netflix against Amazon, Disney+, Max, and Paramount+ across subscribers, revenue, ARM, and churn from Q1 2023 to Q4 2025.",
+    desc:  "Benchmarks Netflix against four streaming peers across subscribers, revenue, ARM, and churn.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
   {
@@ -152,14 +152,14 @@ const WORKFLOW_NODES = [
     step:  "03",
     role:  "Output",
     title: "Executive Deck",
-    desc:  "Translates the forecast into an executive-facing view: FY2025 actuals vs. FY2026-27 scenario projections, revenue and membership charts, and five strategic priorities.",
+    desc:  "Scenario-driven executive view with KPIs, revenue charts, and strategic priorities.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
 ];
 
 const CONNECTOR_LABELS = [
-  { top: "ARM stability → ARM-first", bottom: "model design" },
-  { top: "Scenario drives exec", bottom: "financials live" },
+  { top: "Peer data informs", bottom: "model assumptions" },
+  { top: "Model outputs drive", bottom: "scenario projections" },
 ];
 
 function NetflixWorkflow() {
@@ -179,9 +179,6 @@ function NetflixWorkflow() {
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
             One Integrated FP&A Workflow
           </h2>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, fontFamily: "'Outfit', sans-serif" }}>
-            Three connected views: competitive data feeds the model; the model drives the board presentation.
-          </p>
         </div>
 
         {/* Flow */}
@@ -240,10 +237,6 @@ function NetflixWorkflow() {
 
         </div>
 
-        {/* Bottom note */}
-        <div style={{ marginTop: 28, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.2)", fontFamily: "'Outfit', sans-serif" }}>
-          Change the scenario once, and every downstream number in the Executive Deck updates automatically.
-        </div>
 
       </div>
     </section>
@@ -1134,6 +1127,52 @@ export default function App() {
 
       {/* ── NETFLIX WORKFLOW ── */}
       <NetflixWorkflow />
+
+      {/* ── BEHIND THE BUILD ── */}
+      <section style={{ background: "#fff", padding: "80px 56px", borderTop: "1px solid #E8EAF0" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 36 }}>
+            <div style={{ width: 4, height: 28, background: "#C9A84C", borderRadius: 2 }} />
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 600, color: "#0B1628", margin: 0 }}>Behind the Build</h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 14 }}>How It Started</div>
+              <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.85, margin: "0 0 16px" }}>
+                This portfolio started as a simple question: how do I show FP&A work publicly when the actual work lives in confidential internal systems? A slide deck felt flat. A spreadsheet shared as a link felt impersonal. I wanted something interactive, something that let a reviewer actually engage with the model, not just read its outputs.
+              </p>
+              <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.85, margin: 0 }}>
+                I had no prior experience with React, JavaScript frameworks, or frontend development. What I did have was deep familiarity with how driver-based financial models work, what makes a board-ready output, and what a technical reviewer actually looks for. The domain knowledge was the foundation. The tools did the building.
+              </p>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 14 }}>How AI Shaped It</div>
+              <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.85, margin: "0 0 16px" }}>
+                Every line of code in this project was written through Claude Code. The workflow was conversational: I described what the model needed to do, reviewed the output the same way I would review a model a junior analyst built, and pushed back when the numbers did not reconcile or the presentation was not analyst-grade.
+              </p>
+              <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.85, margin: "0 0 16px" }}>
+                The Netflix model went through several structural rebuilds. The first version used hardcoded scenario outputs. It was replaced with a live driver-based engine after I flagged that hardcoded numbers cannot stress-test assumptions. Churn was initially a CAC driver only; it was rearchitected to affect net adds directly in the Custom scenario after I identified the inconsistency. Scenario state was later lifted into a shared context so the Revenue Forecast and Executive Deck stay in sync across tabs without manual updates.
+              </p>
+              <p style={{ fontSize: 14, color: "#5A6277", lineHeight: 1.85, margin: 0 }}>
+                The process is closer to technical product management than traditional coding. The financial logic, the model architecture decisions, and the quality bar came from the FP&A side. Claude handled implementation. The combination moved faster than either could alone.
+              </p>
+            </div>
+          </div>
+          <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+            {[
+              { stat: "0",    label: "Lines of code written by hand" },
+              { stat: "3",    label: "Live driver-based models" },
+              { stat: "100+", label: "Iterative model revisions" },
+              { stat: "1",    label: "FP&A brain, 1 AI pair" },
+            ].map(({ stat, label }) => (
+              <div key={label} style={{ textAlign: "center", padding: "20px 16px", background: "#F8F9FA", borderRadius: 10, borderTop: "3px solid #C9A84C" }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 700, color: "#0B1628", lineHeight: 1 }}>{stat}</div>
+                <div style={{ fontSize: 11, color: "#5A6277", marginTop: 8, lineHeight: 1.5 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── ALL PROJECTS ── */}
       <section id="projects" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>

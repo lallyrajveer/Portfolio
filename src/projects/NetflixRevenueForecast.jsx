@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
-  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  ReferenceLine, Cell,
 } from "recharts";
 import {
   HISTORICAL, START, SCENARIOS, QUARTERS,
@@ -324,47 +322,62 @@ function ScenarioTab() {
         </p>
       </div>
 
-      {/* Context / Assumptions, bottom of page */}
-      <div style={{ marginTop: 32 }}>
-        <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 10, padding: "16px 18px", fontFamily: "'Outfit', sans-serif" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#5B21B6", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Market Consensus Assumptions</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-            {[
-              {
-                label: "Gross Adds  29→31M/Q",
-                points: [
-                  "Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Password-sharing tailwind largely exhausted; ad-tier and international growth (MENA, SEA, LatAm) are the primary engines.",
-                  "Sports content (NFL Christmas, WWE Raw) adds periodic acquisition spikes and reduces off-season churn.",
-                ],
-              },
-              {
-                label: "ARM Growth  3.0→5.0%/yr",
-                points: [
-                  "Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures: Bear 0.5→1.5%, Consensus 3.0→5.0%, Bull 3.5→6.5%.",
-                  "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp.",
-                ],
-              },
-              {
-                label: "Churn  2.2→1.9%/mo",
-                points: [
-                  "Starts at 2.2%: seasonal weakness + competition from Max and Disney+ bundling. Improves to 1.9% by Q4'27 as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).",
-                  "Ad-tier price floor ($7.99/mo) structurally reduces cancellations; subscribers downgrade rather than leave.",
-                ],
-              },
-            ].map(({ label, points }) => (
-              <div key={label}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#7C3AED", marginBottom: 7 }}>{label}</div>
-                <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
-                  {points.map((pt, i) => (
-                    <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 5 }}>{pt}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #DDD6FE", fontSize: 10, color: "#7C3AED" }}>
-            Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Antenna monthly churn data · Bloomberg Second Measure · Netflix Upfront 2024
-          </div>
+      {/* Scenario Assumptions Rationale */}
+      <div style={{ marginTop: 32, fontFamily: "'Outfit', sans-serif" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.navy, marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Scenario Driver Rationale</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+          {[
+            {
+              label: "Bear",
+              color: "#DC2626",
+              bg: "#FEF2F2",
+              border: "#FECACA",
+              drivers: [
+                { name: "Net Adds  2→4M/Q", points: ["Password-sharing tailwind exhausted; ad-tier fails to offset. Disney+/Max bundles and price fatigue suppress acquisition.", "International growth in MENA and SEA slower than expected; mobile-only tier uptake muted."] },
+                { name: "ARM  0.5→1.5%/yr",  points: ["Price hike fatigue limits UCAN increases throughout the period. Ad-tier CPM monetization ramps slowly; programmatic inventory underpriced.", "EM mix dilution persists; no meaningful pricing cycle resumes before Q4'27."] },
+                { name: "Churn  2.6→3.0%/mo", points: ["Escalating competition and price sensitivity drive elevated cancellations. Sports rights fail to build must-watch habit loops off-season.", "Ad-tier subscribers churn at higher rate than standard tier; price floor provides limited structural benefit."] },
+              ],
+            },
+            {
+              label: "Consensus",
+              color: "#1D4ED8",
+              bg: "#EFF6FF",
+              border: "#BFDBFE",
+              drivers: [
+                { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Ad-tier and international growth (MENA, SEA, LatAm) are the primary acquisition engines.", "Sports content (NFL Christmas, WWE Raw) adds periodic spikes and reduces off-season churn."] },
+                { name: "ARM  3.0→5.0%/yr",   points: ["Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures.", "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth."] },
+                { name: "Churn  2.2→1.9%/mo", points: ["Modest improvement as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).", "Ad-tier price floor ($7.99/mo) reduces cancellations; subscribers downgrade rather than leave."] },
+              ],
+            },
+            {
+              label: "Bull",
+              color: "#16A34A",
+              bg: "#F0FDF4",
+              border: "#BBF7D0",
+              drivers: [
+                { name: "Net Adds  8→14M/Q",  points: ["Ad-tier accelerates sign-ups to 40%+ mix by Q4'26. FIFA World Cup 2026 and expanded live sports drive broad international acquisition.", "Mobile-only tiers in India and SEA contribute 15–20M+ incremental members over the forecast."] },
+                { name: "ARM  3.5→6.5%/yr",   points: ["Aggressive UCAN pricing cycle resumes in late 2026. Ad-tier CPM matures rapidly to $40+ by FY2027; standard/premium mix shift compounds.", "New UCAN hike cycle adds an estimated 1.5–2.5pp above the base ARM trajectory."] },
+                { name: "Churn  2.1→1.5%/mo", points: ["Must-watch sports slate (NFL, WWE, FIFA) drives materially better retention. Deep content reduces off-season churn gaps.", "Ad-tier price floor creates structural floor; subscribers downgrade rather than cancel at higher rates than Consensus."] },
+              ],
+            },
+          ].map(sc => (
+            <div key={sc.label} style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 10, padding: "14px 16px" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1 }}>{sc.label}</div>
+              {sc.drivers.map(d => (
+                <div key={d.name} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 5 }}>{d.name}</div>
+                  <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
+                    {d.points.map((pt, i) => (
+                      <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 4 }}>{pt}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 12, fontSize: 10, color: C.muted }}>
+          Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Antenna monthly churn data · Bloomberg Second Measure · Netflix Upfront 2024
         </div>
       </div>
     </div>
@@ -457,91 +470,62 @@ function SensitivityTab() {
     },
   ];
 
-  // Tornado: outermost test values per driver (churn uses its own base for apples-to-apples)
-  const tornadoBars = [];
-  drivers.forEach(d => {
-    const effectiveBase = d.baseOverride ?? baseResult;
-    const extremes = [d.rows[0], d.rows[d.rows.length - 1]];
-    extremes.forEach(row => {
-      const res   = d.getFn(row.val);
-      const delta = +(res.fy26 - effectiveBase.fy26).toFixed(3);
-      tornadoBars.push({ label: `${d.label}: ${d.fmt(row.val)}`, delta, color: delta >= 0 ? "#22c55e" : "#ef4444", fy26: res.fy26, fy27: res.fy27 });
-    });
-  });
-  tornadoBars.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
-
   return (
     <div>
-      <div style={{ background: "#fff", borderRadius: 10, padding: "24px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 20 }}>
-        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: C.navy, margin: "0 0 6px" }}>
-          Netflix: FY2026E Revenue Sensitivity
-        </h3>
-        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 4px", fontFamily: "'Outfit', sans-serif" }}>
-          Absolute stress-test ranges per driver vs. Base case: FY2026E revenue delta ($B)
-        </p>
-        <p style={{ fontSize: 11, color: C.muted, margin: "0 0 20px", fontFamily: "'Outfit', sans-serif" }}>
-          Churn: gross adds held fixed at base level; higher churn reduces net adds and revenue. Net Adds & ARM Growth: all other drivers held at base.
-        </p>
-        <ResponsiveContainer width="100%" height={260}>
-          <BarChart layout="vertical" data={tornadoBars} margin={{ top: 4, right: 60, bottom: 4, left: 120 }}>
-            <CartesianGrid {...gridProps} horizontal={false} />
-            <XAxis type="number" tick={axisStyle} tickFormatter={v => (v >= 0 ? "+" : "") + v.toFixed(1) + "B"} domain={["auto","auto"]} />
-            <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: C.tick }} width={118} />
-            <Tooltip formatter={v => [`${v >= 0 ? "+" : ""}$${v.toFixed(3)}B`, "Delta vs Base"]} />
-            <ReferenceLine x={0} stroke={C.navy} strokeWidth={1.5} />
-            <Bar dataKey="delta" radius={[0, 3, 3, 0]}>
-              {tornadoBars.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginTop: 28 }}>
         <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 16px" }}>
           Driver Sensitivity Tables
         </h4>
-        {drivers.map(d => (
-          <div key={d.key} style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: C.NF, margin: "0 0 8px", fontFamily: "'Outfit', sans-serif" }}>
-              {d.label} Sensitivity
-            </p>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
-                <thead>
-                  <tr>
-                    {["Variation","Driver Value","FY2026E Rev ($B)","FY2027E Rev ($B)","vs Base ($B)","vs Base (%)"].map((h, i) => (
-                      <th key={h} style={{ padding: "8px 12px", textAlign: i === 0 ? "left" : "center", background: "#F8F9FA", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}`, whiteSpace: "nowrap" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {d.rows.map(row => {
-                    const isBase       = !!row.isBase;
-                    const effectiveBase = d.baseOverride ?? baseResult;
-                    const res          = isBase ? effectiveBase : d.getFn(row.val);
-                    const deltaB       = +(res.fy26 - effectiveBase.fy26).toFixed(3);
-                    const deltaPct     = +((deltaB / effectiveBase.fy26) * 100).toFixed(2);
-                    const rowBg    = isBase ? "#FFFBEB" : deltaB > 0 ? "#F0FDF4" : deltaB < 0 ? "#FEF2F2" : "#fff";
-                    return (
-                      <tr key={row.label} style={{ background: rowBg }}>
-                        <td style={{ padding: "8px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{row.label}</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>{d.fmt(row.val)}</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", color: isBase ? C.tick : deltaB > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
-                          {isBase ? "—" : `${deltaB >= 0 ? "+" : ""}$${deltaB.toFixed(3)}B`}
-                        </td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", color: isBase ? C.tick : deltaPct > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
-                          {isBase ? "—" : `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "14%" }} />
+            <col style={{ width: "14%" }} />
+            <col style={{ width: "18%" }} />
+            <col style={{ width: "18%" }} />
+            <col style={{ width: "18%" }} />
+            <col style={{ width: "18%" }} />
+          </colgroup>
+          <thead>
+            <tr>
+              {["Variation","Driver Value","FY2026E Rev ($B)","FY2027E Rev ($B)","vs Base ($B)","vs Base (%)"].map((h, i) => (
+                <th key={h} style={{ padding: "8px 12px", textAlign: i < 2 ? "left" : "center", background: "#F8F9FA", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}`, whiteSpace: "nowrap" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {drivers.map((d, di) => (
+              <>
+                <tr key={`header-${d.key}`}>
+                  <td colSpan={6} style={{ padding: "8px 12px", fontWeight: 700, fontSize: 11, color: C.NF, background: "#FFF5F5", borderTop: di > 0 ? `2px solid ${C.grid}` : undefined, letterSpacing: 0.3 }}>
+                    {d.label} Sensitivity
+                  </td>
+                </tr>
+                {d.rows.map(row => {
+                  const isBase        = !!row.isBase;
+                  const effectiveBase = d.baseOverride ?? baseResult;
+                  const res           = isBase ? effectiveBase : d.getFn(row.val);
+                  const deltaB        = +(res.fy26 - effectiveBase.fy26).toFixed(3);
+                  const deltaPct      = +((deltaB / effectiveBase.fy26) * 100).toFixed(2);
+                  const rowBg         = isBase ? "#FFFBEB" : deltaB > 0 ? "#F0FDF4" : deltaB < 0 ? "#FEF2F2" : "#fff";
+                  return (
+                    <tr key={`${d.key}-${row.label}`} style={{ background: rowBg }}>
+                      <td style={{ padding: "7px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{row.label}</td>
+                      <td style={{ padding: "7px 12px", color: C.tick }}>{d.fmt(row.val)}</td>
+                      <td style={{ padding: "7px 12px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 12px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 12px", textAlign: "center", color: isBase ? C.tick : deltaB > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
+                        {isBase ? "—" : `${deltaB >= 0 ? "+" : ""}$${deltaB.toFixed(3)}B`}
+                      </td>
+                      <td style={{ padding: "7px 12px", textAlign: "center", color: isBase ? C.tick : deltaPct > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
+                        {isBase ? "—" : `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -552,14 +536,8 @@ function SensitivityTab() {
    ROOT
    ══════════════════════════════════════════════════════════════ */
 export default function NetflixRevenueForecast() {
-  const [activeTab, setActiveTab] = useState("scenarios");
-
   const consForecast = getForecast("consensus");
   const consFY26     = +getFY(consForecast, 2026).toFixed(1);
-
-  const tabs = [
-    { id: "scenarios", label: "Scenario Forecast" },
-  ];
 
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif", background: C.bg, minHeight: "100vh" }}>
@@ -606,27 +584,10 @@ export default function NetflixRevenueForecast() {
       {/* Body */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 40px" }}>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
-        {tabs.map(tab => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-              padding: "9px 22px", borderRadius: 7, border: "none", cursor: "pointer",
-              background: isActive ? C.NF : "#F0F1F5",
-              color: isActive ? "#fff" : C.tick,
-              fontSize: 13, fontWeight: isActive ? 600 : 400, transition: "all 0.15s",
-            }}>
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Content */}
       <div style={{ paddingBottom: 28 }}>
-        {activeTab === "scenarios"   && <ScenarioTab />}
-        {activeTab === "sensitivity" && <SensitivityTab />}
+        <ScenarioTab />
+        <SensitivityTab />
       </div>
 
       {/* Footer */}

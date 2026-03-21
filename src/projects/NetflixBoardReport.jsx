@@ -252,7 +252,7 @@ function FinancialOutlook() {
     { metric: "Annual Revenue ($B)",         fy25: "$45.2B",  fy26: `$${m.rev26}B`,             fy27: `$${m.rev27}B`             },
     { metric: "End-Period Paid Members (M)", fy25: "332M",    fy26: `${m.subs26.toFixed(0)}M`,  fy27: `${m.subs27.toFixed(0)}M`  },
     { metric: "Annual Paid Net Adds (M)",    fy25: "+30M",    fy26: `+${m.netAdds26}M`,         fy27: `+${m.netAdds27}M`         },
-    { metric: "Avg ARM ($/month)",           fy25: "$11.84",  fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
+    { metric: "Avg ARM ($/month)\u2020",       fy25: "$12.23",  fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
     { metric: "Monthly Churn Rate",          fy25: "2.0%",    fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%` },
   ];
 
@@ -299,7 +299,7 @@ function FinancialOutlook() {
             {rows.map((row, ri) => (
               <tr key={row.metric} style={{ background: ri % 2 === 0 ? "#FAFAFA" : "#fff" }}>
                 <td style={{ padding: "11px 16px", fontWeight: 600, color: NAVY }}>{row.metric}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", color: MUTED, fontWeight: 500 }}>{row.fy25}</td>
+                <td style={{ padding: "11px 16px", textAlign: "center", color: NAVY, fontWeight: 700 }}>{row.fy25}</td>
                 <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy26 ? col : MUTED }}>{row.fy26 ?? "N/A"}</td>
                 <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy27 ? col : MUTED }}>{row.fy27 ?? "N/A"}</td>
               </tr>
@@ -309,8 +309,14 @@ function FinancialOutlook() {
       </div>
 
       <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
-        <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.5 }}>
-          Driver-based model outputs. Change scenario in Revenue Forecast; numbers here update automatically. Not financial guidance.
+        <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+          Driver-based model. Change scenario above; numbers update automatically. Not financial guidance.
+        </p>
+        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
+          &#8224; ARM FY2025A shows Q4'25 exit rate ($12.23/mo), the model's starting input; FY2025 annual avg was $11.84. Bear FY2026E avg ARM of ~$12.28 implies ~0.4% growth above the starting rate, consistent with the 0.5&#8211;1.5%/yr Bear assumption.
+        </p>
+        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
+          FY2026&#8594;27E ~14% revenue growth: ~9% paid member growth + ~4% ARM lift. Ad-tier CPM monetization contributes an estimated +$1.5&#8211;2.5B by FY2027 (eMarketer streaming ad revenue forecast; Wells Fargo equity research), embedded in the ARM growth assumption. Password-sharing tailwind largely exhausted; incremental growth is ad-tier and international-led.
         </p>
       </div>
     </div>

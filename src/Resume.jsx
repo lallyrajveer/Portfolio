@@ -119,7 +119,7 @@ const experience = [
       {
         heading: "Financial Planning & Forecasting",
         items: [
-          "Led financial planning and forecasting for the ~$1B Wireline Products portfolio, ensuring strategic alignment and achieving a 15% improvement in E/R Margin for security subscription services.",
+          "Led financial planning, budgeting, and forecasting for the ~$1B Wireline Products portfolio, ensuring strategic alignment and achieving a 15% improvement in E/R Margin for security subscription services.",
           "Designed and built automated, complex driver based financial models from the ground up, embedding advanced scenario planning and sensitivity analysis capabilities to stress-test financial assumptions and support critical strategic decisions.",
           "Provided critical leadership by consistently transitioning between high-level strategic visioning and the development of deep, detailed bottoms-up financial models necessary to drive effective execution.",
         ],
@@ -144,7 +144,7 @@ const experience = [
         heading: "Data, Systems & Process Improvement",
         items: [
           "Defined critical data requirements for the Business Intelligence team, optimizing planning, forecasting, and reporting processes, and conducting strategic business analysis with overlays and commentary to drive actionable insights.",
-          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units, reducing time spent by 60% and achieving a 90% increase in accuracy.",
+          "Streamlined reporting, forecasting, and budgeting processes across sales, business, and corporate units, reducing time spent by 60%.",
           "Directed the design and user-acceptance-testing of assigned financial models within the 1EPM planning tool to simplify, standardize, and automate planning and reporting, improving operational efficiency by up to 40%.",
         ],
       },
@@ -223,7 +223,7 @@ const experience = [
 ];
 
 const skills = {
-  "Finance & Strategy": ["Forecasting & Budgeting", "Financial Modeling", "KPI Development", "Strategic Decision Support", "Data Visualization", "Ad-Hoc Analysis", "Variance Analysis", "Audit", "Accounting", "SEC Reporting", "Process Optimization"],
+  "Finance & Strategy": ["Forecasting & Budgeting", "Financial Modeling", "KPI Development", "Strategic Decision Support", "Data Visualization", "Ad-Hoc Analysis", "Variance Analysis", "Audit", "Accounting", "GAAP", "SEC Reporting", "Process Optimization"],
   "Tools & Technology": ["Claude", "Gemini", "NotebookLM", "CoPilot", "ChatGPT", "Google App Script", "Advanced Excel", "SQL", "Tableau", "Qlik", "Alteryx", "Oracle", "SAP", "Hyperion / Essbase", "Dynamics SL", "Prophix", "Workiva", "ThoughtSpot"],
   "Interpersonal": ["Leadership", "Collaboration", "Communication", "Mentorship", "Problem Solving", "Emotional Intelligence", "Adaptability", "Discipline", "Integrity", "Accountability"],
 };
@@ -361,8 +361,8 @@ export default function Resume({ onBack }) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
             {[
               { name: "B.S. Business Administration - Accounting", issuer: "San Jose State University" },
-              { name: "Financial Modeling & Valuation Analyst (FMVA®)", issuer: "Corporate Finance Institute" },
               { name: "AI For Finance Specialization", issuer: "Corporate Finance Institute" },
+              { name: "Financial Modeling & Valuation Analyst (FMVA®)", issuer: "Corporate Finance Institute" },
               { name: "Finance & Quantitative Modeling Specialization", issuer: "Wharton Online" },
               { name: "Business and Financial Modeling Specialization", issuer: "Wharton Online" },
               { name: "Google Data Analytics Professional Certificate", issuer: "Google" },
