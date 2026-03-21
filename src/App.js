@@ -12,6 +12,7 @@ const CAT_COLORS = {
   "Board Reporting": { bg: "#F5EBF8", text: "#6B21A8" },
   Modeling:          { bg: "#ECFAF8", text: "#0F5345" },
   "Streaming Market Analysis":  { bg: "#FFF8EB", text: "#92400E" },
+  "Cloud Infrastructure":       { bg: "#E8F0FE", text: "#174EA6" },
   Other:             { bg: "#F3F4F6", text: "#374151" },
 };
 

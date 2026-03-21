@@ -3,6 +3,7 @@ import { lazy } from "react";
 const NetflixStreamingAnalysis = lazy(() => import("./NetflixStreamingAnalysis.jsx"));
 const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx"));
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));
+const GoogleCloudProject       = lazy(() => import("./GoogleCloudProject.jsx"));
 
 export const projects = [
   /* Verizon projects, hidden locally
@@ -41,6 +42,17 @@ export const projects = [
   },
   */
   {
+    id: "google-cloud-capex",
+    title: "Google Cloud ML CapEx Benchmarking",
+    category: "Cloud Infrastructure",
+    description:
+      "End-to-end CapEx and cloud revenue analysis benchmarking Alphabet against AWS and Microsoft. Includes peer KPI benchmarking, Bear/Base/Bull scenario modeling, 1,000-iteration Monte Carlo simulation, and an investment recommendation framed for Google Cloud Finance leadership.",
+    date: "Q1 2026",
+    tags: ["Google Cloud", "CapEx", "Monte Carlo", "benchmarking", "scenario analysis", "FP&A"],
+    featured: true,
+    component: GoogleCloudProject,
+  },
+  {
     id: "netflix-streaming-analysis",
     title: "Global Streaming Competitive Analysis: Top 5 Services",
     category: "Streaming Market Analysis",
@@ -75,4 +87,4 @@ export const projects = [
   },
 ];
 
-export const categories = ["All", "Streaming Market Analysis", "Forecasting", "Board Reporting"];
+export const categories = ["All", "Cloud Infrastructure", "Streaming Market Analysis", "Forecasting", "Board Reporting"];
