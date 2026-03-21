@@ -349,22 +349,6 @@ function GoogleCloudWorkflow() {
                     {node.desc}
                   </div>
 
-                  {/* Tags — each tag cycles through all 4 Google colors */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
-                    {node.tags.map((t, ti) => {
-                      const tagColors = ["#4285F4","#EA4335","#FBBC05","#34A853"];
-                      const tc = tagColors[ti % 4];
-                      return (
-                        <span key={t} style={{
-                          fontSize: 10, color: tc,
-                          background: `${tc}18`,
-                          border: `1px solid ${tc}40`,
-                          borderRadius: 4, padding: "2px 8px", fontWeight: 700,
-                        }}>{t}</span>
-                      );
-                    })}
-                  </div>
-
                   <div style={{
                     fontSize: 11, fontWeight: 700, letterSpacing: 0.5,
                     color: isHovered ? color : `${colorAlpha}0.4)`,
