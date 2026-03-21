@@ -215,13 +215,6 @@ function NetflixWorkflow() {
                   {node.desc}
                 </div>
 
-                {/* Tags */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
-                  {node.tags.map(t => (
-                    <span key={t} style={{ fontSize: 10, color: "#C9A84C", border: "1px solid rgba(201,168,76,0.28)", borderRadius: 20, padding: "2px 9px", fontFamily: "'Outfit', sans-serif" }}>{t}</span>
-                  ))}
-                </div>
-
                 {/* CTA */}
                 <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
                   Open →
