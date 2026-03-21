@@ -329,7 +329,7 @@ function GoogleCloudWorkflow() {
                     flexDirection: "column",
                   }}
                 >
-                  {/* Step + role */}
+                  {/* Role */}
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <span style={{
                       fontSize: 10, fontWeight: 800, letterSpacing: 1.5,
@@ -338,7 +338,7 @@ function GoogleCloudWorkflow() {
                       border: `1px solid ${colorAlpha}0.25)`,
                       borderRadius: 4, padding: "2px 8px",
                     }}>
-                      {node.step} · {node.role}
+                      {node.role}
                     </span>
                   </div>
 
