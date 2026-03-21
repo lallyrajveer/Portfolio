@@ -144,7 +144,7 @@ const WORKFLOW_NODES = [
     step:  "02",
     role:  "Model",
     title: "Revenue Forecast",
-    desc:  "Projects Netflix revenue through FY2027 using two drivers: ARM growth and net membership adds.",
+    desc:  "Driver-based model projecting Netflix revenue through FY2027.",
     tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
