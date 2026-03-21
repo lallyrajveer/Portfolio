@@ -244,6 +244,121 @@ function NetflixWorkflow() {
   );
 }
 
+// ── Google Cloud Workflow Diagram ────────────────────────────
+const GC_WORKFLOW_NODES = [
+  {
+    id:   "google-cloud-capex",
+    step: "01",
+    role: "Foundation",
+    title: "Peer Benchmarking",
+    desc: "Benchmarks Alphabet CapEx efficiency against AWS and Microsoft across 4 KPIs (2020–2024).",
+    tags: ["CapEx Intensity", "Cloud CAGR", "Op Margin"],
+  },
+  {
+    id:   "google-cloud-capex",
+    step: "02",
+    role: "Model",
+    title: "Scenario Modeling",
+    desc: "Bear / Base / Bull scenarios with 1,000-iteration Monte Carlo simulation per scenario.",
+    tags: ["P10 / P50 / P90", "Uniform sampling", "3-year forecast"],
+  },
+  {
+    id:   "google-cloud-capex",
+    step: "03",
+    role: "Output",
+    title: "Investment Recommendation",
+    desc: "CapEx investment guidance framed for Google Cloud Finance senior leadership.",
+    tags: ["$55–65B/yr base", "Performance-gated trigger", "Exec-ready"],
+  },
+];
+
+const GC_CONNECTOR_LABELS = [
+  { top: "KPIs anchor",    bottom: "scenario ranges"      },
+  { top: "Simulation drives", bottom: "investment thesis" },
+];
+
+function GoogleCloudWorkflow() {
+  const [hovered, setHovered] = useState(null);
+  return (
+    <section style={{ background: "#060E1A", padding: "64px 56px", borderTop: "1px solid rgba(66,133,244,0.15)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <div style={{ width: 24, height: 24, background: "#4285F4", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontWeight: 900, fontSize: 11 }}>G</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#4285F4" }}>Google Cloud CapEx Benchmarking</span>
+          </div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
+            End-to-End Cloud Finance Analysis
+          </h2>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0, maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>
+            From 10-K data through Monte Carlo simulation to an executive investment recommendation.
+          </p>
+        </div>
+
+        {/* Flow */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 112px 1fr 112px 1fr", alignItems: "stretch" }}>
+          {GC_WORKFLOW_NODES.map((node, i) => (
+            <div key={i} style={{ display: "contents" }}>
+              <div
+                onClick={() => window.open(`#/project/${node.id}`, "_blank")}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  background: hovered === i ? "rgba(66,133,244,0.09)" : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${hovered === i ? "rgba(66,133,244,0.45)" : "rgba(255,255,255,0.08)"}`,
+                  borderRadius: 10,
+                  padding: "24px 22px",
+                  cursor: "pointer",
+                  transition: "all 0.18s",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: "#4285F4", textTransform: "uppercase" }}>
+                    {node.role}
+                  </span>
+                </div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "#fff", marginBottom: 10 }}>
+                  {node.title}
+                </div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.65, marginBottom: 18, flex: 1 }}>
+                  {node.desc}
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+                  {node.tags.map(t => (
+                    <span key={t} style={{ fontSize: 10, color: "rgba(66,133,244,0.8)", background: "rgba(66,133,244,0.1)", border: "1px solid rgba(66,133,244,0.2)", borderRadius: 4, padding: "2px 7px", fontWeight: 600 }}>{t}</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: 11, color: hovered === i ? "#4285F4" : "rgba(66,133,244,0.45)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
+                  Open →
+                </div>
+              </div>
+
+              {i < GC_WORKFLOW_NODES.length - 1 && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+                  <div style={{ width: "100%", display: "flex", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ flex: 1, height: 1, background: "rgba(66,133,244,0.3)" }} />
+                    <div style={{ color: "#4285F4", fontSize: 16, lineHeight: 1, marginLeft: 2 }}>▶</div>
+                  </div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center", lineHeight: 1.5, fontFamily: "'Outfit', sans-serif" }}>
+                    {GC_CONNECTOR_LABELS[i].top}<br />{GC_CONNECTOR_LABELS[i].bottom}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
 // ── Project Modal (live preview) ─────────────────────────────
 
 // ── Project Card ─────────────────────────────────────────────
@@ -1174,6 +1289,9 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {/* ── GOOGLE CLOUD WORKFLOW ── */}
+      <GoogleCloudWorkflow />
 
       {/* ── ALL PROJECTS ── */}
       <section id="projects" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>
