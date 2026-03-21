@@ -136,7 +136,7 @@ const WORKFLOW_NODES = [
     step:  "01",
     role:  "Foundation",
     title: "Streaming Market Analysis",
-    desc:  "5-service KPI benchmarks: subscribers, revenue, ARM, and churn from Q1 2023 through Q4 2025. The key finding: Netflix's blended ARM has grown more steadily (+4% CAGR) than its volatile quarterly net adds, which justified making ARM the primary forecast driver rather than subscriber count.",
+    desc:  "Benchmarks Netflix against Amazon, Disney+, Max, and Paramount+ across subscribers, revenue, ARM, and churn from Q1 2023 to Q4 2025. Identifies ARM as the more stable growth driver compared to net adds, informing the forecast model design.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
   {
@@ -144,7 +144,7 @@ const WORKFLOW_NODES = [
     step:  "02",
     role:  "Model",
     title: "Revenue Forecast",
-    desc:  "ARM × net adds driver model with subscriber mechanics (gross adds / churn / net), Bear/Base/Bull scenarios, and a sensitivity analysis. Churn is modeled as a cost driver (CAC), not a revenue driver, a deliberate choice explained in the sensitivity tab because Netflix's guidance targets net adds, not gross.",
+    desc:  "Projects Netflix revenue through FY2027 using two drivers: ARM growth and net membership adds. Models gross adds, churn losses, and net adds per quarter across Bear, Consensus, and Bull scenarios, with a tornado sensitivity analysis showing which driver moves revenue most.",
     tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
@@ -152,7 +152,7 @@ const WORKFLOW_NODES = [
     step:  "03",
     role:  "Output",
     title: "Executive Deck",
-    desc:  "Exec-facing board pack: FY2025 KPIs, competitive positioning, and five strategic priorities for FY2026–27. The financial outlook table pulls live from the forecast model so scenario assumptions and board numbers stay consistent, serving as a single source of truth instead of copy-pasted figures.",
+    desc:  "Translates the forecast into an executive-facing view: FY2025 actuals vs. FY2026-27 scenario projections, revenue and membership charts, and five strategic priorities. Financial outlook syncs live from the forecast model.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
 ];
