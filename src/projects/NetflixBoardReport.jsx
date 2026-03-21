@@ -255,22 +255,12 @@ function StrategicPriorities() {
         ))}
       </div>
 
-      {/* Recommendation */}
-      <div style={{ background: "#0B1628", borderRadius: 10, padding: "18px 22px", border: "1px solid rgba(229,9,20,0.25)" }}>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: NF, marginBottom: 10 }}>Capital Allocation Priority</div>
-        <ol style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", lineHeight: 1.9, margin: 0, paddingLeft: 18 }}>
-          <li><strong style={{ color: "#fff" }}>Ad-Tier Monetization:</strong> infrastructure built; near-zero marginal cost on next ad dollar</li>
-          <li><strong style={{ color: "#fff" }}>ARM Pricing:</strong> no content spend; flows directly to operating income</li>
-          <li><strong style={{ color: "#fff" }}>Live Events + Global Penetration:</strong> long payback; fund after above two</li>
-          <li><strong style={{ color: "#fff" }}>Gaming:</strong> optionality; no revenue proof point at scale yet</li>
-        </ol>
-      </div>
     </div>
   );
 }
 
 function FinancialOutlook() {
-  const { scenario, customDrivers } = useNetflix();
+  const { scenario, setScenario, customDrivers } = useNetflix();
   const isCustom = scenario === "custom";
   const drivers  = isCustom
     ? { ...SCENARIOS.consensus, ...customDrivers }
@@ -280,22 +270,33 @@ function FinancialOutlook() {
   const label    = SCENARIO_LABELS[scenario] ?? "Consensus";
 
   const rows = [
-    { metric: "Annual Paid Net Adds (M)",    fy26: `+${m.netAdds26}M`,         fy27: `+${m.netAdds27}M`         },
-    { metric: "End-Period Paid Members (M)", fy26: `${m.subs26.toFixed(0)}M`,  fy27: `${m.subs27.toFixed(0)}M`  },
-    { metric: "Avg ARM ($/month)",           fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
-    { metric: "Monthly Churn Rate",          fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%` },
-    { metric: "Annual Revenue ($B)",         fy26: `$${m.rev26}B`,             fy27: `$${m.rev27}B`             },
+    { metric: "Annual Revenue ($B)",         fy25: "$45.2B",  fy26: `$${m.rev26}B`,             fy27: `$${m.rev27}B`             },
+    { metric: "End-Period Paid Members (M)", fy25: "332M",    fy26: `${m.subs26.toFixed(0)}M`,  fy27: `${m.subs27.toFixed(0)}M`  },
+    { metric: "Annual Paid Net Adds (M)",    fy25: "+30M",    fy26: `+${m.netAdds26}M`,         fy27: `+${m.netAdds27}M`         },
+    { metric: "Avg ARM ($/month)",           fy25: "$11.84",  fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
+    { metric: "Monthly Churn Rate",          fy25: "2.0%",    fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%` },
   ];
 
   return (
     <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
-      {/* Sync Badge */}
-      <div style={{ background: LIGHT, padding: "10px 20px", borderBottom: `1px solid ${GRID}`, display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Scenario selector + sync badge */}
+      <div style={{ background: LIGHT, padding: "10px 20px", borderBottom: `1px solid ${GRID}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          {["bear","consensus","bull","custom"].map(key => {
+            const active = scenario === key;
+            return (
+              <button key={key} onClick={() => setScenario(key)} style={{
+                padding: "3px 14px", borderRadius: 20, cursor: "pointer",
+                border: `1.5px solid ${active ? SCENARIO_COLORS[key] : GRID}`,
+                background: active ? SCENARIO_COLORS[key] : "#fff",
+                color: active ? "#fff" : MUTED,
+                fontSize: 11, fontWeight: active ? 700 : 400, transition: "all 0.15s",
+              }}>{SCENARIO_LABELS[key]}</button>
+            );
+          })}
+        </div>
         <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0", fontWeight: 600 }}>
-          ⟳ Live, synced from Netflix Revenue Forecast
-        </span>
-        <span style={{ fontSize: 12, color: MUTED }}>
-          Active: <strong style={{ color: col }}>{label} Scenario</strong>
+          ⟳ Synced with Revenue Forecast
         </span>
       </div>
 
@@ -304,11 +305,12 @@ function FinancialOutlook() {
           <thead>
             <tr>
               {[
-                { label: "Metric",             bg: "#F4F5F8", color: NAVY  },
-                { label: `FY2026E (${label})`, bg: col,       color: "#fff" },
-                { label: `FY2027E (${label})`, bg: col,       color: "#fff" },
+                { label: "Metric",             bg: "#F4F5F8", color: NAVY,  center: false },
+                { label: "FY2025A",            bg: "#F4F5F8", color: MUTED, center: true  },
+                { label: `FY2026E (${label})`, bg: col,       color: "#fff", center: true },
+                { label: `FY2027E (${label})`, bg: col,       color: "#fff", center: true },
               ].map((h, i) => (
-                <th key={i} style={{ padding: "11px 16px", textAlign: i === 0 ? "left" : "center", background: h.bg, color: h.color, fontWeight: 600, borderBottom: `2px solid ${NF}`, whiteSpace: "nowrap" }}>
+                <th key={i} style={{ padding: "11px 16px", textAlign: h.center ? "center" : "left", background: h.bg, color: h.color, fontWeight: 600, borderBottom: `2px solid ${NF}`, whiteSpace: "nowrap" }}>
                   {h.label}
                 </th>
               ))}
@@ -318,8 +320,9 @@ function FinancialOutlook() {
             {rows.map((row, ri) => (
               <tr key={row.metric} style={{ background: ri % 2 === 0 ? "#FAFAFA" : "#fff" }}>
                 <td style={{ padding: "11px 16px", fontWeight: 600, color: NAVY }}>{row.metric}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: col }}>{row.fy26}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: col }}>{row.fy27}</td>
+                <td style={{ padding: "11px 16px", textAlign: "center", color: MUTED, fontWeight: 500 }}>{row.fy25}</td>
+                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy26 ? col : MUTED }}>{row.fy26 ?? "N/A"}</td>
+                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy27 ? col : MUTED }}>{row.fy27 ?? "N/A"}</td>
               </tr>
             ))}
           </tbody>
@@ -367,8 +370,8 @@ export default function NetflixBoardReport() {
       {/* Body */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 48px" }}>
 
-        <SectionHeading title="KPI Snapshot: FY2025" />
-        <KPISection />
+        <SectionHeading title="Performance & Financial Outlook" />
+        <FinancialOutlook />
 
         <SectionHeading title="Revenue & Membership Trajectory" />
         <RevenueScenariosChart />
@@ -377,9 +380,6 @@ export default function NetflixBoardReport() {
 
         <SectionHeading title="Strategic Priorities: FY2026–27" />
         <StrategicPriorities />
-
-        <SectionHeading title="Financial Outlook: FY2026–27E" />
-        <FinancialOutlook />
 
       </div>
 
