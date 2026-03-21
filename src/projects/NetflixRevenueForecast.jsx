@@ -1,8 +1,5 @@
 import { useState } from "react";
 import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
-import {
   HISTORICAL, START, SCENARIOS, QUARTERS,
   buildForecast, getForecast, getFY,
 } from "./NetflixShared.js";
@@ -78,9 +75,6 @@ const C = {
   tick:  "#6B7280",
   muted: "#9CA3AF",
 };
-
-const axisStyle = { fontSize: 11, fill: C.tick };
-const gridProps  = { stroke: C.grid, strokeDasharray: "3 3" };
 
 const SLIDER_CONFIG = [
   { key: "netAdds",   label: "Gross Adds/Q",  startKey: "netAddsStart",   endKey: "netAddsEnd",   min: 5,   max: 55,  step: 0.5, fmt: v => `+${v.toFixed(1)}M`   },
