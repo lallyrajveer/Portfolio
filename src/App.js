@@ -136,7 +136,7 @@ const WORKFLOW_NODES = [
     step:  "01",
     role:  "Foundation",
     title: "Streaming Market Analysis",
-    desc:  "Benchmarks Netflix against Amazon, Disney+, Max, and Paramount+ across subscribers, revenue, ARM, and churn from Q1 2023 to Q4 2025. Identifies ARM as the more stable growth driver compared to net adds, informing the forecast model design.",
+    desc:  "Benchmarks Netflix against Amazon, Disney+, Max, and Paramount+ across subscribers, revenue, ARM, and churn from Q1 2023 to Q4 2025.",
     tags:  ["Market sizing", "Peer benchmarking", "Churn context"],
   },
   {
@@ -144,7 +144,7 @@ const WORKFLOW_NODES = [
     step:  "02",
     role:  "Model",
     title: "Revenue Forecast",
-    desc:  "Projects Netflix revenue through FY2027 using two drivers: ARM growth and net membership adds. Models gross adds, churn losses, and net adds per quarter across Bear, Consensus, and Bull scenarios, with a tornado sensitivity analysis showing which driver moves revenue most.",
+    desc:  "Projects Netflix revenue through FY2027 using two drivers: ARM growth and net membership adds.",
     tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
@@ -152,7 +152,7 @@ const WORKFLOW_NODES = [
     step:  "03",
     role:  "Output",
     title: "Executive Deck",
-    desc:  "Translates the forecast into an executive-facing view: FY2025 actuals vs. FY2026-27 scenario projections, revenue and membership charts, and five strategic priorities. Financial outlook syncs live from the forecast model.",
+    desc:  "Translates the forecast into an executive-facing view: FY2025 actuals vs. FY2026-27 scenario projections, revenue and membership charts, and five strategic priorities.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
 ];
