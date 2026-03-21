@@ -329,19 +329,6 @@ function GoogleCloudWorkflow() {
                     flexDirection: "column",
                   }}
                 >
-                  {/* Role */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 800, letterSpacing: 1.5,
-                      color: color, textTransform: "uppercase",
-                      background: `${colorAlpha}0.12)`,
-                      border: `1px solid ${colorAlpha}0.25)`,
-                      borderRadius: 4, padding: "2px 8px",
-                    }}>
-                      {node.role}
-                    </span>
-                  </div>
-
                   <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 21, fontWeight: 600, color: "#fff", marginBottom: 10 }}>
                     {node.title}
                   </div>
