@@ -12,13 +12,6 @@ const LIGHT = "#F8F9FA";
 const SCENARIO_COLORS = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
 const SCENARIO_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull",  custom: "Custom" };
 
-/* ─── Static Board Data ──────────────────────────────────────── */
-const kpiCards = [
-  { label: "Paid Members",       value: "332M",  sub: "Q4 2025",        change: "+7M QoQ",      up: true },
-  { label: "FY2025 Revenue",     value: "$45.2B", sub: "Full Year",     change: "+16% YoY",     up: true },
-  { label: "Operating Margin",   value: "29%",    sub: "FY2025",        change: "+2pts YoY",    up: true },
-  { label: "Global ARM",         value: "$12.23", sub: "per month",     change: "+4.6% YoY",    up: true },
-];
 
 const priorities = [
   {
@@ -222,20 +215,6 @@ function SectionHeading({ title }) {
   );
 }
 
-function KPISection() {
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-      {kpiCards.map((k, i) => (
-        <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${NF}` }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: MUTED, marginBottom: 6 }}>{k.label}</div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: NAVY, lineHeight: 1, fontFamily: "'Cormorant Garamond', serif" }}>{k.value}</div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 4 }}>{k.sub}</div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: k.up ? "#16A34A" : "#DC2626", marginTop: 5 }}>{k.change}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function StrategicPriorities() {
   return (
