@@ -440,7 +440,7 @@ function SensitivityTab() {
       fmt: v => (v * 4).toFixed(0) + "M/yr",
     },
     {
-      label: "ARM Growth", key: "armGrowth", baseVal: baseArmGrowth,
+      label: "ARM Growth (Q4'27 implied)", key: "armGrowth", baseVal: baseArmGrowth,
       rows: [
         { label: "Price-hike pause",  val: 0.0  },
         { label: "Modest",            val: 1.5  },
@@ -449,7 +449,7 @@ function SensitivityTab() {
         { label: "Aggressive cycle",  val: 6.0  },
       ],
       getFn: val => computeRev(baseNetAdds, val, baseChurn),
-      fmt: v => v.toFixed(1) + "%/yr",
+      fmt: v => `$${(START.arm * Math.pow(1 + v / 400, 8)).toFixed(2)}/mo`,
     },
     {
       label: "Churn Rate", key: "churn", baseVal: baseChurn,
@@ -465,7 +465,7 @@ function SensitivityTab() {
         { label: "High",      val: 2.8  },
       ],
       getFn: val => computeRevChurnSensitivity(val),
-      fmt: v => (v * 12).toFixed(1) + "%/yr",
+      fmt: v => v.toFixed(2) + "%/mo",
     },
   ];
 
