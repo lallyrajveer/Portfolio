@@ -392,26 +392,39 @@ function SensitivityTab() {
   const baseNetAdds   = (sc.netAddsStart  + sc.netAddsEnd)  / 2;
   const baseArmGrowth = (sc.armGrowthStart + sc.armGrowthEnd) / 2;
   const baseChurn     = (sc.churnStart    + sc.churnEnd)    / 2;
+  const n             = QUARTERS.length;
 
-  // Revenue from flat drivers (net-adds and ARM growth held fixed)
-  const computeRev = (netAdds, armGrowth, churn) => {
-    const fc = buildForecast(START.subs, START.arm, netAdds, armGrowth, churn, QUARTERS);
-    return { fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) };
-  };
+  const toRev = fc => ({ fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) });
 
-  // Churn sensitivity: hold gross adds fixed at base level; higher churn reduces net adds → revenue
-  const baseFC = buildForecast(START.subs, START.arm, baseNetAdds, baseArmGrowth, baseChurn, QUARTERS);
-  const computeRevChurnSensitivity = (churnRate) => {
+  // Net Adds sensitivity: flat netAdds tested, Consensus ramp held for ARM + Churn
+  const computeNetAddsSens = val =>
+    toRev(buildForecast(START.subs, START.arm,
+      val, sc.armGrowthStart, sc.churnStart, QUARTERS,
+      val, sc.armGrowthEnd,   sc.churnEnd));
+
+  // ARM sensitivity: flat armGrowth tested, Consensus ramp held for Net Adds + Churn
+  const computeArmSens = val =>
+    toRev(buildForecast(START.subs, START.arm,
+      sc.netAddsStart, val, sc.churnStart, QUARTERS,
+      sc.netAddsEnd,   val, sc.churnEnd));
+
+  // Churn sensitivity: gross adds fixed from full Consensus forecast; flat churnRate tested;
+  // Consensus ramp held for ARM growth across each quarter
+  const consForecast = buildForecast(START.subs, START.arm,
+    sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS,
+    sc.netAddsEnd,   sc.armGrowthEnd,   sc.churnEnd);
+  const computeChurnSens = churnRate => {
     let subs = START.subs;
     let arm  = START.arm;
     const revs = [];
-    for (let qi = 0; qi < QUARTERS.length; qi++) {
-      const grossAdds   = baseFC[qi].grossAdds;
+    for (let qi = 0; qi < n; qi++) {
+      const grossAdds   = consForecast[qi].grossAdds;
       const churnLosses = churnRate / 100 * subs * 3;
       const netAdds     = grossAdds - churnLosses;
       const endSubs     = subs + netAdds;
       const avgSubs     = (subs + endSubs) / 2;
-      arm = arm * (1 + baseArmGrowth / 400);
+      const armGrowthQ  = sc.armGrowthStart + (sc.armGrowthEnd - sc.armGrowthStart) * qi / (n - 1);
+      arm = arm * (1 + armGrowthQ / 400);
       revs.push(+(avgSubs * arm * 3 / 1000).toFixed(2));
       subs = endSubs;
     }
@@ -421,14 +434,10 @@ function SensitivityTab() {
     };
   };
 
-  const baseResult          = computeRev(baseNetAdds, baseArmGrowth, baseChurn);
-  // Churn uses its own base so delta comparison is apples-to-apples within the fixed-gross-adds model
-  const churnSensBaseResult = computeRevChurnSensitivity(baseChurn);
-
-  // Absolute test ranges: economically meaningful stress tests, not ±% of the rate
   const drivers = [
     {
       label: "Net Adds/Q", key: "netAdds", baseVal: baseNetAdds,
+      baseOverride: computeNetAddsSens(baseNetAdds),
       rows: [
         { label: "Bear floor",   val: 2.0  },
         { label: "Low",          val: 4.0  },
@@ -436,11 +445,12 @@ function SensitivityTab() {
         { label: "High",         val: 12.0 },
         { label: "Bull ceiling", val: 14.0 },
       ],
-      getFn: val => computeRev(val, baseArmGrowth, baseChurn),
+      getFn: computeNetAddsSens,
       fmt: v => (v * 4).toFixed(0) + "M/yr",
     },
     {
       label: "ARM Growth (Q4'27 implied)", key: "armGrowth", baseVal: baseArmGrowth,
+      baseOverride: computeArmSens(baseArmGrowth),
       rows: [
         { label: "Price-hike pause",  val: 0.0  },
         { label: "Modest",            val: 1.5  },
@@ -448,15 +458,12 @@ function SensitivityTab() {
         { label: "Strong hikes",      val: 4.5  },
         { label: "Aggressive cycle",  val: 6.0  },
       ],
-      getFn: val => computeRev(baseNetAdds, val, baseChurn),
+      getFn: computeArmSens,
       fmt: v => `$${(START.arm * Math.pow(1 + v / 400, 8)).toFixed(2)}/mo`,
     },
     {
       label: "Churn Rate", key: "churn", baseVal: baseChurn,
-      // baseOverride: delta is compared against churnSensBaseResult, not the fixed-net-adds baseResult.
-      // Without this, churn rows compare two different models (fixed-net-adds vs fixed-gross-adds),
-      // which produces zero or near-zero deltas even though churn materially affects subscriber counts.
-      baseOverride: churnSensBaseResult,
+      baseOverride: computeChurnSens(baseChurn),
       rows: [
         { label: "Very low",  val: 1.5  },
         { label: "Low",       val: 1.8  },
@@ -464,7 +471,7 @@ function SensitivityTab() {
         { label: "Elevated",  val: 2.6  },
         { label: "High",      val: 3.0  },
       ],
-      getFn: val => computeRevChurnSensitivity(val),
+      getFn: computeChurnSens,
       fmt: v => v.toFixed(2) + "%/mo",
     },
   ];
@@ -501,7 +508,7 @@ function SensitivityTab() {
                 </tr>
                 {d.rows.map(row => {
                   const isBase        = !!row.isBase;
-                  const effectiveBase = d.baseOverride ?? baseResult;
+                  const effectiveBase = d.baseOverride;
                   const res           = isBase ? effectiveBase : d.getFn(row.val);
                   const deltaB        = +(res.fy26 - effectiveBase.fy26).toFixed(3);
                   const deltaPct      = +((deltaB / effectiveBase.fy26) * 100).toFixed(2);
