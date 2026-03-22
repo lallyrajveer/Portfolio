@@ -1,5 +1,5 @@
 import { useNetflix } from "./NetflixContext.js";
-import { SCENARIOS, HISTORICAL, QUARTERS, getScenarioMetrics, getForecast, buildForecast, START } from "./NetflixShared.js";
+import { HISTORICAL, QUARTERS, getForecast, buildForecast, START } from "./NetflixShared.js";
 import { ComposedChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
