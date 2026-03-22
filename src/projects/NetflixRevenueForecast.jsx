@@ -35,29 +35,34 @@ if (typeof document !== "undefined" && !document.getElementById("nf-dual-range-s
 }
 
 function DualRangeSlider({ min, max, step, startVal, endVal, onStartChange, onEndChange, fmt }) {
-  const pct   = v => ((v - min) / (max - min)) * 100;
-  const pLo   = pct(startVal);
-  const pHi   = pct(endVal);
-  // When handles are very close, give the lower-value thumb higher z-index so it stays grabbable
-  const zLo   = pLo >= pHi - 2 ? 5 : 3;
-  const zHi   = pLo >= pHi - 2 ? 3 : 5;
+  const pct      = v => ((v - min) / (max - min)) * 100;
+  const pStart   = pct(startVal);
+  const pEnd     = pct(endVal);
+  const trackL   = Math.min(pStart, pEnd);
+  const trackW   = Math.abs(pEnd - pStart);
+  const declining = endVal < startVal;
+  const arrow    = declining ? "↘" : endVal > startVal ? "↗" : "→";
+  const arrowClr = declining ? "#DC2626" : "#16A34A";
+  // When handles cross, bring the start handle forward so it can be pulled back left
+  const zStart   = startVal >= endVal ? 5 : 3;
+  const zEnd     = startVal >= endVal ? 3 : 5;
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
         <span style={{ fontSize: 10, color: "#6B7280" }}>Q1'26 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(startVal)}</strong></span>
-        <span style={{ fontSize: 10, color: "#7C3AED" }}>→</span>
+        <span style={{ fontSize: 12, color: arrowClr, fontWeight: 700 }}>{arrow}</span>
         <span style={{ fontSize: 10, color: "#6B7280" }}>Q4'27 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(endVal)}</strong></span>
       </div>
       <div className="nf-dual-range">
         <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", width: "100%", height: 4, background: "#E5E7EB", borderRadius: 2 }} />
-        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${pLo}%`, width: `${pHi - pLo}%`, height: 4, background: "#7C3AED", borderRadius: 2 }} />
+        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${trackL}%`, width: `${trackW}%`, height: 4, background: "#7C3AED", borderRadius: 2 }} />
         <input type="range" min={min} max={max} step={step} value={startVal}
-          style={{ zIndex: zLo }}
-          onChange={e => onStartChange(Math.min(parseFloat(e.target.value), endVal - step))} />
+          style={{ zIndex: zStart }}
+          onChange={e => onStartChange(parseFloat(e.target.value))} />
         <input type="range" min={min} max={max} step={step} value={endVal}
-          style={{ zIndex: zHi }}
-          onChange={e => onEndChange(Math.max(parseFloat(e.target.value), startVal + step))} />
+          style={{ zIndex: zEnd }}
+          onChange={e => onEndChange(parseFloat(e.target.value))} />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#9CA3AF", marginTop: 3 }}>
         <span>{min}</span><span>{max}</span>
