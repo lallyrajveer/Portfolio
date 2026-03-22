@@ -40,10 +40,12 @@ export const BASE_CHURN = 2.3;
 //   Bear 2.6→3.0% (avg 2.8%): escalating competition + price hike fatigue erodes retention.
 //   Consensus 2.2→1.9% (avg 2.05%): modest improvement from sports habit loops, ad-tier price floor, deeper slate.
 //   Bull 2.1→1.5% (avg 1.8%): strong must-watch slate drives materially better retention by FY2027.
+// All scenarios share Q4'25 actual start values (net adds 7.0M, ARM growth 4.5%/yr, churn 1.90%/mo)
+// and diverge toward their respective Q4'27 end assumptions.
 export const SCENARIOS = {
-  bear:      { netAddsStart: 2.0, netAddsEnd:  4.0, armGrowthStart: 0.5, armGrowthEnd: 1.5, churnStart: 2.6, churnEnd: 3.0 },
-  consensus: { netAddsStart: 7.0, netAddsEnd:  9.0, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 },
-  bull:      { netAddsStart: 8.0, netAddsEnd: 14.0, armGrowthStart: 3.5, armGrowthEnd: 6.5, churnStart: 2.1, churnEnd: 1.5 },
+  bear:      { netAddsStart: 7.0, netAddsEnd:  4.0, armGrowthStart: 4.5, armGrowthEnd: 1.5, churnStart: 1.9, churnEnd: 3.0 },
+  consensus: { netAddsStart: 7.0, netAddsEnd:  9.0, armGrowthStart: 4.5, armGrowthEnd: 5.0, churnStart: 1.9, churnEnd: 1.9 },
+  bull:      { netAddsStart: 7.0, netAddsEnd: 14.0, armGrowthStart: 4.5, armGrowthEnd: 6.5, churnStart: 1.9, churnEnd: 1.5 },
 };
 
 export const QUARTERS = [
@@ -78,7 +80,12 @@ export const QUARTERS = [
  *                                     if false (default), netAddsStart/End are fixed net add targets;
  *                                     churn only affects gross adds (CAC), not revenue.
  */
-export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual, churnPct, quarters, netAddsEnd = netAddsStart, armGrowthEnd = armGrowthAnnual, churnEnd = churnPct, useGrossAdds = false) {
+// Seasonal factors derived from FY2025 actuals (cleanest year, no password-sharing distortion).
+// Q1=1.10, Q2=1.30, Q3=0.65, Q4=0.95 — sum to 4.00 so annual totals are preserved.
+// Applied as a multiplier on the quarterly net/gross adds ramp value.
+export const SEASONAL_FACTORS = [1.10, 1.30, 0.65, 0.95]; // [Q1, Q2, Q3, Q4]
+
+export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual, churnPct, quarters, netAddsEnd = netAddsStart, armGrowthEnd = armGrowthAnnual, churnEnd = churnPct, useGrossAdds = false, seasonalFactors = null) {
   const results = [];
   let subs = startSubs;
   let arm  = startARM;
@@ -86,7 +93,8 @@ export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual
 
   for (let qi = 0; qi < n; qi++) {
     const q           = quarters[qi];
-    const addsInput   = n > 1 ? netAddsStart + (netAddsEnd - netAddsStart) * qi / (n - 1) : netAddsStart;
+    const seasonal    = seasonalFactors ? seasonalFactors[qi % 4] : 1;
+    const addsInput   = seasonal * (n > 1 ? netAddsStart + (netAddsEnd - netAddsStart) * qi / (n - 1) : netAddsStart);
     const armGrowthQ  = n > 1 ? armGrowthAnnual + (armGrowthEnd - armGrowthAnnual) * qi / (n - 1) : armGrowthAnnual;
     const churnQ      = n > 1 ? churnPct + (churnEnd - churnPct) * qi / (n - 1) : churnPct;
     const beginSubs   = subs;
@@ -114,9 +122,9 @@ export function buildForecast(startSubs, startARM, netAddsStart, armGrowthAnnual
   return results;
 }
 
-export function getForecast(scenarioKey) {
+export function getForecast(scenarioKey, seasonalFactors = null) {
   const sc = SCENARIOS[scenarioKey];
-  return buildForecast(START.subs, START.arm, sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS, sc.netAddsEnd, sc.armGrowthEnd, sc.churnEnd);
+  return buildForecast(START.subs, START.arm, sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS, sc.netAddsEnd, sc.armGrowthEnd, sc.churnEnd, false, seasonalFactors);
 }
 
 export function getFY(forecast, year) {

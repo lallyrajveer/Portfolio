@@ -1,5 +1,5 @@
 import { useNetflix } from "./NetflixContext.js";
-import { HISTORICAL, QUARTERS, getForecast, buildForecast, START } from "./NetflixShared.js";
+import { HISTORICAL, QUARTERS, getForecast, buildForecast, START, SEASONAL_FACTORS } from "./NetflixShared.js";
 import { ComposedChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
@@ -77,17 +77,23 @@ const gridProps  = { stroke: GRID, strokeDasharray: "3 3" };
 
 function useScenariosData() {
   const { customDrivers } = useNetflix();
-  const bear      = getForecast("bear");
-  const consensus = getForecast("consensus");
-  const bull      = getForecast("bull");
+  const sf        = SEASONAL_FACTORS;
+  const bear      = getForecast("bear",      sf);
+  const consensus = getForecast("consensus", sf);
+  const bull      = getForecast("bull",      sf);
+  const cd = customDrivers ?? {};
+  const customArmGrowthEnd = (((cd.armEnd ?? 13.51) / START.arm) ** (1 / 8) - 1) * 400;
   const custom    = buildForecast(
     START.subs, START.arm,
-    customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart,
+    cd.netAddsStart   ?? 7.0,
+    cd.armGrowthStart ?? 4.5,
+    cd.churnStart     ?? 1.9,
     QUARTERS,
-    customDrivers.netAddsEnd, customDrivers.armGrowthEnd, customDrivers.churnEnd,
-    true
+    cd.netAddsEnd  ?? 9.0,
+    customArmGrowthEnd,
+    cd.churnEnd    ?? 1.9,
+    false, sf
   );
-
   // Revenue
   const histRev = HISTORICAL.map(h => ({ period: h.period, actual: h.rev, bear_v: null, cons_v: null, bull_v: null, custom_v: null }));
   const lastRev  = HISTORICAL[HISTORICAL.length - 1].rev;
@@ -126,11 +132,11 @@ const makeEndLabel = (color, formatter, idx) => (props) => {
 };
 
 const SC_LINES = [
-  { dataKey: "actual",   name: "Historical", stroke: "#94A3B8", width: 1.5, dash: "3 2",  endIdx: HIST_END_IDX },
-  { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,      width: 2,   dash: null,    endIdx: FORE_END_IDX },
-  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus, width: 2.5, dash: null,    endIdx: FORE_END_IDX },
-  { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,      width: 2,   dash: null,    endIdx: FORE_END_IDX },
-  { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,    width: 2,   dash: "5 3",   endIdx: FORE_END_IDX },
+  { dataKey: "actual",   name: "Historical", stroke: "#94A3B8",                  width: 1.5, dash: "3 2",  endIdx: HIST_END_IDX },
+  { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,       width: 2,   dash: null,   endIdx: FORE_END_IDX },
+  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus,  width: 2,   dash: null,   endIdx: FORE_END_IDX },
+  { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,       width: 2,   dash: null,   endIdx: FORE_END_IDX },
+  { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,     width: 2.5, dash: "5 3",  endIdx: FORE_END_IDX },
 ];
 
 function RevenueScenariosChart() {
@@ -145,7 +151,7 @@ function RevenueScenariosChart() {
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
           <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
-          <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}B` : "—", name]} />
+          <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(1)}B` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
           {SC_LINES.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `$${v.toFixed(1)}B`, l.endIdx)} />)}
         </ComposedChart>
@@ -254,7 +260,7 @@ const _domainNetAdds  = [];
   const d = _aggH(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
 });
 ["bear","consensus","bull"].forEach(sc => {
-  const f = getForecast(sc);
+  const f = getForecast(sc, SEASONAL_FACTORS);
   [f.slice(0,4), f.slice(4,8)].forEach(qs => {
     const d = _aggF(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
   });
@@ -265,19 +271,27 @@ const FY_ADDS_DOMAIN  = [0, Math.ceil(Math.max(..._domainNetAdds) * 1.15 / 5) * 
 function FinancialOutlook() {
   const { scenario, setScenario, customDrivers } = useNetflix();
 
+  const cd = customDrivers ?? {};
+  const customArmGrowthEnd = (((cd.armEnd ?? 13.51) / START.arm) ** (1 / 8) - 1) * 400;
   const forecast = scenario === "custom"
     ? buildForecast(START.subs, START.arm,
-        customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart, QUARTERS,
-        customDrivers.netAddsEnd,   customDrivers.armGrowthEnd,   customDrivers.churnEnd, true)
-    : getForecast(scenario);
+        cd.netAddsStart   ?? 7.0,
+        cd.armGrowthStart ?? 4.5,
+        cd.churnStart     ?? 1.9,
+        QUARTERS,
+        cd.netAddsEnd  ?? 9.0,
+        customArmGrowthEnd,
+        cd.churnEnd    ?? 1.9,
+        false, SEASONAL_FACTORS)
+    : getForecast(scenario, SEASONAL_FACTORS);
 
   const agg = (qs, isHist) => {
     const rev     = +(qs.reduce((s, q) => s + (isHist ? q.rev : q.revenue), 0)).toFixed(1);
     const members = +qs[3].subs.toFixed(0);
     const arm     = +qs[3].arm.toFixed(2);
+    const avgArm  = +(qs.reduce((s, q) => s + q.arm, 0) / qs.length).toFixed(2);
     const netAdds = +(qs.reduce((s, q) => s + q.netAdds, 0)).toFixed(1);
-    const churn   = +qs.reduce((s, q) => s + q.churn, 0).toFixed(2) / qs.length;
-    return { rev, members, arm, netAdds, churn: +churn.toFixed(2) };
+    return { rev, members, arm, arpu: avgArm, netAdds };
   };
 
   const years = [
@@ -298,9 +312,8 @@ function FinancialOutlook() {
     { label: "Revenue ($B)",      fmt: y => `$${y.rev.toFixed(1)}B` },
     { label: "YoY Growth",        fmt: y => y.revGrowth != null ? `${y.revGrowth > 0 ? "+" : ""}${y.revGrowth}%` : "—" },
     { label: "Members (M)",       fmt: y => `${y.members}M` },
-    { label: "ARM ($/mo)\u2020",  fmt: y => `$${y.arm.toFixed(2)}` },
+    { label: "ARPU ($/mo)",       fmt: y => `$${y.arpu.toFixed(2)}` },
     { label: "Net Adds (M)",      fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
-    { label: "Avg Churn (%/mo)",  fmt: y => `${y.churn.toFixed(2)}%` },
   ];
 
   return (
@@ -410,7 +423,7 @@ function FinancialOutlook() {
           Driver-based model. Change scenario above; charts and table update automatically. Not financial guidance.
         </p>
         <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
-          &#8224; ARM FY2025A shows Q4'25 exit rate ($12.23/mo), the model's starting input; FY2025 annual avg was $11.84. Bear FY2026E avg ARM of ~$12.28 implies ~0.4% growth above the starting rate, consistent with the 0.5&#8211;1.5%/yr Bear assumption.
+          ARPU = annual avg ARM ($/mo) across the four quarters; matches the ARM driver shown in the sensitivity table. Model starts from Q4'25 exit rate of $12.23/mo.
         </p>
         <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
           FY2026&#8594;27E ~14% revenue growth: ~9% paid member growth + ~4% ARM lift. Ad-tier CPM monetization contributes an estimated +$1.5&#8211;2.5B by FY2027, embedded in the ARM growth assumption. Password-sharing tailwind largely exhausted; growth is ad-tier and international-led.

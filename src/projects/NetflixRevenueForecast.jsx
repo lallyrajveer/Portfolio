@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   HISTORICAL, START, SCENARIOS, QUARTERS,
-  buildForecast, getForecast, getFY,
+  buildForecast, getForecast, getFY, SEASONAL_FACTORS,
 } from "./NetflixShared.js";
 import { useNetflix } from "./NetflixContext.js";
 
@@ -34,7 +34,7 @@ if (typeof document !== "undefined" && !document.getElementById("nf-dual-range-s
   document.head.appendChild(s);
 }
 
-function DualRangeSlider({ min, max, step, startVal, endVal, onStartChange, onEndChange, fmt }) {
+function DualRangeSlider({ min, max, step, startVal, endVal, onStartChange, onEndChange, fmt, startFmt, lockStart = false }) {
   const pct      = v => ((v - min) / (max - min)) * 100;
   const pStart   = pct(startVal);
   const pEnd     = pct(endVal);
@@ -43,29 +43,32 @@ function DualRangeSlider({ min, max, step, startVal, endVal, onStartChange, onEn
   const declining = endVal < startVal;
   const arrow    = declining ? "↘" : endVal > startVal ? "↗" : "→";
   const arrowClr = declining ? "#DC2626" : "#16A34A";
-  // When handles cross, bring the start handle forward so it can be pulled back left
-  const zStart   = startVal >= endVal ? 5 : 3;
-  const zEnd     = startVal >= endVal ? 3 : 5;
+  const zStart   = lockStart ? 1 : (startVal >= endVal ? 5 : 3);
+  const zEnd     = lockStart ? 5 : (startVal >= endVal ? 3 : 5);
 
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-        <span style={{ fontSize: 10, color: "#6B7280" }}>Q1'26 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(startVal)}</strong></span>
+        <span style={{ fontSize: 10, color: "#6B7280" }}>
+          {lockStart ? "Q4'25" : "Q1'26"} <strong style={{ color: lockStart ? "#9CA3AF" : "#7C3AED", fontSize: 11 }}>{lockStart && startFmt ? startFmt(startVal) : fmt(startVal)}</strong>
+          {lockStart && <span style={{ marginLeft: 4, fontSize: 9, background: "#F3F4F6", color: "#6B7280", padding: "1px 5px", borderRadius: 4, border: "1px solid #E5E7EB" }}>Actual</span>}
+        </span>
         <span style={{ fontSize: 12, color: arrowClr, fontWeight: 700 }}>{arrow}</span>
         <span style={{ fontSize: 10, color: "#6B7280" }}>Q4'27 <strong style={{ color: "#7C3AED", fontSize: 11 }}>{fmt(endVal)}</strong></span>
       </div>
       <div className="nf-dual-range">
         <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", width: "100%", height: 4, background: "#E5E7EB", borderRadius: 2 }} />
-        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${trackL}%`, width: `${trackW}%`, height: 4, background: "#7C3AED", borderRadius: 2 }} />
+        <div style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: `${trackL}%`, width: `${trackW}%`, height: 4, background: lockStart ? "#D1D5DB" : "#7C3AED", borderRadius: 2 }} />
+        {lockStart && <div style={{ position: "absolute", top: "50%", left: `${pStart}%`, transform: "translate(-50%, -50%)", width: 10, height: 10, borderRadius: "50%", background: "rgba(0,0,0,0.18)", border: "1.5px solid rgba(0,0,0,0.12)", pointerEvents: "none", zIndex: 2 }} />}
         <input type="range" min={min} max={max} step={step} value={startVal}
-          style={{ zIndex: zStart }}
-          onChange={e => onStartChange(parseFloat(e.target.value))} />
+          style={{ zIndex: zStart, pointerEvents: lockStart ? "none" : "auto", opacity: lockStart ? 0 : 1 }}
+          onChange={e => !lockStart && onStartChange(parseFloat(e.target.value))} />
         <input type="range" min={min} max={max} step={step} value={endVal}
           style={{ zIndex: zEnd }}
           onChange={e => onEndChange(parseFloat(e.target.value))} />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#9CA3AF", marginTop: 3 }}>
-        <span>{min}</span><span>{max}</span>
+        <span>{fmt(min)}</span><span>{fmt(max)}</span>
       </div>
     </div>
   );
@@ -82,9 +85,8 @@ const C = {
 };
 
 const SLIDER_CONFIG = [
-  { key: "netAdds",   label: "Gross Adds/Q",  startKey: "netAddsStart",   endKey: "netAddsEnd",   min: 5,   max: 55,  step: 0.5, fmt: v => `+${v.toFixed(1)}M`   },
-  { key: "armGrowth", label: "ARM Growth",    startKey: "armGrowthStart", endKey: "armGrowthEnd", min: 0,   max: 8.0, step: 0.1, fmt: v => `${v.toFixed(1)}%/yr` },
-  { key: "churn",     label: "Monthly Churn", startKey: "churnStart",     endKey: "churnEnd",     min: 1.0, max: 4.0, step: 0.1, fmt: v => `${v.toFixed(1)}%/mo` },
+  { key: "netAdds",   label: "Net Adds/Q",    startKey: "netAddsStart",   endKey: "netAddsEnd",   min: 0,   max: 15,  step: 0.5, fmt: v => `+${v.toFixed(1)}M` },
+  { key: "armGrowth", label: "ARM ($/mo)",    startKey: "armStart",       endKey: "armEnd",       min: 12.0, max: 17.0, step: 0.1, fmt: v => `$${v.toFixed(2)}`, startFmt: () => `$${START.arm.toFixed(2)}` },
 ];
 
 /* ══════════════════════════════════════════════════════════════
@@ -95,18 +97,21 @@ const SC_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull", custo
 
 function ScenarioTab() {
   const { scenario, setScenario, customDrivers, setCustomDrivers } = useNetflix();
-  const [mechKey, setMechKey] = useState("consensus");
+  const [rationaleOpen, setRationaleOpen] = useState(false);
 
-  const bear      = getForecast("bear");
-  const consensus = getForecast("consensus");
-  const bull      = getForecast("bull");
-  const custom    = buildForecast(START.subs, START.arm, customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart, QUARTERS, customDrivers.netAddsEnd, customDrivers.armGrowthEnd, customDrivers.churnEnd, true);
+  const sf        = SEASONAL_FACTORS;
+  const bear      = getForecast("bear",      sf);
+  const consensus = getForecast("consensus", sf);
+  const bull      = getForecast("bull",      sf);
+  const cd = customDrivers ?? {};
+  const customArmGrowthEnd = (((cd.armEnd ?? 13.51) / START.arm) ** (1 / 8) - 1) * 400;
+  const custom    = buildForecast(START.subs, START.arm, cd.netAddsStart ?? 7.0, cd.armGrowthStart ?? 4.5, cd.churnStart ?? 1.9, QUARTERS, cd.netAddsEnd ?? 9.0, customArmGrowthEnd, cd.churnEnd ?? 1.9, false, sf);
   const allForecasts = { bear, consensus, bull, custom };
 
-  const fy26 = { bear: +getFY(bear,2026).toFixed(2), consensus: +getFY(consensus,2026).toFixed(2), bull: +getFY(bull,2026).toFixed(2), custom: +getFY(custom,2026).toFixed(2) };
-  const fy27 = { bear: +getFY(bear,2027).toFixed(2), consensus: +getFY(consensus,2027).toFixed(2), bull: +getFY(bull,2027).toFixed(2), custom: +getFY(custom,2027).toFixed(2) };
+  const fy26 = { bear: +getFY(bear,2026).toFixed(1), consensus: +getFY(consensus,2026).toFixed(1), bull: +getFY(bull,2026).toFixed(1), custom: +getFY(custom,2026).toFixed(1) };
+  const fy27 = { bear: +getFY(bear,2027).toFixed(1), consensus: +getFY(consensus,2027).toFixed(1), bull: +getFY(bull,2027).toFixed(1), custom: +getFY(custom,2027).toFixed(1) };
 
-  const mechForecast = allForecasts[mechKey];
+  const mechForecast = allForecasts[scenario];
 
 
   const customDriversDisplay = { ...customDrivers };
@@ -117,25 +122,6 @@ function ScenarioTab() {
       <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, color: C.navy, margin: "0 0 16px", fontWeight: 600 }}>
         Scenario Assumptions &amp; Implied Revenue
       </h3>
-
-      {/* Executive Deck sync, small secondary row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 11, color: C.muted, fontFamily: "'Outfit', sans-serif" }}>Sync Executive Deck to:</span>
-        {["bear","consensus","bull","custom"].map(key => {
-          const active = scenario === key;
-          return (
-            <button key={key} onClick={() => setScenario(key)} style={{
-              padding: "3px 12px", borderRadius: 20,
-              border: `1.5px solid ${active ? SC_COLORS[key] : C.grid}`,
-              background: active ? SC_COLORS[key] : "#fff",
-              color: active ? "#fff" : C.tick,
-              fontSize: 11, fontFamily: "'Outfit', sans-serif",
-              fontWeight: active ? 700 : 400, cursor: "pointer", transition: "all 0.15s",
-            }}>{SC_LABELS[key]}</button>
-          );
-        })}
-        <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>⟳ Live</span>
-      </div>
 
       {/* 4 scenario summary cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 16 }}>
@@ -161,15 +147,13 @@ function ScenarioTab() {
               <div style={{ fontSize: 10, color: C.muted, borderTop: `1px solid ${C.grid}`, paddingTop: 8, display: "flex", flexDirection: "column", gap: 2 }}>
                 {key === "custom" ? (
                   <>
-                    <span>+{customDriversDisplay.netAddsStart.toFixed(1)}→{customDriversDisplay.netAddsEnd.toFixed(1)}M gross/Q</span>
-                    <span>{customDriversDisplay.armGrowthStart.toFixed(1)}→{customDriversDisplay.armGrowthEnd.toFixed(1)}% ARM/yr</span>
-                    <span>{customDriversDisplay.churnStart.toFixed(1)}→{customDriversDisplay.churnEnd.toFixed(1)}% churn/mo</span>
+                    <span>+{customDriversDisplay.netAddsStart.toFixed(1)}→{customDriversDisplay.netAddsEnd.toFixed(1)}M adds/Q</span>
+                    <span>${customDriversDisplay.armStart.toFixed(2)}→${customDriversDisplay.armEnd.toFixed(2)} ARM/mo</span>
                   </>
                 ) : (
                   <>
                     <span>+{SCENARIOS[key].netAddsStart.toFixed(1)}→{SCENARIOS[key].netAddsEnd.toFixed(1)}M adds/Q</span>
-                    <span>{SCENARIOS[key].armGrowthStart.toFixed(1)}→{SCENARIOS[key].armGrowthEnd.toFixed(1)}% ARM/yr</span>
-                    <span>{SCENARIOS[key].churnStart.toFixed(1)}→{SCENARIOS[key].churnEnd.toFixed(1)}% churn/mo</span>
+                    <span>${START.arm.toFixed(2)}→${(START.arm * Math.pow(1 + SCENARIOS[key].armGrowthEnd / 400, 8)).toFixed(2)} ARM/mo</span>
                   </>
                 )}
               </div>
@@ -178,22 +162,87 @@ function ScenarioTab() {
         ))}
       </div>
 
+      {/* Scenario Driver Rationale — collapsible */}
+      <div style={{ marginBottom: 12, fontFamily: "'Outfit', sans-serif" }}>
+        <button onClick={() => setRationaleOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 700, color: C.navy, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          <span style={{ fontSize: 13, lineHeight: 1, transition: "transform 0.2s", display: "inline-block", transform: rationaleOpen ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
+          Scenario Driver Rationale
+        </button>
+        {rationaleOpen && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+              {[
+                {
+                  label: "Bear",
+                  color: "#DC2626",
+                  bg: "#FEF2F2",
+                  border: "#FECACA",
+                  drivers: [
+                    { name: "Net Adds  7→4M/Q", points: ["Starts at Q4'25 actuals; deteriorates as password-sharing tailwind exhausts and ad-tier fails to offset. Disney+/Max bundles and price fatigue suppress acquisition.", "International growth in MENA and SEA slower than expected; mobile-only tier uptake muted."] },
+                    { name: "ARM  4.5→1.5%/yr",  points: ["Starts at Q4'25 trailing rate; decelerates as price hike fatigue limits UCAN increases. Ad-tier CPM monetization ramps slowly; programmatic inventory underpriced.", "EM mix dilution persists; no meaningful pricing cycle resumes before Q4'27."] },
+                  ],
+                },
+                {
+                  label: "Consensus",
+                  color: "#1D4ED8",
+                  bg: "#EFF6FF",
+                  border: "#BFDBFE",
+                  drivers: [
+                    { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). The +2M/Q ramp is sourced as follows: ~1M/Q from ad-tier acquisition growth (ad tier was 40% of new sign-ups in ad-available markets per Netflix Q4'24; scaling gross adds on a larger base adds ~1M/Q by FY2027); ~0.8M/Q from APAC/MENA mobile-tier expansion (APAC at <10% penetration in a 500M+ broadband-HH market); ~0.2M/Q residual from FIFA World Cup 2026 host-market spikes absorbed into the H2'26 ramp.", "Password-sharing tailwind is assumed exhausted by Q1'26. Sports content (NFL Christmas, WWE Raw) reduces off-season churn but is not credited as a net-adds driver."] },
+                    { name: "ARM  4.5→5.0%/yr",   points: ["Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures.", "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth."] },
+                  ],
+                },
+                {
+                  label: "Bull",
+                  color: "#16A34A",
+                  bg: "#F0FDF4",
+                  border: "#BBF7D0",
+                  drivers: [
+                    { name: "Net Adds  7→14M/Q",  points: ["Ad-tier accelerates sign-ups to 40%+ mix by Q4'26. FIFA World Cup 2026 and expanded live sports drive broad international acquisition.", "Mobile-only tiers in India and SEA contribute 15–20M+ incremental members over the forecast."] },
+                    { name: "ARM  4.5→6.5%/yr",   points: ["Aggressive UCAN pricing cycle resumes in late 2026. Ad-tier CPM matures rapidly to $40+ by FY2027; standard/premium mix shift compounds.", "New UCAN hike cycle adds an estimated 1.5–2.5pp above the base ARM trajectory."] },
+                  ],
+                },
+              ].map(sc => (
+                <div key={sc.label} style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 10, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1 }}>{sc.label}</div>
+                  {sc.drivers.map(d => (
+                    <div key={d.name} style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 5 }}>{d.name}</div>
+                      <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
+                        {d.points.map((pt, i) => (
+                          <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 4 }}>{pt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 12, fontSize: 10, color: C.muted }}>
+              Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Bloomberg Second Measure · Netflix Upfront 2024
+            </div>
+            <div style={{ marginTop: 6, fontSize: 10, color: C.muted }}>
+              Seasonality: Net adds are adjusted by quarterly seasonal factors derived from FY2025 actuals (Q1 ×1.10 · Q2 ×1.30 · Q3 ×0.65 · Q4 ×0.95; sum = 4.00, preserving annual totals). Applied to all scenarios including Custom.
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Custom sliders */}
       <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, padding: "10px 16px", marginBottom: 8, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
         <strong>Bear / Consensus / Bull</strong> are fixed research scenarios, named market views that cannot be edited.{" "}
-        <strong>Custom</strong> uses fixed gross adds: adjust the sliders to test any driver combination. Sync the Executive Deck to Custom when you want the financial outlook to reflect your specific assumptions rather than a named case.
+        <strong>Custom</strong> uses fixed net adds — the same model as the named scenarios: adjust the sliders to test any driver combination. Sync the Executive Deck to Custom when you want the financial outlook to reflect your specific assumptions rather than a named case.
       </div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#7C3AED" }}>Custom Drivers</div>
-            <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Each driver ramps linearly from Start (Q1'26) to End (Q4'27)</div>
           </div>
-          <button onClick={() => setCustomDrivers({ netAddsStart: 28.9, netAddsEnd: 31.1, armGrowthStart: 3.0, armGrowthEnd: 5.0, churnStart: 2.2, churnEnd: 1.9 })} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
-            Reset to Market Consensus
+          <button onClick={() => setCustomDrivers(prev => ({ ...prev, netAddsEnd: 9.0, armEnd: 13.51, churnEnd: 1.9 }))} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
+            Reset to Consensus
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
           {SLIDER_CONFIG.map(cfg => {
             const startVal = customDrivers[cfg.startKey];
             const endVal   = customDrivers[cfg.endKey];
@@ -203,7 +252,8 @@ function ScenarioTab() {
                 <DualRangeSlider
                   min={cfg.min} max={cfg.max} step={cfg.step}
                   startVal={startVal} endVal={endVal}
-                  fmt={cfg.fmt}
+                  fmt={cfg.fmt} startFmt={cfg.startFmt}
+                  lockStart
                   onStartChange={v => setCustomDrivers(prev => ({ ...prev, [cfg.startKey]: v }))}
                   onEndChange={v   => setCustomDrivers(prev => ({ ...prev, [cfg.endKey]:   v }))}
                 />
@@ -215,15 +265,15 @@ function ScenarioTab() {
 
       {/* Subscriber mechanics, per-scenario selector within section */}
       <div style={{ background: "#fff", borderRadius: 10, padding: "20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14, flexWrap: "wrap", gap: 10 }}>
           <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: 0 }}>
             Membership & Revenue Bridge
           </h4>
-          <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
             {["bear","consensus","bull","custom"].map(key => {
-              const active = mechKey === key;
+              const active = scenario === key;
               return (
-                <button key={key} onClick={() => setMechKey(key)} style={{
+                <button key={key} onClick={() => setScenario(key)} style={{
                   padding: "3px 12px", borderRadius: 20,
                   border: `1.5px solid ${active ? SC_COLORS[key] : C.grid}`,
                   background: active ? SC_COLORS[key] : "#fff",
@@ -232,42 +282,35 @@ function ScenarioTab() {
                 }}>{SC_LABELS[key]}</button>
               );
             })}
+            <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>⟳ Live</span>
           </div>
         </div>
         <p style={{ fontSize: 12, color: C.muted, margin: "0 0 14px" }}>
-          {mechKey === "custom"
-            ? "Custom uses fixed gross adds; churn reduces them to net adds, so higher churn directly lowers subscriber count and revenue."
-            : "Bear/Consensus/Bull use fixed net add targets; churn determines gross adds needed (acquisition cost) but does not affect subscriber count or revenue directly."}
+          {"Revenue = Avg Subs × ARM × 3 / 1000 ($B)."}
         </p>
         {(() => {
-          // Build historical columns (derive beginSubs + grossAdds/churnLosses from available data)
+          // Build historical columns
           const histCols = HISTORICAL.map((h, i) => {
-            const beginSubs   = +(i === 0 ? h.subs - h.netAdds : HISTORICAL[i - 1].subs).toFixed(1);
-            const avgSubs     = (beginSubs + h.subs) / 2;
-            const churnLosses = +(h.churn / 100 * avgSubs * 3).toFixed(1);
-            const grossAdds   = +(h.netAdds + churnLosses).toFixed(1);
-            return { period: h.period, isHist: true, beginSubs, grossAdds, churnLosses, netAdds: h.netAdds, endSubs: h.subs, arm: h.arm, revenue: h.rev, churn: h.churn };
+            const beginSubs = +(i === 0 ? h.subs - h.netAdds : HISTORICAL[i - 1].subs).toFixed(1);
+            return { period: h.period, isHist: true, beginSubs, netAdds: h.netAdds, endSubs: h.subs, arm: h.arm, revenue: h.rev };
           });
           const foreCols = mechForecast.map(r => ({ ...r, isHist: false }));
           const allCols  = [...histCols, ...foreCols];
 
           const metricRows = [
-            { label: "Begin Subs (M)",    key: "beginSubs",   fmt: v => v.toFixed(1),             color: C.tick   },
-            { label: "Gross Adds (M)",    key: "grossAdds",   fmt: v => `+${v.toFixed(1)}`,        color: "#16a34a" },
-            { label: "Churn Losses (M)",  key: "churnLosses", fmt: v => `−${v.toFixed(1)}`,        color: "#dc2626" },
-            { label: "Net Adds (M)",      key: "netAdds",     fmt: v => `+${v.toFixed(1)}`,        color: SC_COLORS[mechKey] },
-            { label: "End Subs (M)",      key: "endSubs",     fmt: v => v.toFixed(1),              color: C.navy   },
-            { label: "Churn Rate (%/mo)", key: "churn",       fmt: v => `${v.toFixed(2)}%`,        color: C.tick   },
-            { label: "ARM ($/mo)",        key: "arm",         fmt: v => `$${v.toFixed(2)}`,        color: SC_COLORS[mechKey] },
-            { label: "Qtrly Rev ($B)",    key: "revenue",     fmt: v => `$${v.toFixed(2)}B`,       color: C.navy   },
+            { label: "Begin Subs (M)", key: "beginSubs", fmt: v => v.toFixed(1),                                    color: C.tick              },
+            { label: "Net Adds (M)",   key: "netAdds",   fmt: v => v >= 0 ? `+${v.toFixed(1)}` : v.toFixed(1),     color: SC_COLORS[scenario]  },
+            { label: "End Subs (M)",   key: "endSubs",   fmt: v => v.toFixed(1),                                    color: C.navy              },
+            { label: "ARM ($/mo)",     key: "arm",       fmt: v => `$${v.toFixed(2)}`,                              color: SC_COLORS[scenario]  },
+            { label: "Qtrly Rev ($B)", key: "revenue",   fmt: v => `$${v.toFixed(1)}B`,                             color: C.navy              },
           ];
 
           const thStyle = (isHist, isFore) => ({
             padding: "5px 3px", textAlign: "center", fontSize: 10, fontWeight: 600,
             background: isHist ? "#F4F5F8" : "#EEF2FF",
-            color: isHist ? C.tick : SC_COLORS[mechKey],
-            borderBottom: `2px solid ${isHist ? C.grid : SC_COLORS[mechKey]}`,
-            borderLeft: isFore === "first" ? `2px solid ${SC_COLORS[mechKey]}` : undefined,
+            color: isHist ? C.tick : SC_COLORS[scenario],
+            borderBottom: `2px solid ${isHist ? C.grid : SC_COLORS[scenario]}`,
+            borderLeft: isFore === "first" ? `2px solid ${SC_COLORS[scenario]}` : undefined,
           });
 
           return (
@@ -300,7 +343,7 @@ function ScenarioTab() {
                           padding: "5px 3px", textAlign: "center",
                           color: col.isHist ? C.muted : row.color,
                           fontWeight: col.isHist ? 400 : (row.key === "netAdds" || row.key === "revenue" ? 700 : 500),
-                          borderLeft: !col.isHist && ci === histCols.length ? `2px solid ${SC_COLORS[mechKey]}` : undefined,
+                          borderLeft: !col.isHist && ci === histCols.length ? `2px solid ${SC_COLORS[scenario]}` : undefined,
                           fontSize: 10,
                         }}>
                           {row.fmt(col[row.key])}
@@ -314,74 +357,10 @@ function ScenarioTab() {
           );
         })()}
         <p style={{ fontSize: 11, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
-          Historical gross adds and churn losses are estimated from reported net adds, end-period subs, and third-party churn data (Antenna/YipitData).
-          Forecast: {mechKey === "custom"
-            ? "gross adds fixed; net adds = gross adds − churn losses."
-            : "net adds fixed; gross adds = net adds + churn losses (CAC driver only)."}
-        </p>
-        <p style={{ fontSize: 11, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
-          <strong style={{ color: C.navy }}>† Q3'24:</strong> −19.3M churn losses are the period high but mathematically consistent (2.30% × ~280M subs × 3 months). Driven by a thin post-strike content slate and UCAN price restructuring; normalized to 1.80% in Q4'24 with Squid Game S2 and NFL Christmas.
+          Net adds seasonally adjusted (Q1 ×1.10 · Q2 ×1.30 · Q3 ×0.65 · Q4 ×0.95); ARM compounds quarterly. Revenue = Avg Subs × ARM × 3 / 1000 ($B).
         </p>
       </div>
 
-      {/* Scenario Assumptions Rationale */}
-      <div style={{ marginTop: 32, fontFamily: "'Outfit', sans-serif" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: C.navy, marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>Scenario Driver Rationale</div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-          {[
-            {
-              label: "Bear",
-              color: "#DC2626",
-              bg: "#FEF2F2",
-              border: "#FECACA",
-              drivers: [
-                { name: "Net Adds  2→4M/Q", points: ["Password-sharing tailwind exhausted; ad-tier fails to offset. Disney+/Max bundles and price fatigue suppress acquisition.", "International growth in MENA and SEA slower than expected; mobile-only tier uptake muted."] },
-                { name: "ARM  0.5→1.5%/yr",  points: ["Price hike fatigue limits UCAN increases throughout the period. Ad-tier CPM monetization ramps slowly; programmatic inventory underpriced.", "EM mix dilution persists; no meaningful pricing cycle resumes before Q4'27."] },
-                { name: "Churn  2.6→3.0%/mo", points: ["Escalating competition and price sensitivity drive elevated cancellations. Sports rights fail to build must-watch habit loops off-season.", "Ad-tier subscribers churn at higher rate than standard tier; price floor provides limited structural benefit."] },
-              ],
-            },
-            {
-              label: "Consensus",
-              color: "#1D4ED8",
-              bg: "#EFF6FF",
-              border: "#BFDBFE",
-              drivers: [
-                { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). The +2M/Q ramp is sourced as follows: ~1M/Q from ad-tier acquisition growth (ad tier was 40% of new sign-ups in ad-available markets per Netflix Q4'24; scaling gross adds on a larger base adds ~1M/Q by FY2027); ~0.8M/Q from APAC/MENA mobile-tier expansion (APAC at <10% penetration in a 500M+ broadband-HH market); ~0.2M/Q residual from FIFA World Cup 2026 host-market spikes absorbed into the H2'26 ramp.", "Password-sharing tailwind is assumed exhausted by Q1'26. Sports content (NFL Christmas, WWE Raw) reduces off-season churn but is not credited as a net-adds driver."] },
-                { name: "ARM  3.0→5.0%/yr",   points: ["Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures.", "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth."] },
-                { name: "Churn  2.2→1.9%/mo", points: ["Modest improvement as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).", "Ad-tier price floor ($7.99/mo) reduces cancellations; subscribers downgrade rather than leave."] },
-              ],
-            },
-            {
-              label: "Bull",
-              color: "#16A34A",
-              bg: "#F0FDF4",
-              border: "#BBF7D0",
-              drivers: [
-                { name: "Net Adds  8→14M/Q",  points: ["Ad-tier accelerates sign-ups to 40%+ mix by Q4'26. FIFA World Cup 2026 and expanded live sports drive broad international acquisition.", "Mobile-only tiers in India and SEA contribute 15–20M+ incremental members over the forecast."] },
-                { name: "ARM  3.5→6.5%/yr",   points: ["Aggressive UCAN pricing cycle resumes in late 2026. Ad-tier CPM matures rapidly to $40+ by FY2027; standard/premium mix shift compounds.", "New UCAN hike cycle adds an estimated 1.5–2.5pp above the base ARM trajectory."] },
-                { name: "Churn  2.1→1.5%/mo", points: ["Must-watch sports slate (NFL, WWE, FIFA) drives materially better retention. Deep content reduces off-season churn gaps.", "Ad-tier price floor creates structural floor; subscribers downgrade rather than cancel at higher rates than Consensus."] },
-              ],
-            },
-          ].map(sc => (
-            <div key={sc.label} style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 10, padding: "14px 16px" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1 }}>{sc.label}</div>
-              {sc.drivers.map(d => (
-                <div key={d.name} style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: sc.color, marginBottom: 5 }}>{d.name}</div>
-                  <ul style={{ margin: 0, padding: "0 0 0 14px", listStyle: "disc" }}>
-                    {d.points.map((pt, i) => (
-                      <li key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, marginBottom: 4 }}>{pt}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 12, fontSize: 10, color: C.muted }}>
-          Sources: Netflix Q3–Q4 2025 Shareholder Letters · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025) · eMarketer Streaming Ad Revenue Forecast 2024 · Antenna monthly churn data · Bloomberg Second Measure · Netflix Upfront 2024
-        </div>
-      </div>
     </div>
   );
 }
@@ -391,21 +370,20 @@ function ScenarioTab() {
    ══════════════════════════════════════════════════════════════ */
 function SensitivityTab() {
   const sc = SCENARIOS.consensus;
-  const n  = QUARTERS.length;
 
   const toRev = fc => ({ fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) });
 
   // Full Consensus ramp forecast — used as base for all three sensitivity tables
   const consForecast = buildForecast(START.subs, START.arm,
     sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS,
-    sc.netAddsEnd,   sc.armGrowthEnd,   sc.churnEnd);
+    sc.netAddsEnd,   sc.armGrowthEnd,   sc.churnEnd, false, SEASONAL_FACTORS);
 
   // ── Net Adds ──────────────────────────────────────────────────────────
   // Flat val applied each quarter; ARM + Churn held on Consensus ramp
   const getNetAddsSens = val => {
     const fc = buildForecast(START.subs, START.arm,
       val, sc.armGrowthStart, sc.churnStart, QUARTERS,
-      val, sc.armGrowthEnd,   sc.churnEnd);
+      val, sc.armGrowthEnd,   sc.churnEnd, false, SEASONAL_FACTORS);
     const drv = (val * 4).toFixed(1) + "M/yr";
     return { ...toRev(fc), drv26: drv, drv27: drv };
   };
@@ -420,42 +398,15 @@ function SensitivityTab() {
   const getArmSens = val => {
     const fc = buildForecast(START.subs, START.arm,
       sc.netAddsStart, val, sc.churnStart, QUARTERS,
-      sc.netAddsEnd,   val, sc.churnEnd);
-    return { ...toRev(fc), drv26: "$" + fc[3].arm.toFixed(2) + "/mo", drv27: "$" + fc[7].arm.toFixed(2) + "/mo" };
+      sc.netAddsEnd,   val, sc.churnEnd, false, SEASONAL_FACTORS);
+    const avg26 = (fc.slice(0,4).reduce((s,q) => s + q.arm, 0) / 4).toFixed(2);
+    const avg27 = (fc.slice(4,8).reduce((s,q) => s + q.arm, 0) / 4).toFixed(2);
+    return { ...toRev(fc), drv26: "$" + avg26 + "/mo", drv27: "$" + avg27 + "/mo" };
   };
   const baseArm = {
     ...toRev(consForecast),
-    drv26: "$" + consForecast[3].arm.toFixed(2) + "/mo",
-    drv27: "$" + consForecast[7].arm.toFixed(2) + "/mo",
-  };
-
-  // ── Churn Rate ────────────────────────────────────────────────────────
-  // Gross adds fixed from Consensus forecast; flat churnRate tested; ARM on Consensus ramp
-  const getChurnSens = churnRate => {
-    let subs = START.subs, arm = START.arm;
-    const revs = [];
-    for (let qi = 0; qi < n; qi++) {
-      const grossAdds   = consForecast[qi].grossAdds;
-      const churnLosses = churnRate / 100 * subs * 3;
-      const netAdds     = grossAdds - churnLosses;
-      const endSubs     = subs + netAdds;
-      const avgSubs     = (subs + endSubs) / 2;
-      const armGrowthQ  = sc.armGrowthStart + (sc.armGrowthEnd - sc.armGrowthStart) * qi / (n - 1);
-      arm = arm * (1 + armGrowthQ / 400);
-      revs.push(+(avgSubs * arm * 3 / 1000).toFixed(2));
-      subs = endSubs;
-    }
-    const drv = churnRate.toFixed(2) + "%/mo";
-    return {
-      fy26: +revs.slice(0, 4).reduce((s, v) => s + v, 0).toFixed(3),
-      fy27: +revs.slice(4, 8).reduce((s, v) => s + v, 0).toFixed(3),
-      drv26: drv, drv27: drv,
-    };
-  };
-  const baseChurn = {
-    ...toRev(consForecast),
-    drv26: (+(consForecast.slice(0, 4).reduce((s, q) => s + q.churn, 0).toFixed(2)) / 4).toFixed(2) + "%/mo",
-    drv27: (+(consForecast.slice(4, 8).reduce((s, q) => s + q.churn, 0).toFixed(2)) / 4).toFixed(2) + "%/mo",
+    drv26: "$" + (consForecast.slice(0,4).reduce((s,q) => s + q.arm, 0) / 4).toFixed(2) + "/mo",
+    drv27: "$" + (consForecast.slice(4,8).reduce((s,q) => s + q.arm, 0) / 4).toFixed(2) + "/mo",
   };
 
   const drivers = [
@@ -468,11 +419,6 @@ function SensitivityTab() {
       label: "ARM", key: "armGrowth", baseRes: baseArm,
       rows: [{ val: 0.0 }, { val: 1.5 }, { isBase: true }, { val: 4.5 }, { val: 6.0 }],
       getFn: getArmSens,
-    },
-    {
-      label: "Churn Rate", key: "churn", baseRes: baseChurn,
-      rows: [{ val: 1.5 }, { val: 1.8 }, { isBase: true }, { val: 2.6 }, { val: 3.0 }],
-      getFn: getChurnSens,
     },
   ];
 
@@ -539,17 +485,17 @@ function SensitivityTab() {
                   return (
                     <tr key={`${d.key}-${ri}`} style={{ background: rowBg }}>
                       <td style={{ padding: "7px 10px", fontWeight: isBase ? 700 : 400, color: isBase ? C.navy : C.tick }}>{res.drv26}</td>
-                      <td style={{ padding: "7px 10px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(1)}B</td>
                       <td style={{ padding: "7px 10px", textAlign: "center", color: clr26, fontWeight: isBase ? 400 : 600 }}>
-                        {isBase ? "—" : `${db26 >= 0 ? "+" : ""}$${db26.toFixed(3)}B`}
+                        {isBase ? "—" : `${db26 >= 0 ? "+" : ""}$${db26.toFixed(1)}B`}
                       </td>
                       <td style={{ padding: "7px 10px", textAlign: "center", color: clr26, fontWeight: isBase ? 400 : 600, borderRight: `2px solid ${C.grid}` }}>
                         {isBase ? "—" : `${dp26 >= 0 ? "+" : ""}${dp26.toFixed(2)}%`}
                       </td>
                       <td style={{ padding: "7px 10px", color: C.tick }}>{res.drv27}</td>
-                      <td style={{ padding: "7px 10px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(1)}B</td>
                       <td style={{ padding: "7px 10px", textAlign: "center", color: clr27, fontWeight: isBase ? 400 : 600 }}>
-                        {isBase ? "—" : `${db27 >= 0 ? "+" : ""}$${db27.toFixed(3)}B`}
+                        {isBase ? "—" : `${db27 >= 0 ? "+" : ""}$${db27.toFixed(1)}B`}
                       </td>
                       <td style={{ padding: "7px 10px", textAlign: "center", color: clr27, fontWeight: isBase ? 400 : 600 }}>
                         {isBase ? "—" : `${dp27 >= 0 ? "+" : ""}${dp27.toFixed(2)}%`}
@@ -571,8 +517,6 @@ function SensitivityTab() {
    ROOT
    ══════════════════════════════════════════════════════════════ */
 export default function NetflixRevenueForecast() {
-  const consForecast = getForecast("consensus");
-  const consFY26     = +getFY(consForecast, 2026).toFixed(1);
 
   return (
     <div style={{ fontFamily: "'Outfit', sans-serif", background: C.bg, minHeight: "100vh" }}>
@@ -590,31 +534,11 @@ export default function NetflixRevenueForecast() {
             Netflix Revenue Forecast
           </h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: 0 }}>
-            Driver-Based Model · Q1 2026–Q4 2027 · Starting from Q4 2025 Actuals ($12.05B / 332M members)
+            Driver-Based Model · Q1 2026–Q4 2027 · Starting from Q4 2025 Actuals ($12.1B / 332M members)
           </p>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div style={{ background: "#fff", borderBottom: `1px solid ${C.grid}`, padding: "18px 40px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
-          {[
-            { label: "Starting Revenue",  value: "$12.05B",                   sub: "Q4 2025 actual",   trend: "Q4 2025" },
-            { label: "Starting Members",  value: "332M",                      sub: "paid memberships", trend: "Q4 2025" },
-            { label: "Starting ARM",      value: "$12.23/mo",                 sub: "global blended",   trend: "Q4 2025" },
-            { label: "Consensus FY2026E", value: `$${consFY26.toFixed(1)}B`,  sub: "consensus scenario", trend: "FY2026" },
-          ].map(card => (
-            <div key={card.label} style={{ padding: "13px 16px", borderRadius: 10, background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${C.NF}` }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: C.tick, marginBottom: 4 }}>{card.label}</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: C.navy, lineHeight: 1 }}>{card.value}</div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-                <span style={{ fontSize: 11, color: C.tick }}>{card.sub}</span>
-                <span style={{ fontSize: 11, color: C.tick }}>{card.trend}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Body */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 40px" }}>
