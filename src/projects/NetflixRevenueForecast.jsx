@@ -437,7 +437,7 @@ function SensitivityTab() {
         { label: "Bull ceiling", val: 10.0 },
       ],
       getFn: val => computeRev(val, baseArmGrowth, baseChurn),
-      fmt: v => v.toFixed(1) + "M/Q",
+      fmt: v => (v * 4).toFixed(0) + "M/yr",
     },
     {
       label: "ARM Growth", key: "armGrowth", baseVal: baseArmGrowth,
@@ -465,7 +465,7 @@ function SensitivityTab() {
         { label: "High",      val: 2.8  },
       ],
       getFn: val => computeRevChurnSensitivity(val),
-      fmt: v => v.toFixed(2) + "%/mo",
+      fmt: v => (v * 12).toFixed(1) + "%/yr",
     },
   ];
 
