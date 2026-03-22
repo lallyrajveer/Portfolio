@@ -22,8 +22,8 @@ const priorities = [
       "Expand CPM yield and programmatic inventory in UCAN and EMEA",
       "Scale measurement partnerships to capture premium brand budgets",
     ],
-    status: "In Progress",
-    statusColor: "#D97706",
+    status: "Scaling",
+    statusColor: "#16A34A",
   },
   {
     title: "Live Events & Sports Rights",
@@ -33,8 +33,8 @@ const priorities = [
       "Pursue FIFA World Cup 2026 streaming rights",
       "Expand live sports in India and LatAm for retention",
     ],
-    status: "Strategic Priority",
-    statusColor: NF,
+    status: "In Flight",
+    statusColor: "#D97706",
   },
   {
     title: "Gaming & Interactive Content",
@@ -44,8 +44,8 @@ const priorities = [
       "Explore cloud gaming as a competitive moat vs. Disney+ and Max",
       "Target 10M daily active players by FY2026",
     ],
-    status: "In Progress",
-    statusColor: "#D97706",
+    status: "Early Stage",
+    statusColor: "#6B7280",
   },
   {
     title: "ARM Expansion via Pricing",
@@ -66,7 +66,7 @@ const priorities = [
       "Mobile-only tiers at sub-$5/mo",
       "Near-term ARM dilution; long-term pricing ladder opportunity",
     ],
-    status: "Expanding",
+    status: "Scaling",
     statusColor: "#16A34A",
   },
 ];
@@ -238,27 +238,74 @@ function StrategicPriorities() {
   );
 }
 
+/* Fixed chart domains — computed once across all standard scenarios so axis range
+   never shifts when the user switches Bear / Consensus / Bull / Custom.          */
+const _aggH = qs => ({
+  rev:      +(qs.reduce((s, q) => s + q.rev,      0)).toFixed(1),
+  netAdds:  +(qs.reduce((s, q) => s + q.netAdds,  0)).toFixed(1),
+});
+const _aggF = qs => ({
+  rev:      +(qs.reduce((s, q) => s + q.revenue,  0)).toFixed(1),
+  netAdds:  +(qs.reduce((s, q) => s + q.netAdds,  0)).toFixed(1),
+});
+const _domainRevs     = [];
+const _domainNetAdds  = [];
+[HISTORICAL.slice(0,4), HISTORICAL.slice(4,8), HISTORICAL.slice(8,12)].forEach(qs => {
+  const d = _aggH(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
+});
+["bear","consensus","bull"].forEach(sc => {
+  const f = getForecast(sc);
+  [f.slice(0,4), f.slice(4,8)].forEach(qs => {
+    const d = _aggF(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
+  });
+});
+const FY_REV_DOMAIN   = [0, Math.ceil(Math.max(..._domainRevs)    * 1.12 / 5) * 5];
+const FY_ADDS_DOMAIN  = [0, Math.ceil(Math.max(..._domainNetAdds) * 1.15 / 5) * 5];
+
 function FinancialOutlook() {
   const { scenario, setScenario, customDrivers } = useNetflix();
-  const isCustom = scenario === "custom";
-  const drivers  = isCustom
-    ? { ...SCENARIOS.consensus, ...customDrivers }
-    : SCENARIOS[scenario] ?? SCENARIOS.consensus;
-  const m        = getScenarioMetrics(drivers, isCustom);
-  const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.consensus;
-  const label    = SCENARIO_LABELS[scenario] ?? "Consensus";
 
-  const rows = [
-    { metric: "Annual Revenue ($B)",         fy25: "$45.2B",  fy26: `$${m.rev26}B`,             fy27: `$${m.rev27}B`             },
-    { metric: "End-Period Paid Members (M)", fy25: "332M",    fy26: `${m.subs26.toFixed(0)}M`,  fy27: `${m.subs27.toFixed(0)}M`  },
-    { metric: "Annual Paid Net Adds (M)",    fy25: "+30M",    fy26: `+${m.netAdds26}M`,         fy27: `+${m.netAdds27}M`         },
-    { metric: "Avg ARM ($/month)\u2020",       fy25: "$12.23",  fy26: `$${m.arm26}`,              fy27: `$${m.arm27}`              },
-    { metric: "Monthly Churn Rate",          fy25: "2.0%",    fy26: `${m.churn26.toFixed(1)}%`, fy27: `${m.churn27.toFixed(1)}%` },
+  const forecast = scenario === "custom"
+    ? buildForecast(START.subs, START.arm,
+        customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart, QUARTERS,
+        customDrivers.netAddsEnd,   customDrivers.armGrowthEnd,   customDrivers.churnEnd, true)
+    : getForecast(scenario);
+
+  const agg = (qs, isHist) => {
+    const rev     = +(qs.reduce((s, q) => s + (isHist ? q.rev : q.revenue), 0)).toFixed(1);
+    const members = +qs[3].subs.toFixed(0);
+    const arm     = +qs[3].arm.toFixed(2);
+    const netAdds = +(qs.reduce((s, q) => s + q.netAdds, 0)).toFixed(1);
+    const churn   = +qs.reduce((s, q) => s + q.churn, 0).toFixed(2) / qs.length;
+    return { rev, members, arm, netAdds, churn: +churn.toFixed(2) };
+  };
+
+  const years = [
+    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true) },
+    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true) },
+    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true) },
+    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false) },
+    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false) },
+  ].map((y, i, arr) => ({
+    ...y,
+    revGrowth: i > 0 ? +((y.rev / arr[i - 1].rev - 1) * 100).toFixed(1) : null,
+  }));
+
+  const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.consensus;
+  const ttStyle  = { fontFamily: "'Outfit', sans-serif", fontSize: 12 };
+
+  const metrics = [
+    { label: "Revenue ($B)",      fmt: y => `$${y.rev.toFixed(1)}B` },
+    { label: "YoY Growth",        fmt: y => y.revGrowth != null ? `${y.revGrowth > 0 ? "+" : ""}${y.revGrowth}%` : "—" },
+    { label: "Members (M)",       fmt: y => `${y.members}M` },
+    { label: "ARM ($/mo)\u2020",  fmt: y => `$${y.arm.toFixed(2)}` },
+    { label: "Net Adds (M)",      fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
+    { label: "Avg Churn (%/mo)",  fmt: y => `${y.churn.toFixed(2)}%` },
   ];
 
   return (
     <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
-      {/* Scenario selector + sync badge */}
+      {/* Scenario selector */}
       <div style={{ background: LIGHT, padding: "10px 20px", borderBottom: `1px solid ${GRID}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
         <div style={{ display: "flex", gap: 6 }}>
           {["bear","consensus","bull","custom"].map(key => {
@@ -279,144 +326,57 @@ function FinancialOutlook() {
         </span>
       </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "'Outfit', sans-serif" }}>
-          <thead>
-            <tr>
-              {[
-                { label: "Metric",             bg: "#F4F5F8", color: NAVY,  center: false },
-                { label: "FY2025A",            bg: "#F4F5F8", color: MUTED, center: true  },
-                { label: `FY2026E (${label})`, bg: col,       color: "#fff", center: true },
-                { label: `FY2027E (${label})`, bg: col,       color: "#fff", center: true },
-              ].map((h, i) => (
-                <th key={i} style={{ padding: "11px 16px", textAlign: h.center ? "center" : "left", background: h.bg, color: h.color, fontWeight: 600, borderBottom: `2px solid ${NF}`, whiteSpace: "nowrap" }}>
-                  {h.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, ri) => (
-              <tr key={row.metric} style={{ background: ri % 2 === 0 ? "#FAFAFA" : "#fff" }}>
-                <td style={{ padding: "11px 16px", fontWeight: 600, color: NAVY }}>{row.metric}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", color: NAVY, fontWeight: 700 }}>{row.fy25}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy26 ? col : MUTED }}>{row.fy26 ?? "N/A"}</td>
-                <td style={{ padding: "11px 16px", textAlign: "center", fontWeight: 700, color: row.fy27 ? col : MUTED }}>{row.fy27 ?? "N/A"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
-        <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.6 }}>
-          Driver-based model. Change scenario above; numbers update automatically. Not financial guidance.
-        </p>
-        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
-          &#8224; ARM FY2025A shows Q4'25 exit rate ($12.23/mo), the model's starting input; FY2025 annual avg was $11.84. Bear FY2026E avg ARM of ~$12.28 implies ~0.4% growth above the starting rate, consistent with the 0.5&#8211;1.5%/yr Bear assumption.
-        </p>
-        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
-          FY2026&#8594;27E ~14% revenue growth: ~9% paid member growth + ~4% ARM lift. Ad-tier CPM monetization contributes an estimated +$1.5&#8211;2.5B by FY2027 (eMarketer streaming ad revenue forecast; Wells Fargo equity research), embedded in the ARM growth assumption. Password-sharing tailwind largely exhausted; incremental growth is ad-tier and international-led.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   FY SUMMARY TABLE + CHARTS
-   ═══════════════════════════════════════════════════════════════ */
-const SC_COLORS_FY = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
-
-function FYSummaryTable() {
-  const { scenario, customDrivers } = useNetflix();
-
-  const forecast = scenario === "custom"
-    ? buildForecast(START.subs, START.arm,
-        customDrivers.netAddsStart, customDrivers.armGrowthStart, customDrivers.churnStart, QUARTERS,
-        customDrivers.netAddsEnd,   customDrivers.armGrowthEnd,   customDrivers.churnEnd, true)
-    : getForecast(scenario);
-
-  const agg = (qs, isHist) => {
-    const rev     = +(qs.reduce((s, q) => s + (isHist ? q.rev : q.revenue), 0)).toFixed(1);
-    const members = +qs[3].subs.toFixed(0);
-    const arm     = +qs[3].arm.toFixed(2);
-    const netAdds = +(qs.reduce((s, q) => s + q.netAdds, 0)).toFixed(1);
-    return { rev, members, arm, netAdds };
-  };
-
-  const years = [
-    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true) },
-    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true) },
-    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true) },
-    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false) },
-    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false) },
-  ].map((y, i, arr) => ({
-    ...y,
-    revGrowth: i > 0 ? +((y.rev / arr[i - 1].rev - 1) * 100).toFixed(1) : null,
-  }));
-
-  const fColor = SC_COLORS_FY[scenario] || SC_COLORS_FY.consensus;
-  const ttStyle = { fontFamily: "'Outfit', sans-serif", fontSize: 12 };
-
-  const metrics = [
-    { label: "Revenue ($B)", fmt: y => `$${y.rev.toFixed(1)}B` },
-    { label: "YoY Growth",   fmt: y => y.revGrowth != null ? `${y.revGrowth > 0 ? "+" : ""}${y.revGrowth}%` : "—" },
-    { label: "Members (M)",  fmt: y => `${y.members}M` },
-    { label: "ARM ($/mo)",   fmt: y => `$${y.arm.toFixed(2)}` },
-    { label: "Net Adds (M)", fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
-  ];
-
-  return (
-    <div style={{ marginBottom: 28 }}>
-      {/* Charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-        <div style={{ background: "#fff", borderRadius: 10, padding: "16px 12px 8px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+      {/* Bar charts */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 20px" }}>
+        <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: NAVY, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Annual Revenue ($B)</div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={years} barCategoryGap="30%">
               <CartesianGrid vertical={false} stroke={GRID} />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}B`} />
+              <YAxis domain={FY_REV_DOMAIN} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}B`} />
               <Tooltip contentStyle={ttStyle} formatter={v => [`$${v.toFixed(1)}B`, "Revenue"]} />
               <Bar dataKey="rev" radius={[4, 4, 0, 0]}>
-                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? fColor : NF} opacity={y.isForecast ? 0.75 : 1} />)}
+                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? col : NF} opacity={y.isForecast ? 0.75 : 1} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
-
-        <div style={{ background: "#fff", borderRadius: 10, padding: "16px 12px 8px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: NAVY, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Annual Net Adds (M)</div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={years} barCategoryGap="30%">
               <CartesianGrid vertical={false} stroke={GRID} />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}M`} />
+              <YAxis domain={FY_ADDS_DOMAIN} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}M`} />
               <Tooltip contentStyle={ttStyle} formatter={v => [`${v > 0 ? "+" : ""}${v.toFixed(1)}M`, "Net Adds"]} />
               <Bar dataKey="netAdds" radius={[4, 4, 0, 0]}>
-                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? fColor : NF} opacity={y.isForecast ? 0.75 : 1} />)}
+                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? col : NF} opacity={y.isForecast ? 0.75 : 1} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Table */}
-      <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
+      {/* Metrics table */}
+      <div style={{ borderTop: `1px solid ${GRID}` }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif", tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "20%" }} />
+            {years.map(y => <col key={y.label} style={{ width: "16%" }} />)}
+          </colgroup>
           <thead>
             <tr style={{ background: LIGHT }}>
-              <th style={{ padding: "10px 16px", textAlign: "left", color: NAVY, fontWeight: 600, borderBottom: `2px solid ${NF}`, width: "22%" }}>Metric</th>
+              <th style={{ padding: "10px 16px", textAlign: "left", color: NAVY, fontWeight: 600, borderBottom: `2px solid ${NF}` }}>Metric</th>
               {years.map(y => (
                 <th key={y.label} style={{
                   padding: "10px 16px", textAlign: "center", fontWeight: 700,
-                  borderBottom: `2px solid ${y.isForecast ? fColor : NF}`,
-                  color: y.isForecast ? fColor : NAVY,
-                  background: y.isForecast ? `${fColor}08` : LIGHT,
+                  borderBottom: `2px solid ${y.isForecast ? col : NF}`,
+                  color: y.isForecast ? col : NAVY,
+                  background: y.isForecast ? `${col}08` : LIGHT,
                 }}>
                   {y.label}
-                  {y.isForecast && <span style={{ display: "block", fontSize: 9, fontWeight: 500, color: fColor, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 1 }}>{scenario}</span>}
+                  {y.isForecast && <span style={{ display: "block", fontSize: 9, fontWeight: 500, color: col, letterSpacing: 0.5, textTransform: "uppercase", marginTop: 1 }}>{scenario}</span>}
                 </th>
               ))}
             </tr>
@@ -431,9 +391,9 @@ function FYSummaryTable() {
                   return (
                     <td key={yi} style={{
                       padding: "9px 16px", textAlign: "center",
-                      color: y.isForecast ? (isGrowth ? growthColor : fColor) : (isGrowth ? growthColor : NAVY),
+                      color: y.isForecast ? (isGrowth ? growthColor : col) : (isGrowth ? growthColor : NAVY),
                       fontWeight: y.isForecast ? 600 : 400,
-                      background: y.isForecast ? `${fColor}05` : undefined,
+                      background: y.isForecast ? `${col}05` : undefined,
                     }}>
                       {m.fmt(y)}
                     </td>
@@ -443,9 +403,18 @@ function FYSummaryTable() {
             ))}
           </tbody>
         </table>
-        <div style={{ padding: "8px 16px", fontSize: 10, color: MUTED, borderTop: `1px solid ${GRID}` }}>
-          Actuals: Netflix shareholder letters. Q2–Q4 2025 members estimated. Forecast: {scenario} scenario.
-        </div>
+      </div>
+
+      <div style={{ padding: "14px 20px", borderTop: `1px solid ${GRID}`, background: LIGHT }}>
+        <p style={{ fontSize: 11, color: MUTED, margin: 0, lineHeight: 1.6 }}>
+          Driver-based model. Change scenario above; charts and table update automatically. Not financial guidance.
+        </p>
+        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
+          &#8224; ARM FY2025A shows Q4'25 exit rate ($12.23/mo), the model's starting input; FY2025 annual avg was $11.84. Bear FY2026E avg ARM of ~$12.28 implies ~0.4% growth above the starting rate, consistent with the 0.5&#8211;1.5%/yr Bear assumption.
+        </p>
+        <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
+          FY2026&#8594;27E ~14% revenue growth: ~9% paid member growth + ~4% ARM lift. Ad-tier CPM monetization contributes an estimated +$1.5&#8211;2.5B by FY2027, embedded in the ARM growth assumption. Password-sharing tailwind largely exhausted; growth is ad-tier and international-led.
+        </p>
       </div>
     </div>
   );
@@ -482,9 +451,6 @@ export default function NetflixBoardReport() {
 
       {/* Body */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 48px 48px" }}>
-
-        <SectionHeading title="FY Historical & Forecast Summary" />
-        <FYSummaryTable />
 
         <SectionHeading title="Performance & Financial Outlook" />
         <FinancialOutlook />

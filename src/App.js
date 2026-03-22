@@ -166,7 +166,7 @@ const CONNECTOR_LABELS = [
 function NetflixWorkflow() {
   const [hovered, setHovered] = useState(null);
   return (
-    <section style={{ background: "#060E1A", padding: "64px 56px", borderTop: "1px solid rgba(201,168,76,0.10)" }}>
+    <section style={{ background: "#060E1A", padding: "clamp(40px, 6vw, 64px) clamp(16px, 5vw, 56px)", borderTop: "1px solid rgba(201,168,76,0.10)" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
@@ -183,7 +183,7 @@ function NetflixWorkflow() {
         </div>
 
         {/* Flow */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 112px 1fr 112px 1fr", alignItems: "stretch" }}>
+        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 112px 1fr 112px 1fr", alignItems: "stretch" }}>
 
           {WORKFLOW_NODES.map((node, i) => (
             <div key={node.id} style={{ display: "contents" }}>
@@ -221,7 +221,7 @@ function NetflixWorkflow() {
 
               {/* Connector (between cards only) */}
               {i < WORKFLOW_NODES.length - 1 && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
+                <div className="rsp-wf-conn" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
                   {/* Arrow line */}
                   <div style={{ width: "100%", display: "flex", alignItems: "center", marginBottom: 10 }}>
                     <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.3)" }} />
@@ -518,7 +518,7 @@ function ContactModal({ onClose }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div className="rsp-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: "#9BA3B8", display: "block", marginBottom: 6 }}>Name *</label>
                   <input
@@ -932,6 +932,13 @@ export default function App() {
         .d2 { animation-delay: 0.25s; opacity: 0; }
         .d3 { animation-delay: 0.4s; opacity: 0; }
         .d4 { animation-delay: 0.55s; opacity: 0; }
+        @media (max-width: 640px) {
+          .rsp-nav-text   { display: none !important; }
+          .rsp-nav-right  { gap: 16px !important; }
+          .rsp-wf-grid    { grid-template-columns: 1fr !important; }
+          .rsp-wf-conn    { display: none !important; }
+          .rsp-form-grid  { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* ── NAV ── */}
@@ -940,7 +947,7 @@ export default function App() {
         background: "rgba(11,22,40,0.97)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(201,168,76,0.15)",
-        padding: "0 56px", height: 64,
+        padding: "0 clamp(16px, 4vw, 56px)", height: 64,
         display: "flex", alignItems: "center", justifyContent: "space-between",
         transition: "all 0.3s ease",
       }}>
@@ -964,7 +971,7 @@ export default function App() {
         </div>
 
         {/* Right: Contact links */}
-        <div style={{ display: "flex", gap: 20, alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
+        <div className="rsp-nav-right" style={{ display: "flex", gap: 20, alignItems: "center", flex: 1, justifyContent: "flex-end" }}>
           <a href="https://www.linkedin.com/in/sidhurajveer/" target="_blank" rel="noreferrer"
             style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none", fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", transition: "color 0.2s", display: "flex", alignItems: "center", gap: 6 }}
             onMouseEnter={e => { e.currentTarget.style.color = "#C9A84C"; e.currentTarget.querySelector("svg").style.fill = "#C9A84C"; }}
@@ -973,7 +980,7 @@ export default function App() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)" style={{ transition: "fill 0.2s", flexShrink: 0 }}>
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
-            LinkedIn
+            <span className="rsp-nav-text">LinkedIn</span>
           </a>
           <button
             onClick={() => setShowResume(true)}
@@ -985,13 +992,13 @@ export default function App() {
             }}
             onMouseEnter={e => e.currentTarget.style.color = "#C9A84C"}
             onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
-          >📄 Resume</button>
+          >📄 <span className="rsp-nav-text">Resume</span></button>
           <button
             onClick={() => setShowContact(true)}
             style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6, padding: 0, transition: "color 0.2s" }}
             onMouseEnter={e => e.currentTarget.style.color = "#C9A84C"}
             onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.5)"}
-          >✉️ Contact</button>
+          >✉️ <span className="rsp-nav-text">Contact</span></button>
         </div>
       </nav>
 
@@ -1031,7 +1038,7 @@ export default function App() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ padding: "96px 56px", background: "#F8F6F1" }}>
+      <section id="about" style={{ padding: "clamp(48px, 8vw, 96px) clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto" }}>
             <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 24 }}>
@@ -1293,7 +1300,7 @@ export default function App() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: "#060E1A", padding: "20px 56px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(201,168,76,0.08)" }}>
+      <footer style={{ background: "#060E1A", padding: "20px clamp(16px, 4vw, 56px)", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(201,168,76,0.08)" }}>
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", margin: 0 }}>© 2026 Rajveer Sidhu · All Rights Reserved</p>
       </footer>
 
