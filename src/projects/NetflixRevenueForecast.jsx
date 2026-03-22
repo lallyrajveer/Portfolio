@@ -458,11 +458,11 @@ function SensitivityTab() {
       // which produces zero or near-zero deltas even though churn materially affects subscriber counts.
       baseOverride: churnSensBaseResult,
       rows: [
-        { label: "Very low",  val: 1.8  },
-        { label: "Low",       val: 2.05 },
+        { label: "Very low",  val: 1.5  },
+        { label: "Low",       val: 1.8  },
         { label: "Base",      val: baseChurn, isBase: true },
-        { label: "Elevated",  val: 2.55 },
-        { label: "High",      val: 2.8  },
+        { label: "Elevated",  val: 2.6  },
+        { label: "High",      val: 3.0  },
       ],
       getFn: val => computeRevChurnSensitivity(val),
       fmt: v => v.toFixed(2) + "%/mo",
