@@ -1253,7 +1253,7 @@ export default function App() {
       <NetflixWorkflow />
 
       {/* ── GOOGLE CLOUD WORKFLOW ── */}
-      <GoogleCloudWorkflow />
+      {false && <GoogleCloudWorkflow />}
 
       {/* ── ALL PROJECTS ── */}
       <section id="projects" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>
