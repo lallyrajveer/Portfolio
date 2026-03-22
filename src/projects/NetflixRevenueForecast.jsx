@@ -319,6 +319,9 @@ function ScenarioTab() {
             ? "gross adds fixed; net adds = gross adds − churn losses."
             : "net adds fixed; gross adds = net adds + churn losses (CAC driver only)."}
         </p>
+        <p style={{ fontSize: 11, color: C.muted, marginTop: 6, lineHeight: 1.5 }}>
+          <strong style={{ color: C.navy }}>† Q3'24:</strong> −19.3M churn losses are the period high but mathematically consistent (2.30% × ~280M subs × 3 months). Driven by a thin post-strike content slate and UCAN price restructuring; normalized to 1.80% in Q4'24 with Squid Game S2 and NFL Christmas.
+        </p>
       </div>
 
       {/* Scenario Assumptions Rationale */}
@@ -343,7 +346,7 @@ function ScenarioTab() {
               bg: "#EFF6FF",
               border: "#BFDBFE",
               drivers: [
-                { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). Ad-tier and international growth (MENA, SEA, LatAm) are the primary acquisition engines.", "Sports content (NFL Christmas, WWE Raw) adds periodic spikes and reduces off-season churn."] },
+                { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). The +2M/Q ramp is sourced as follows: ~1M/Q from ad-tier acquisition growth (ad tier was 40% of new sign-ups in ad-available markets per Netflix Q4'24; scaling gross adds on a larger base adds ~1M/Q by FY2027); ~0.8M/Q from APAC/MENA mobile-tier expansion (APAC at <10% penetration in a 500M+ broadband-HH market); ~0.2M/Q residual from FIFA World Cup 2026 host-market spikes absorbed into the H2'26 ramp.", "Password-sharing tailwind is assumed exhausted by Q1'26. Sports content (NFL Christmas, WWE Raw) reduces off-season churn but is not credited as a net-adds driver."] },
                 { name: "ARM  3.0→5.0%/yr",   points: ["Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures.", "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth."] },
                 { name: "Churn  2.2→1.9%/mo", points: ["Modest improvement as sports content builds weekly viewing habits (Antenna: churn 30–40% lower in live-sports months).", "Ad-tier price floor ($7.99/mo) reduces cancellations; subscribers downgrade rather than leave."] },
               ],
@@ -388,34 +391,48 @@ function ScenarioTab() {
    ══════════════════════════════════════════════════════════════ */
 function SensitivityTab() {
   const sc = SCENARIOS.consensus;
-
-  const baseNetAdds   = (sc.netAddsStart  + sc.netAddsEnd)  / 2;
-  const baseArmGrowth = (sc.armGrowthStart + sc.armGrowthEnd) / 2;
-  const baseChurn     = (sc.churnStart    + sc.churnEnd)    / 2;
-  const n             = QUARTERS.length;
+  const n  = QUARTERS.length;
 
   const toRev = fc => ({ fy26: +getFY(fc, 2026).toFixed(3), fy27: +getFY(fc, 2027).toFixed(3) });
 
-  // Net Adds sensitivity: flat netAdds tested, Consensus ramp held for ARM + Churn
-  const computeNetAddsSens = val =>
-    toRev(buildForecast(START.subs, START.arm,
-      val, sc.armGrowthStart, sc.churnStart, QUARTERS,
-      val, sc.armGrowthEnd,   sc.churnEnd));
-
-  // ARM sensitivity: flat armGrowth tested, Consensus ramp held for Net Adds + Churn
-  const computeArmSens = val =>
-    toRev(buildForecast(START.subs, START.arm,
-      sc.netAddsStart, val, sc.churnStart, QUARTERS,
-      sc.netAddsEnd,   val, sc.churnEnd));
-
-  // Churn sensitivity: gross adds fixed from full Consensus forecast; flat churnRate tested;
-  // Consensus ramp held for ARM growth across each quarter
+  // Full Consensus ramp forecast — used as base for all three sensitivity tables
   const consForecast = buildForecast(START.subs, START.arm,
     sc.netAddsStart, sc.armGrowthStart, sc.churnStart, QUARTERS,
     sc.netAddsEnd,   sc.armGrowthEnd,   sc.churnEnd);
-  const computeChurnSens = churnRate => {
-    let subs = START.subs;
-    let arm  = START.arm;
+
+  // ── Net Adds ──────────────────────────────────────────────────────────
+  // Flat val applied each quarter; ARM + Churn held on Consensus ramp
+  const getNetAddsSens = val => {
+    const fc = buildForecast(START.subs, START.arm,
+      val, sc.armGrowthStart, sc.churnStart, QUARTERS,
+      val, sc.armGrowthEnd,   sc.churnEnd);
+    const drv = (val * 4).toFixed(1) + "M/yr";
+    return { ...toRev(fc), drv26: drv, drv27: drv };
+  };
+  const baseNetAdds = {
+    ...toRev(consForecast),
+    drv26: consForecast.slice(0, 4).reduce((s, q) => s + q.netAdds, 0).toFixed(1) + "M/yr",
+    drv27: consForecast.slice(4, 8).reduce((s, q) => s + q.netAdds, 0).toFixed(1) + "M/yr",
+  };
+
+  // ── ARM Growth ────────────────────────────────────────────────────────
+  // Flat armGrowth% applied; Net Adds + Churn held on Consensus ramp
+  const getArmSens = val => {
+    const fc = buildForecast(START.subs, START.arm,
+      sc.netAddsStart, val, sc.churnStart, QUARTERS,
+      sc.netAddsEnd,   val, sc.churnEnd);
+    return { ...toRev(fc), drv26: "$" + fc[3].arm.toFixed(2) + "/mo", drv27: "$" + fc[7].arm.toFixed(2) + "/mo" };
+  };
+  const baseArm = {
+    ...toRev(consForecast),
+    drv26: "$" + consForecast[3].arm.toFixed(2) + "/mo",
+    drv27: "$" + consForecast[7].arm.toFixed(2) + "/mo",
+  };
+
+  // ── Churn Rate ────────────────────────────────────────────────────────
+  // Gross adds fixed from Consensus forecast; flat churnRate tested; ARM on Consensus ramp
+  const getChurnSens = churnRate => {
+    let subs = START.subs, arm = START.arm;
     const revs = [];
     for (let qi = 0; qi < n; qi++) {
       const grossAdds   = consForecast[qi].grossAdds;
@@ -428,51 +445,34 @@ function SensitivityTab() {
       revs.push(+(avgSubs * arm * 3 / 1000).toFixed(2));
       subs = endSubs;
     }
+    const drv = churnRate.toFixed(2) + "%/mo";
     return {
       fy26: +revs.slice(0, 4).reduce((s, v) => s + v, 0).toFixed(3),
       fy27: +revs.slice(4, 8).reduce((s, v) => s + v, 0).toFixed(3),
+      drv26: drv, drv27: drv,
     };
+  };
+  const baseChurn = {
+    ...toRev(consForecast),
+    drv26: (+(consForecast.slice(0, 4).reduce((s, q) => s + q.churn, 0).toFixed(2)) / 4).toFixed(2) + "%/mo",
+    drv27: (+(consForecast.slice(4, 8).reduce((s, q) => s + q.churn, 0).toFixed(2)) / 4).toFixed(2) + "%/mo",
   };
 
   const drivers = [
     {
-      label: "Net Adds/Q", key: "netAdds", baseVal: baseNetAdds,
-      baseOverride: computeNetAddsSens(baseNetAdds),
-      rows: [
-        { label: "Bear floor",   val: 2.0  },
-        { label: "Low",          val: 4.0  },
-        { label: "Base",         val: baseNetAdds, isBase: true },
-        { label: "High",         val: 12.0 },
-        { label: "Bull ceiling", val: 14.0 },
-      ],
-      getFn: computeNetAddsSens,
-      fmt: v => (v * 4).toFixed(0) + "M/yr",
+      label: "Net Adds", key: "netAdds", baseRes: baseNetAdds,
+      rows: [{ val: 2.0 }, { val: 4.0 }, { isBase: true }, { val: 12.0 }, { val: 14.0 }],
+      getFn: getNetAddsSens,
     },
     {
-      label: "ARM Growth (Q4'27 implied)", key: "armGrowth", baseVal: baseArmGrowth,
-      baseOverride: computeArmSens(baseArmGrowth),
-      rows: [
-        { label: "Price-hike pause",  val: 0.0  },
-        { label: "Modest",            val: 1.5  },
-        { label: "Base",              val: baseArmGrowth, isBase: true },
-        { label: "Strong hikes",      val: 4.5  },
-        { label: "Aggressive cycle",  val: 6.0  },
-      ],
-      getFn: computeArmSens,
-      fmt: v => `$${(START.arm * Math.pow(1 + v / 400, 8)).toFixed(2)}/mo`,
+      label: "ARM", key: "armGrowth", baseRes: baseArm,
+      rows: [{ val: 0.0 }, { val: 1.5 }, { isBase: true }, { val: 4.5 }, { val: 6.0 }],
+      getFn: getArmSens,
     },
     {
-      label: "Churn Rate", key: "churn", baseVal: baseChurn,
-      baseOverride: computeChurnSens(baseChurn),
-      rows: [
-        { label: "Very low",  val: 1.5  },
-        { label: "Low",       val: 1.8  },
-        { label: "Base",      val: baseChurn, isBase: true },
-        { label: "Elevated",  val: 2.6  },
-        { label: "High",      val: 3.0  },
-      ],
-      getFn: computeChurnSens,
-      fmt: v => v.toFixed(2) + "%/mo",
+      label: "Churn Rate", key: "churn", baseRes: baseChurn,
+      rows: [{ val: 1.5 }, { val: 1.8 }, { isBase: true }, { val: 2.6 }, { val: 3.0 }],
+      getFn: getChurnSens,
     },
   ];
 
@@ -482,19 +482,34 @@ function SensitivityTab() {
         <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, color: C.navy, margin: "0 0 16px" }}>
           Driver Sensitivity Tables
         </h4>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, fontFamily: "'Outfit', sans-serif", tableLayout: "fixed" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "'Outfit', sans-serif", tableLayout: "fixed" }}>
           <colgroup>
-            <col style={{ width: "14%" }} />
-            <col style={{ width: "14%" }} />
-            <col style={{ width: "18%" }} />
-            <col style={{ width: "18%" }} />
-            <col style={{ width: "18%" }} />
-            <col style={{ width: "18%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
+            <col style={{ width: "12.5%" }} />
           </colgroup>
           <thead>
             <tr>
-              {["Variation","Driver Value","FY2026E Rev ($B)","FY2027E Rev ($B)","vs Base ($B)","vs Base (%)"].map((h, i) => (
-                <th key={h} style={{ padding: "8px 12px", textAlign: i < 2 ? "left" : "center", background: "#F8F9FA", color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}`, whiteSpace: "nowrap" }}>{h}</th>
+              <th colSpan={4} style={{ padding: "6px 12px", textAlign: "center", background: "#EFF6FF", color: C.navy, fontWeight: 700, borderBottom: `2px solid ${C.NF}`, borderRight: `2px solid ${C.grid}`, fontSize: 11 }}>FY 2026</th>
+              <th colSpan={4} style={{ padding: "6px 12px", textAlign: "center", background: "#F0FDF4", color: C.navy, fontWeight: 700, borderBottom: `2px solid ${C.NF}`, fontSize: 11 }}>FY 2027</th>
+            </tr>
+            <tr>
+              {[
+                { h: "2026 Driver",       left: true,  bg: "#EFF6FF" },
+                { h: "FY2026E Rev ($B)",  left: false, bg: "#EFF6FF" },
+                { h: "vs '26 Base ($B)",  left: false, bg: "#EFF6FF" },
+                { h: "vs '26 Base (%)",   left: false, bg: "#EFF6FF", border: true },
+                { h: "2027 Driver",       left: true,  bg: "#F0FDF4" },
+                { h: "FY2027E Rev ($B)",  left: false, bg: "#F0FDF4" },
+                { h: "vs '27 Base ($B)",  left: false, bg: "#F0FDF4" },
+                { h: "vs '27 Base (%)",   left: false, bg: "#F0FDF4" },
+              ].map(({ h, left, bg, border }) => (
+                <th key={h} style={{ padding: "7px 10px", textAlign: left ? "left" : "center", background: bg, color: C.navy, fontWeight: 600, borderBottom: `2px solid ${C.NF}`, borderRight: border ? `2px solid ${C.grid}` : undefined, whiteSpace: "nowrap", fontSize: 11 }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -502,28 +517,42 @@ function SensitivityTab() {
             {drivers.map((d, di) => (
               <>
                 <tr key={`header-${d.key}`}>
-                  <td colSpan={6} style={{ padding: "8px 12px", fontWeight: 700, fontSize: 11, color: C.NF, background: "#FFF5F5", borderTop: di > 0 ? `2px solid ${C.grid}` : undefined, letterSpacing: 0.3 }}>
-                    {d.label} Sensitivity
+                  <td colSpan={8} style={{ padding: "8px 12px", background: "#FFF5F5", borderTop: di > 0 ? `2px solid ${C.grid}` : undefined }}>
+                    <span style={{ fontWeight: 700, fontSize: 11, color: C.NF, letterSpacing: 0.3 }}>{d.label} Sensitivity</span>
+                    {d.key === "netAdds" && (
+                      <span style={{ marginLeft: 10, fontSize: 10, color: C.tick, fontWeight: 400 }}>
+                        Annual totals shown · ÷4 = per-quarter rate &nbsp;(e.g. 8M/yr = 2M/Q · Consensus ramp: 7→9M/Q)
+                      </span>
+                    )}
                   </td>
                 </tr>
-                {d.rows.map(row => {
-                  const isBase        = !!row.isBase;
-                  const effectiveBase = d.baseOverride;
-                  const res           = isBase ? effectiveBase : d.getFn(row.val);
-                  const deltaB        = +(res.fy26 - effectiveBase.fy26).toFixed(3);
-                  const deltaPct      = +((deltaB / effectiveBase.fy26) * 100).toFixed(2);
-                  const rowBg         = isBase ? "#FFFBEB" : deltaB > 0 ? "#F0FDF4" : deltaB < 0 ? "#FEF2F2" : "#fff";
+                {d.rows.map((row, ri) => {
+                  const isBase    = !!row.isBase;
+                  const res       = isBase ? d.baseRes : d.getFn(row.val);
+                  const db26      = +(res.fy26 - d.baseRes.fy26).toFixed(3);
+                  const dp26      = +((db26 / d.baseRes.fy26) * 100).toFixed(2);
+                  const db27      = +(res.fy27 - d.baseRes.fy27).toFixed(3);
+                  const dp27      = +((db27 / d.baseRes.fy27) * 100).toFixed(2);
+                  const rowBg     = isBase ? "#FFFBEB" : (db26 + db27) > 0 ? "#F0FDF4" : (db26 + db27) < 0 ? "#FEF2F2" : "#fff";
+                  const clr26     = isBase ? C.tick : db26 > 0 ? "#16a34a" : "#dc2626";
+                  const clr27     = isBase ? C.tick : db27 > 0 ? "#16a34a" : "#dc2626";
                   return (
-                    <tr key={`${d.key}-${row.label}`} style={{ background: rowBg }}>
-                      <td style={{ padding: "7px 12px", fontWeight: isBase ? 700 : 400, color: C.navy }}>{row.label}</td>
-                      <td style={{ padding: "7px 12px", color: C.tick }}>{d.fmt(row.val)}</td>
-                      <td style={{ padding: "7px 12px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
-                      <td style={{ padding: "7px 12px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
-                      <td style={{ padding: "7px 12px", textAlign: "center", color: isBase ? C.tick : deltaB > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
-                        {isBase ? "—" : `${deltaB >= 0 ? "+" : ""}$${deltaB.toFixed(3)}B`}
+                    <tr key={`${d.key}-${ri}`} style={{ background: rowBg }}>
+                      <td style={{ padding: "7px 10px", fontWeight: isBase ? 700 : 400, color: isBase ? C.navy : C.tick }}>{res.drv26}</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", fontWeight: isBase ? 700 : 400, color: C.navy }}>${res.fy26.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: clr26, fontWeight: isBase ? 400 : 600 }}>
+                        {isBase ? "—" : `${db26 >= 0 ? "+" : ""}$${db26.toFixed(3)}B`}
                       </td>
-                      <td style={{ padding: "7px 12px", textAlign: "center", color: isBase ? C.tick : deltaPct > 0 ? "#16a34a" : "#dc2626", fontWeight: isBase ? 400 : 600 }}>
-                        {isBase ? "—" : `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`}
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: clr26, fontWeight: isBase ? 400 : 600, borderRight: `2px solid ${C.grid}` }}>
+                        {isBase ? "—" : `${dp26 >= 0 ? "+" : ""}${dp26.toFixed(2)}%`}
+                      </td>
+                      <td style={{ padding: "7px 10px", color: C.tick }}>{res.drv27}</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: C.tick }}>${res.fy27.toFixed(2)}B</td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: clr27, fontWeight: isBase ? 400 : 600 }}>
+                        {isBase ? "—" : `${db27 >= 0 ? "+" : ""}$${db27.toFixed(3)}B`}
+                      </td>
+                      <td style={{ padding: "7px 10px", textAlign: "center", color: clr27, fontWeight: isBase ? 400 : 600 }}>
+                        {isBase ? "—" : `${dp27 >= 0 ? "+" : ""}${dp27.toFixed(2)}%`}
                       </td>
                     </tr>
                   );

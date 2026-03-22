@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Revenue Forecast</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #F8F9FA;
+      color: #0B1628;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px 48px; }
+
+    /* ── Header ─────────────────────────────────────────────── */
+    .header {
+      background: #0B1628;
+      padding: 24px 32px;
+      border-bottom: 3px solid #1D4ED8;
+      margin-bottom: 0;
+    }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-left .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #1D4ED8; margin-bottom: 6px; }
+    .header-left h1 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .header-left .subtitle { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .live-badge { font-size: 11px; font-weight: 700; color: #16a34a; background: rgba(22,163,74,0.15); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(22,163,74,0.3); white-space: nowrap; }
+
+    /* ── KPI Strip ──────────────────────────────────────────── */
+    .kpi-strip { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 16px 32px; }
+    .kpi-strip-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .kpi-card { padding: 14px 16px; border-radius: 10px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-top: 3px solid #1D4ED8; }
+    .kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6B7280; margin-bottom: 4px; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: #0B1628; line-height: 1; margin-bottom: 4px; }
+    .kpi-sub   { font-size: 11px; color: #9CA3AF; }
+
+    /* ── Section headings ───────────────────────────────────── */
+    .section { margin-top: 32px; }
+    .section-heading {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    }
+    .section-heading .bar { width: 4px; height: 22px; background: #1D4ED8; border-radius: 2px; flex-shrink: 0; }
+    .section-heading h2 { font-size: 20px; font-weight: 700; color: #0B1628; }
+    .section-heading .rule { flex: 1; height: 1px; background: #E5E7EB; }
+
+    /* ── Scenario sync row ──────────────────────────────────── */
+    .sync-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .sync-label { font-size: 11px; color: #9CA3AF; }
+    .pill {
+      padding: 4px 14px; border-radius: 20px; cursor: pointer;
+      border: 1.5px solid #E5E7EB; background: #fff;
+      color: #6B7280; font-size: 11px; font-weight: 500;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .pill.active-bear      { border-color: #DC2626; background: #DC2626; color: #fff; font-weight: 700; }
+    .pill.active-consensus { border-color: #1D4ED8; background: #1D4ED8; color: #fff; font-weight: 700; }
+    .pill.active-bull      { border-color: #16A34A; background: #16A34A; color: #fff; font-weight: 700; }
+    .pill.active-custom    { border-color: #7C3AED; background: #7C3AED; color: #fff; font-weight: 700; }
+
+    /* ── Scenario cards ─────────────────────────────────────── */
+    .scenario-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .sc-card {
+      background: #fff; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      cursor: pointer; transition: box-shadow 0.15s;
+    }
+    .sc-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+    .sc-card.selected { outline: 2px solid var(--sc-color); outline-offset: 2px; }
+    .sc-card-top { border-top: 3px solid var(--sc-color); padding: 12px 14px; }
+    .sc-card-name { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sc-color); margin-bottom: 8px; }
+    .sc-card-revs { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .sc-card-fy { }
+    .sc-card-fy-label { font-size: 10px; color: #9CA3AF; }
+    .sc-card-fy-val { font-size: 17px; font-weight: 700; color: #0B1628; line-height: 1.1; }
+    .sc-card-fy-val.right { text-align: right; }
+    .sc-card-drivers { font-size: 10px; color: #9CA3AF; border-top: 1px solid #E5E7EB; padding-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+
+    /* ── Info box ───────────────────────────────────────────── */
+    .info-box {
+      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 7px;
+      padding: 10px 16px; margin-bottom: 12px;
+      font-size: 12px; color: #1E40AF; line-height: 1.6;
+    }
+
+    /* ── Cards / panels ─────────────────────────────────────── */
+    .panel { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 16px; }
+    .panel-title { font-size: 14px; font-weight: 700; color: #0B1628; margin-bottom: 14px; }
+    .panel-subtitle { font-size: 11px; color: #9CA3AF; margin-top: 2px; font-weight: 400; }
+
+    /* ── Dual-range sliders ─────────────────────────────────── */
+    .slider-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .slider-wrap { }
+    .slider-label { font-size: 11px; font-weight: 600; color: #0B1628; margin-bottom: 10px; }
+    .slider-values { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 10px; color: #6B7280; }
+    .slider-values strong { color: #7C3AED; font-size: 11px; }
+    .slider-direction { font-size: 12px; font-weight: 700; }
+    .dual-range { position: relative; height: 20px; }
+    .dual-range input[type=range] {
+      position: absolute; width: 100%; top: 50%;
+      margin: 0; height: 0; background: transparent;
+      appearance: none; -webkit-appearance: none; pointer-events: none;
+    }
+    .dual-range input[type=range]::-webkit-slider-thumb {
+      appearance: none; -webkit-appearance: none; pointer-events: all; cursor: grab;
+      width: 15px; height: 15px; border-radius: 50%;
+      background: #7C3AED; border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(124,58,237,0.4);
+    }
+    .dual-range input[type=range]:active::-webkit-slider-thumb { cursor: grabbing; }
+    .dual-range input[type=range]::-moz-range-thumb {
+      pointer-events: all; cursor: grab; width: 15px; height: 15px;
+      border-radius: 50%; background: #7C3AED; border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(124,58,237,0.4); border: none;
+    }
+    .dual-range .track-bg {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 100%; height: 4px; background: #E5E7EB; border-radius: 2px;
+    }
+    .dual-range .track-fill {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      height: 4px; background: #7C3AED; border-radius: 2px;
+      pointer-events: none;
+    }
+    .slider-minmax { display: flex; justify-content: space-between; font-size: 9px; color: #D1D5DB; margin-top: 3px; }
+    .slider-reset-row { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .btn-ghost {
+      padding: 5px 14px; border-radius: 20px; border: 1.5px solid #7C3AED;
+      background: transparent; color: #7C3AED; font-size: 11px;
+      cursor: pointer; font-weight: 600; font-family: inherit;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover { background: #7C3AED; color: #fff; }
+
+    /* ── Charts ─────────────────────────────────────────────── */
+    .chart-wrap { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); margin-bottom: 16px; }
+    .chart-title { font-size: 14px; font-weight: 700; color: #0B1628; margin-bottom: 16px; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+    /* ── Tables ─────────────────────────────────────────────── */
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: inherit; }
+    table.fixed { table-layout: fixed; }
+    th { padding: 8px 10px; background: #F4F5F8; color: #0B1628; font-weight: 600; border-bottom: 2px solid #E5E7EB; white-space: nowrap; text-align: left; }
+    th.center { text-align: center; }
+    td { padding: 7px 10px; border-bottom: 1px solid #F3F4F6; }
+    td.center { text-align: center; }
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #F9FAFB; }
+    .table-note { font-size: 10px; color: #9CA3AF; margin-top: 8px; line-height: 1.5; }
+
+    /* ── Sensitivity table specifics ────────────────────────── */
+    .sens-section-row td { font-weight: 700; font-size: 11px; color: #1D4ED8; background: #EFF6FF !important; letter-spacing: 0.3px; }
+    tr.base-row td { background: #FFFBEB !important; }
+    tr.up-row  td { background: #F0FDF4 !important; }
+    tr.dn-row  td { background: #FEF2F2 !important; }
+
+    /* ── Bridge table specifics ─────────────────────────────── */
+    .bridge-table th.fore { color: var(--sc-color, #1D4ED8); background: #EFF6FF; border-bottom-color: var(--sc-color, #1D4ED8); }
+    .bridge-table td.fore { color: var(--sc-color, #1D4ED8); font-weight: 600; }
+
+    /* ── FY Summary table ───────────────────────────────────── */
+    .fy-table th.forecast-col { color: var(--sc-color, #1D4ED8); background: rgba(29,78,216,0.05); border-bottom-color: var(--sc-color, #1D4ED8); }
+    .fy-table td.forecast-col { color: var(--sc-color, #1D4ED8); font-weight: 600; background: rgba(29,78,216,0.03); }
+    .fy-table td.growth-pos { color: #16A34A; font-weight: 600; }
+    .fy-table td.growth-neg { color: #DC2626; font-weight: 600; }
+
+    /* ── Collapsible sections ───────────────────────────────── */
+    .collapsible-header {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+      padding: 14px 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      margin-bottom: 4px;
+    }
+    .collapsible-header.open { border-radius: 10px 10px 0 0; margin-bottom: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+    .collapsible-title { font-size: 14px; font-weight: 700; color: #0B1628; }
+    .collapsible-arrow { font-size: 12px; color: #9CA3AF; transition: transform 0.2s; }
+    .collapsible-arrow.open { transform: rotate(180deg); }
+    .collapsible-body { background: #fff; border-radius: 0 0 10px 10px; padding: 0 20px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px; display: none; }
+    .collapsible-body.open { display: block; }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    .footer { background: #0B1628; padding: 16px 32px; margin-top: 48px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; font-size: 11px; color: rgba(255,255,255,0.25); }
+
+    /* ── Loading state ──────────────────────────────────────── */
+    #loading { display: flex; align-items: center; justify-content: center; height: 300px; color: #9CA3AF; font-size: 14px; }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .kpi-strip-inner    { grid-template-columns: repeat(2, 1fr); }
+      .scenario-cards     { grid-template-columns: repeat(2, 1fr); }
+      .slider-grid        { grid-template-columns: 1fr; }
+      .chart-grid         { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .page-wrap          { padding: 0 16px 32px; }
+      .kpi-strip          { padding: 16px; }
+      .kpi-strip-inner    { grid-template-columns: repeat(2, 1fr); }
+      .scenario-cards     { grid-template-columns: 1fr 1fr; }
+      .header             { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="eyebrow" id="hdr-eyebrow">Revenue Forecast</div>
+      <h1 id="hdr-title">Loading…</h1>
+      <div class="subtitle" id="hdr-subtitle">Driver-Based Model · FY2026–27 Outlook</div>
+    </div>
+    <div class="live-badge">⟳ Live from Google Sheets</div>
+  </div>
+</div>
+
+<!-- ── KPI STRIP ────────────────────────────────────────────── -->
+<div class="kpi-strip">
+  <div class="kpi-strip-inner" id="kpi-strip"></div>
+</div>
+
+<!-- ── MAIN CONTENT ─────────────────────────────────────────── -->
+<div id="loading">Loading dashboard…</div>
+
+<div id="app" style="display:none">
+  <div class="page-wrap">
+
+    <!-- ── SCENARIO FORECAST ────────────────────────────────── -->
+    <div class="section">
+      <div class="section-heading">
+        <div class="bar"></div>
+        <h2>Scenario Assumptions &amp; Implied Revenue</h2>
+        <div class="rule"></div>
+      </div>
+
+      <!-- Sync pills -->
+      <div class="sync-row">
+        <span class="sync-label">Sync Financial Outlook to:</span>
+        <button class="pill" onclick="setScenario('bear')"      id="pill-bear">Bear</button>
+        <button class="pill" onclick="setScenario('consensus')" id="pill-consensus">Consensus</button>
+        <button class="pill" onclick="setScenario('bull')"      id="pill-bull">Bull</button>
+        <button class="pill" onclick="setScenario('custom')"    id="pill-custom">Custom</button>
+        <span style="font-size:11px;color:#16a34a;background:#F0FDF4;padding:3px 10px;border-radius:20px;border:1px solid #bbf7d0;">⟳ Live</span>
+      </div>
+
+      <!-- 4 scenario summary cards -->
+      <div class="scenario-cards" id="scenario-cards"></div>
+
+      <!-- Custom driver info + sliders -->
+      <div class="info-box">
+        <strong>Bear / Consensus / Bull</strong> are fixed research scenarios that cannot be edited.
+        <strong>Custom</strong> lets you test any driver combination — adjust the sliders below.
+        Sync the Financial Outlook to Custom to reflect your assumptions in the annual summary table.
+      </div>
+      <div class="panel" id="custom-panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#7C3AED;">Custom Drivers</div>
+            <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Each driver ramps linearly from Q1 Start → Q4 End</div>
+          </div>
+          <button class="btn-ghost" onclick="resetCustom()">Reset to Consensus</button>
+        </div>
+        <div class="slider-grid" id="slider-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── SCENARIO CHARTS ───────────────────────────────────── -->
+    <div class="section">
+      <div class="section-heading">
+        <div class="bar"></div>
+        <h2>Revenue &amp; Membership Trajectory</h2>
+        <div class="rule"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">Quarterly Revenue ($B) — Historical &amp; Forecast Scenarios</div>
+        <canvas id="revenue-chart" height="90"></canvas>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Paid Members (M)</div>
+          <canvas id="subs-chart" height="140"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">ARM ($/mo)</div>
+          <canvas id="arm-chart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BRIDGE TABLE (collapsible) ───────────────────────── -->
+    <div class="section">
+      <div class="collapsible-header" id="bridge-toggle" onclick="toggleCollapsible('bridge')">
+        <span class="collapsible-title">Membership &amp; Revenue Bridge</span>
+        <span class="collapsible-arrow" id="bridge-arrow">▼</span>
+      </div>
+      <div class="collapsible-body" id="bridge-body">
+        <div style="padding-top:16px;">
+          <div class="table-scroll">
+            <table id="bridge-table" class="bridge-table"></table>
+          </div>
+          <div class="table-note" id="bridge-note"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SENSITIVITY ANALYSIS ─────────────────────────────── -->
+    <div class="section">
+      <div class="section-heading">
+        <div class="bar"></div>
+        <h2>Driver Sensitivity Analysis</h2>
+        <div class="rule"></div>
+      </div>
+      <div class="panel">
+        <div style="font-size:12px;color:#6B7280;margin-bottom:16px;line-height:1.7;">
+          Each table varies one driver across a range while holding the other two on the
+          <strong>Consensus ramp</strong>. The Base row reflects the Consensus mid-point.
+          <em>vs Base</em> is measured on FY2026E revenue.
+        </div>
+        <div class="table-scroll">
+          <table id="sens-table" class="fixed"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANNUAL SUMMARY ───────────────────────────────────── -->
+    <div class="section">
+      <div class="section-heading">
+        <div class="bar"></div>
+        <h2>Annual Performance Summary</h2>
+        <div class="rule"></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-wrap">
+          <div class="chart-title">Annual Revenue ($B)</div>
+          <canvas id="fy-rev-chart" height="160"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Annual Net Adds (M)</div>
+          <canvas id="fy-adds-chart" height="160"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="table-scroll">
+          <table id="fy-table" class="fixed fy-table"></table>
+        </div>
+        <div class="table-note" id="fy-note"></div>
+      </div>
+    </div>
+
+  </div><!-- end page-wrap -->
+</div><!-- end #app -->
+
+<!-- ── FOOTER ───────────────────────────────────────────────── -->
+<div class="footer">
+  <div class="footer-inner" id="footer-text">
+    Driver-based revenue model. Forecasts are illustrative scenarios only, not financial guidance.
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let CFG      = {};
+let SCEN     = {};
+let HIST     = [];
+let CUSTOM   = {};
+let ACTIVE   = 'consensus';
+
+const QUARTERS   = ["Q1'26","Q2'26","Q3'26","Q4'26","Q1'27","Q2'27","Q3'27","Q4'27"];
+const SC_COLORS  = { bear: '#DC2626', consensus: '#1D4ED8', bull: '#16A34A', custom: '#7C3AED' };
+const SC_LABELS  = { bear: 'Bear', consensus: 'Consensus', bull: 'Bull', custom: 'Custom' };
+
+// Chart.js instances (kept so we can destroy/rebuild on update)
+let chartRevenue, chartSubs, chartARM, chartFYRev, chartFYAdds;
+
+// ═══════════════════════════════════════════════════════════════
+//  FORECAST ENGINE  (same logic as React portfolio)
+// ═══════════════════════════════════════════════════════════════
+function buildForecast(d1S, d2S, d3S, d1E, d2E, d3E, useGrossAdds, grossAddsSrc) {
+  const n    = QUARTERS.length;
+  let subs   = CFG.startMembers;
+  let arm    = CFG.startARM;
+  const out  = [];
+
+  for (let qi = 0; qi < n; qi++) {
+    const t         = n > 1 ? qi / (n - 1) : 0;
+    const d1Q       = d1S + (d1E - d1S) * t;   // net adds (or gross adds in custom)
+    const d3Q       = d3S + (d3E - d3S) * t;   // churn rate %/mo
+    const d2Q       = d2S + (d2E - d2S) * t;   // arm growth %/yr
+
+    const churnLoss = d3Q / 100 * subs * 3;
+    let   netAdds, grossAdds;
+
+    if (useGrossAdds && grossAddsSrc) {
+      grossAdds = grossAddsSrc[qi].grossAdds;
+      netAdds   = grossAdds - churnLoss;
+    } else if (useGrossAdds) {
+      grossAdds = d1Q;
+      netAdds   = grossAdds - churnLoss;
+    } else {
+      netAdds   = d1Q;
+      grossAdds = netAdds + churnLoss;
+    }
+
+    const endSubs  = subs + netAdds;
+    const avgSubs  = (subs + endSubs) / 2;
+    arm = arm * (1 + d2Q / 400);
+    const revenue  = avgSubs * arm * 3 / 1000;
+
+    out.push({ period: QUARTERS[qi], subs: endSubs, arm, netAdds, grossAdds, churn: d3Q, revenue });
+    subs = endSubs;
+  }
+  return out;
+}
+
+function getForecast(key) {
+  const s = key === 'custom' ? customToDrivers() : scenToDrivers(SCEN[key]);
+  const useGross = key === 'custom';
+  return buildForecast(s.d1S, s.d2S, s.d3S, s.d1E, s.d2E, s.d3E, useGross);
+}
+
+function scenToDrivers(sc) {
+  return { d1S: sc.d1Start, d1E: sc.d1End, d2S: sc.d2Start, d2E: sc.d2End, d3S: sc.d3Start, d3E: sc.d3End };
+}
+
+function customToDrivers() {
+  return { d1S: CUSTOM.d1Start, d1E: CUSTOM.d1End, d2S: CUSTOM.d2Start, d2E: CUSTOM.d2End, d3S: CUSTOM.d3Start, d3E: CUSTOM.d3End };
+}
+
+function getFY(fc, year) {
+  return fc.slice(year === 2026 ? 0 : 4, year === 2026 ? 4 : 8)
+           .reduce((s, q) => s + q.revenue, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT — called when Apps Script returns data
+// ═══════════════════════════════════════════════════════════════
+function init(data) {
+  CFG  = data.config;
+  SCEN = data.scenarios;
+  HIST = data.historical;
+
+  // Default custom = consensus
+  const cons = SCEN.consensus;
+  CUSTOM = { d1Start: cons.d1Start, d1End: cons.d1End, d2Start: cons.d2Start, d2End: cons.d2End, d3Start: cons.d3Start, d3End: cons.d3End };
+
+  // Populate static header elements
+  document.getElementById('hdr-eyebrow').textContent  = CFG.company || 'Revenue Forecast';
+  document.getElementById('hdr-title').textContent    = CFG.title   || 'Revenue Forecast';
+  document.getElementById('hdr-subtitle').textContent =
+    `Driver-Based Model · Starting from ${CFG.startPeriod} Actuals`;
+
+  renderKPICards();
+  renderScenarioCards();
+  renderSliders();
+  initCharts();
+  renderBridgeTable();
+  renderSensitivityTable();
+  renderFYSummary();
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display     = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  KPI CARDS
+// ═══════════════════════════════════════════════════════════════
+function renderKPICards() {
+  const consFc  = getForecast('consensus');
+  const cons26  = getFY(consFc, 2026).toFixed(1);
+  const cards   = [
+    { label: 'Starting Revenue',  value: `${CFG.currencySymbol}${CFG.startRevenue}${CFG.revenueUnit}`, sub: CFG.startPeriod + ' actual' },
+    { label: 'Starting Members',  value: `${CFG.startMembers}${CFG.memberUnit}`,                       sub: 'paid memberships' },
+    { label: 'Starting ARM',      value: `${CFG.currencySymbol}${CFG.startARM}/mo`,                   sub: 'global blended' },
+    { label: 'Consensus FY2026E', value: `${CFG.currencySymbol}${cons26}${CFG.revenueUnit}`,           sub: 'consensus scenario' },
+  ];
+  document.getElementById('kpi-strip').innerHTML = cards.map(c => `
+    <div class="kpi-card">
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      <div class="kpi-sub">${c.sub}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENARIO CARDS
+// ═══════════════════════════════════════════════════════════════
+function renderScenarioCards() {
+  const cons = SCEN.consensus;
+  const html = ['bear','consensus','bull','custom'].map(key => {
+    const fc   = getForecast(key);
+    const fy26 = getFY(fc, 2026).toFixed(2);
+    const fy27 = getFY(fc, 2027).toFixed(2);
+    const col  = SC_COLORS[key];
+    const sc   = key === 'custom' ? customToDrivers() : scenToDrivers(SCEN[key]);
+    const sel  = ACTIVE === key ? 'selected' : '';
+    return `
+      <div class="sc-card ${sel}" style="--sc-color:${col}" onclick="setScenario('${key}')">
+        <div class="sc-card-top">
+          <div class="sc-card-name">${SC_LABELS[key]}</div>
+          <div class="sc-card-revs">
+            <div class="sc-card-fy">
+              <div class="sc-card-fy-label">FY2026E</div>
+              <div class="sc-card-fy-val">${CFG.currencySymbol}${fy26}${CFG.revenueUnit}</div>
+            </div>
+            <div class="sc-card-fy">
+              <div class="sc-card-fy-label" style="text-align:right">FY2027E</div>
+              <div class="sc-card-fy-val right">${CFG.currencySymbol}${fy27}${CFG.revenueUnit}</div>
+            </div>
+          </div>
+          <div class="sc-card-drivers">
+            <span>${CFG.driver1Label}: ${sc.d1S.toFixed(1)}→${sc.d1E.toFixed(1)}</span>
+            <span>${CFG.driver2Label}: ${sc.d2S.toFixed(1)}→${sc.d2E.toFixed(1)}%/yr</span>
+            <span>${CFG.driver3Label}: ${sc.d3S.toFixed(2)}→${sc.d3E.toFixed(2)}%/mo</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  document.getElementById('scenario-cards').innerHTML = html;
+  updatePills();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CUSTOM SLIDERS
+// ═══════════════════════════════════════════════════════════════
+const SLIDER_DEFS = () => [
+  { label: CFG.driver1Label, startKey: 'd1Start', endKey: 'd1End', min: CFG.d1Min, max: CFG.d1Max, step: 0.5, fmt: v => `${v.toFixed(1)}` },
+  { label: CFG.driver2Label, startKey: 'd2Start', endKey: 'd2End', min: CFG.d2Min, max: CFG.d2Max, step: 0.1, fmt: v => `${v.toFixed(1)}%/yr` },
+  { label: CFG.driver3Label, startKey: 'd3Start', endKey: 'd3End', min: CFG.d3Min, max: CFG.d3Max, step: 0.05, fmt: v => `${v.toFixed(2)}%/mo` },
+];
+
+function renderSliders() {
+  document.getElementById('slider-grid').innerHTML = SLIDER_DEFS().map(cfg => `
+    <div class="slider-wrap">
+      <div class="slider-label">${cfg.label}</div>
+      <div class="slider-values">
+        <span>Start &nbsp;<strong id="sv-${cfg.startKey}">${cfg.fmt(CUSTOM[cfg.startKey])}</strong></span>
+        <span class="slider-direction" id="sd-${cfg.startKey}">→</span>
+        <span>End &nbsp;<strong id="sv-${cfg.endKey}">${cfg.fmt(CUSTOM[cfg.endKey])}</strong></span>
+      </div>
+      <div class="dual-range" id="dr-${cfg.startKey}">
+        <div class="track-bg"></div>
+        <div class="track-fill" id="tf-${cfg.startKey}"></div>
+        <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}"
+          value="${CUSTOM[cfg.startKey]}" id="rs-${cfg.startKey}"
+          oninput="onSliderChange('${cfg.startKey}','${cfg.endKey}',${cfg.min},${cfg.max},'${cfg.startKey}')">
+        <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}"
+          value="${CUSTOM[cfg.endKey]}" id="rs-${cfg.endKey}"
+          oninput="onSliderChange('${cfg.startKey}','${cfg.endKey}',${cfg.min},${cfg.max},'${cfg.endKey}')">
+      </div>
+      <div class="slider-minmax"><span>${cfg.min}</span><span>${cfg.max}</span></div>
+    </div>`).join('');
+
+  SLIDER_DEFS().forEach(cfg => updateTrack(cfg.startKey, cfg.endKey, cfg.min, cfg.max, cfg.fmt));
+}
+
+function onSliderChange(startKey, endKey, min, max, changedKey) {
+  CUSTOM[startKey] = parseFloat(document.getElementById('rs-' + startKey).value);
+  CUSTOM[endKey]   = parseFloat(document.getElementById('rs-' + endKey).value);
+  const cfg = SLIDER_DEFS().find(c => c.startKey === startKey);
+  updateTrack(startKey, endKey, min, max, cfg.fmt);
+  onCustomChange();
+}
+
+function updateTrack(startKey, endKey, min, max, fmt) {
+  const sv = CUSTOM[startKey], ev = CUSTOM[endKey];
+  const pct = v => (v - min) / (max - min) * 100;
+  const pS  = pct(sv), pE = pct(ev);
+  const tL  = Math.min(pS, pE), tW = Math.abs(pE - pS);
+
+  const fill = document.getElementById('tf-' + startKey);
+  if (fill) { fill.style.left = tL + '%'; fill.style.width = tW + '%'; }
+
+  const sDisp = document.getElementById('sv-' + startKey);
+  const eDisp = document.getElementById('sv-' + endKey);
+  const dir   = document.getElementById('sd-' + startKey);
+  if (sDisp) sDisp.textContent = fmt(sv);
+  if (eDisp) eDisp.textContent = fmt(ev);
+  if (dir)   { dir.textContent = ev < sv ? '↘' : ev > sv ? '↗' : '→'; dir.style.color = ev < sv ? '#DC2626' : '#16A34A'; }
+
+  // Z-index: bring start handle forward when handles cross
+  const rsS = document.getElementById('rs-' + startKey);
+  const rsE = document.getElementById('rs-' + endKey);
+  if (rsS && rsE) { rsS.style.zIndex = sv >= ev ? 5 : 3; rsE.style.zIndex = sv >= ev ? 3 : 5; }
+}
+
+function onCustomChange() {
+  if (ACTIVE === 'custom') {
+    renderScenarioCards();
+    updateCharts();
+    renderBridgeTable();
+    renderFYSummary();
+  } else {
+    renderScenarioCards();
+  }
+}
+
+function resetCustom() {
+  const cons = SCEN.consensus;
+  CUSTOM = { d1Start: cons.d1Start, d1End: cons.d1End, d2Start: cons.d2Start, d2End: cons.d2End, d3Start: cons.d3Start, d3End: cons.d3End };
+  renderSliders();
+  onCustomChange();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SCENARIO SELECTION
+// ═══════════════════════════════════════════════════════════════
+function setScenario(key) {
+  ACTIVE = key;
+  updatePills();
+  renderScenarioCards();
+  updateCharts();
+  renderBridgeTable();
+  renderFYSummary();
+  // Update CSS variable for colored table columns
+  document.documentElement.style.setProperty('--sc-color', SC_COLORS[key]);
+}
+
+function updatePills() {
+  ['bear','consensus','bull','custom'].forEach(k => {
+    const el = document.getElementById('pill-' + k);
+    if (!el) return;
+    el.className = 'pill' + (ACTIVE === k ? ' active-' + k : '');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CHARTS  (Chart.js)
+// ═══════════════════════════════════════════════════════════════
+function buildChartData() {
+  const bear      = getForecast('bear');
+  const consensus = getForecast('consensus');
+  const bull      = getForecast('bull');
+  const custom    = getForecast('custom');
+
+  // Combined labels: historical + forecast
+  const histLabels = HIST.map(h => h.period);
+  const allLabels  = [...histLabels, ...QUARTERS];
+
+  const nH = HIST.length;
+  const nullH = Array(nH - 1).fill(null);    // nulls for historical portion
+  const nullF = Array(QUARTERS.length).fill(null); // nulls for forecast portion
+
+  // Revenue
+  const histRevData = [...HIST.map(h => h.rev), ...nullF];
+  const lastHist    = HIST[nH - 1].rev;
+  const connector   = [...nullH, lastHist];  // connector point at last hist
+
+  const makeScRevData = fc => [...nullH, lastHist, ...fc.map(q => q.revenue)];
+
+  // Subs
+  const histSubData   = [...HIST.map(h => h.subs), ...nullF];
+  const lastSub       = HIST[nH - 1].subs;
+  const makeScSubData = fc => [...nullH, lastSub, ...fc.map(q => q.subs)];
+
+  // ARM
+  const histArmData   = [...HIST.map(h => h.arm), ...nullF];
+  const lastArm       = HIST[nH - 1].arm;
+  const makeScArmData = fc => [...nullH, lastArm, ...fc.map(q => q.arm)];
+
+  return {
+    labels: allLabels,
+    rev: {
+      hist:  histRevData,
+      bear:  makeScRevData(bear),
+      cons:  makeScRevData(consensus),
+      bull:  makeScRevData(bull),
+      cust:  makeScRevData(custom),
+    },
+    subs: {
+      hist:  histSubData,
+      bear:  makeScSubData(bear),
+      cons:  makeScSubData(consensus),
+      bull:  makeScSubData(bull),
+      cust:  makeScSubData(custom),
+    },
+    arm: {
+      hist:  histArmData,
+      bear:  makeScArmData(bear),
+      cons:  makeScArmData(consensus),
+      bull:  makeScArmData(bull),
+      cust:  makeScArmData(custom),
+    },
+  };
+}
+
+const chartDefaults = {
+  responsive: true,
+  animation: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 16 } } },
+  scales: {
+    x: { grid: { color: '#F3F4F6' }, ticks: { font: { size: 10 }, color: '#9CA3AF', maxTicksLimit: 12 } },
+    y: { grid: { color: '#F3F4F6' }, ticks: { font: { size: 10 }, color: '#9CA3AF' } },
+  },
+};
+
+function makeLineDs(label, data, color, width, dash) {
+  return {
+    label, data, borderColor: color, backgroundColor: 'transparent',
+    borderWidth: width || 2, borderDash: dash || [], pointRadius: 0,
+    tension: 0.3, spanGaps: false,
+  };
+}
+
+function initCharts() {
+  const d = buildChartData();
+
+  const revFmt   = v => v != null ? `$${v.toFixed(2)}B` : '—';
+  const subFmt   = v => v != null ? `${v.toFixed(1)}M`  : '—';
+  const armFmt   = v => v != null ? `$${v.toFixed(2)}/mo` : '—';
+
+  if (chartRevenue) chartRevenue.destroy();
+  chartRevenue = new Chart(document.getElementById('revenue-chart'), {
+    type: 'line',
+    data: { labels: d.labels, datasets: [
+      makeLineDs('Historical', d.rev.hist, '#94A3B8', 1.5, [3,2]),
+      makeLineDs('Bear',       d.rev.bear, SC_COLORS.bear, 2),
+      makeLineDs('Consensus',  d.rev.cons, SC_COLORS.consensus, 2.5),
+      makeLineDs('Bull',       d.rev.bull, SC_COLORS.bull, 2),
+      makeLineDs('Custom',     d.rev.cust, SC_COLORS.custom, 2, [5,3]),
+    ]},
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins,
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${revFmt(ctx.raw)}` }},
+    }, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `$${v}B` }}}},
+  });
+
+  if (chartSubs) chartSubs.destroy();
+  chartSubs = new Chart(document.getElementById('subs-chart'), {
+    type: 'line',
+    data: { labels: d.labels, datasets: [
+      makeLineDs('Historical', d.subs.hist, '#94A3B8', 1.5, [3,2]),
+      makeLineDs('Bear',       d.subs.bear, SC_COLORS.bear, 2),
+      makeLineDs('Consensus',  d.subs.cons, SC_COLORS.consensus, 2.5),
+      makeLineDs('Bull',       d.subs.bull, SC_COLORS.bull, 2),
+      makeLineDs('Custom',     d.subs.cust, SC_COLORS.custom, 2, [5,3]),
+    ]},
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins,
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${subFmt(ctx.raw)}` }},
+    }, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `${v}M` }}}},
+  });
+
+  if (chartARM) chartARM.destroy();
+  chartARM = new Chart(document.getElementById('arm-chart'), {
+    type: 'line',
+    data: { labels: d.labels, datasets: [
+      makeLineDs('Historical', d.arm.hist, '#94A3B8', 1.5, [3,2]),
+      makeLineDs('Bear',       d.arm.bear, SC_COLORS.bear, 2),
+      makeLineDs('Consensus',  d.arm.cons, SC_COLORS.consensus, 2.5),
+      makeLineDs('Bull',       d.arm.bull, SC_COLORS.bull, 2),
+      makeLineDs('Custom',     d.arm.cust, SC_COLORS.custom, 2, [5,3]),
+    ]},
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins,
+      tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${armFmt(ctx.raw)}` }},
+    }, scales: { ...chartDefaults.scales, y: { ...chartDefaults.scales.y, ticks: { ...chartDefaults.scales.y.ticks, callback: v => `$${v}` }}}},
+  });
+}
+
+function updateCharts() {
+  const d = buildChartData();
+
+  const updateLine = (chart, rev, subs, arm) => {
+    if (!chart) return;
+    chart.data.datasets[4].data = rev || subs || arm;
+    chart.update();
+  };
+
+  if (chartRevenue) { chartRevenue.data.datasets[4].data = d.rev.cust;  chartRevenue.update(); }
+  if (chartSubs)    { chartSubs.data.datasets[4].data    = d.subs.cust; chartSubs.update();    }
+  if (chartARM)     { chartARM.data.datasets[4].data     = d.arm.cust;  chartARM.update();     }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BRIDGE TABLE
+// ═══════════════════════════════════════════════════════════════
+function renderBridgeTable() {
+  const key = ACTIVE;
+  const fc  = getForecast(key);
+  const col = SC_COLORS[key];
+
+  // Build historical cols
+  const histCols = HIST.map((h, i) => {
+    const beginSubs   = i === 0 ? +(h.subs - h.netAdds).toFixed(1) : +HIST[i-1].subs.toFixed(1);
+    const avgSubs     = (beginSubs + h.subs) / 2;
+    const churnLosses = +(h.churn / 100 * avgSubs * 3).toFixed(1);
+    const grossAdds   = +(h.netAdds + churnLosses).toFixed(1);
+    return { period: h.period, isHist: true, beginSubs, grossAdds, churnLosses, netAdds: h.netAdds, endSubs: h.subs, arm: h.arm, revenue: h.rev, churn: h.churn };
+  });
+  const foreCols = fc.map(r => {
+    const beginSubs   = 0; // we'll fill from prev
+    return { ...r, isHist: false };
+  });
+  // Fill beginSubs for forecast
+  foreCols.forEach((c, i) => {
+    c.beginSubs = i === 0 ? HIST[HIST.length-1].subs : foreCols[i-1].subs;
+  });
+
+  const allCols = [...histCols, ...foreCols];
+  const rows = [
+    { label: 'Begin Subs (M)',    key: 'beginSubs',   fmt: v => v.toFixed(1), bold: false },
+    { label: 'Gross Adds (M)',    key: 'grossAdds',   fmt: v => `+${v.toFixed(1)}`, color: '#16a34a', bold: false },
+    { label: 'Churn Losses (M)',  key: 'churnLosses', fmt: v => `−${v.toFixed(1)}`, color: '#dc2626', bold: false },
+    { label: 'Net Adds (M)',      key: 'netAdds',     fmt: v => `+${v.toFixed(1)}`, color: col, bold: true },
+    { label: 'End Subs (M)',      key: 'endSubs',     fmt: v => v.toFixed(1), bold: true },
+    { label: 'Churn Rate (%/mo)', key: 'churn',       fmt: v => `${v.toFixed(2)}%`, bold: false },
+    { label: 'ARM ($/mo)',        key: 'arm',         fmt: v => `$${v.toFixed(2)}`, color: col, bold: false },
+    { label: 'Qtrly Rev ($B)',    key: 'revenue',     fmt: v => `$${v.toFixed(2)}B`, bold: true },
+  ];
+
+  const firstForeIdx = histCols.length;
+  let html = '<thead><tr>';
+  html += `<th style="min-width:120px">Metric</th>`;
+  allCols.forEach((c, ci) => {
+    const isFore = !c.isHist;
+    const isFirst = ci === firstForeIdx;
+    html += `<th class="${isFore ? 'center fore' : 'center'}" style="${isFore ? `color:${col};border-bottom-color:${col};background:#EFF6FF;` : ''}${isFirst ? `border-left:2px solid ${col};` : ''}min-width:62px">${c.period}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  rows.forEach((row, ri) => {
+    html += `<tr style="background:${ri%2===0?'#F9FAFB':'#fff'}"><td style="font-weight:600;white-space:nowrap;font-size:10px">${row.label}</td>`;
+    allCols.forEach((col2, ci) => {
+      const isFore  = !col2.isHist;
+      const isFirst = ci === firstForeIdx;
+      const val     = col2[row.key];
+      const clr     = isFore ? (row.color || col) : '#6B7280';
+      html += `<td class="center" style="font-size:10px;color:${clr};font-weight:${row.bold&&isFore?'700':'400'};${isFirst?`border-left:2px solid ${col};`:''}">${val != null ? row.fmt(val) : '—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+
+  document.getElementById('bridge-table').innerHTML = html;
+  document.getElementById('bridge-note').textContent =
+    `Historical gross adds and churn losses estimated from reported net adds and end-period members. Forecast: ${SC_LABELS[key]} scenario.`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SENSITIVITY TABLES
+// ═══════════════════════════════════════════════════════════════
+function renderSensitivityTable() {
+  const sc     = SCEN.consensus;
+  const baseD1 = (sc.d1Start + sc.d1End) / 2;
+  const baseD2 = (sc.d2Start + sc.d2End) / 2;
+  const baseD3 = (sc.d3Start + sc.d3End) / 2;
+
+  const toRev = fc => ({
+    fy26: fc.slice(0,4).reduce((s,q) => s+q.revenue, 0),
+    fy27: fc.slice(4,8).reduce((s,q) => s+q.revenue, 0),
+  });
+
+  const computeD1 = val => toRev(buildForecast(val, sc.d2Start, sc.d3Start, val, sc.d2End, sc.d3End));
+  const computeD2 = val => toRev(buildForecast(sc.d1Start, val, sc.d3Start, sc.d1End, val, sc.d3End));
+
+  // Churn: gross adds fixed from Consensus forecast, ARM ramp held
+  const consFc = getForecast('consensus');
+  const computeD3 = churnRate => {
+    const n = QUARTERS.length;
+    let subs = CFG.startMembers, arm = CFG.startARM;
+    const revs = [];
+    for (let qi = 0; qi < n; qi++) {
+      const grossAdds   = consFc[qi].grossAdds;
+      const churnLoss   = churnRate / 100 * subs * 3;
+      const netAdds     = grossAdds - churnLoss;
+      const endSubs     = subs + netAdds;
+      const avgSubs     = (subs + endSubs) / 2;
+      const d2Q         = sc.d2Start + (sc.d2End - sc.d2Start) * (n > 1 ? qi/(n-1) : 0);
+      arm = arm * (1 + d2Q / 400);
+      revs.push(avgSubs * arm * 3 / 1000);
+      subs = endSubs;
+    }
+    return { fy26: revs.slice(0,4).reduce((s,v)=>s+v,0), fy27: revs.slice(4,8).reduce((s,v)=>s+v,0) };
+  };
+
+  const parseRows = str => str.toString().split(',').map(v => parseFloat(v.trim()));
+
+  const drivers = [
+    {
+      label: CFG.driver1Label + ' Sensitivity',
+      baseVal: baseD1, base: computeD1(baseD1), getFn: computeD1,
+      rows: parseRows(CFG.d1SensRows),
+      fmt: v => `${(v * 4).toFixed(0)} units/yr`,
+    },
+    {
+      label: CFG.driver2Label + ' Sensitivity',
+      baseVal: baseD2, base: computeD2(baseD2), getFn: computeD2,
+      rows: parseRows(CFG.d2SensRows),
+      fmt: v => `${v.toFixed(1)}%/yr`,
+    },
+    {
+      label: CFG.driver3Label + ' Sensitivity',
+      baseVal: baseD3, base: computeD3(baseD3), getFn: computeD3,
+      rows: parseRows(CFG.d3SensRows),
+      fmt: v => `${v.toFixed(2)}%/mo`,
+    },
+  ];
+
+  const headers = ['Variation','Driver Value','FY2026E ($B)','FY2027E ($B)','vs Base ($B)','vs Base (%)'];
+  let html = `<colgroup><col style="width:15%"><col style="width:15%"><col style="width:17%"><col style="width:17%"><col style="width:18%"><col style="width:18%"></colgroup>`;
+  html += '<thead><tr>' + headers.map((h,i) => `<th class="${i>=2?'center':''}">${h}</th>`).join('') + '</tr></thead><tbody>';
+
+  drivers.forEach((d, di) => {
+    html += `<tr class="sens-section-row"><td colspan="6" style="padding:8px 10px;font-size:11px;font-weight:700;background:#EFF6FF;color:#1D4ED8;${di>0?'border-top:2px solid #E5E7EB':''}">${d.label}</td></tr>`;
+    d.rows.forEach(val => {
+      const isBase = Math.abs(val - d.baseVal) < 0.001;
+      const res    = isBase ? d.base : d.getFn(val);
+      const dB     = +(res.fy26 - d.base.fy26).toFixed(3);
+      const dPct   = +((dB / d.base.fy26) * 100).toFixed(2);
+      const rowCls = isBase ? 'base-row' : dB > 0 ? 'up-row' : 'dn-row';
+      const dBstr  = isBase ? '—' : `${dB >= 0 ? '+' : ''}$${dB.toFixed(3)}B`;
+      const dPstr  = isBase ? '—' : `${dPct >= 0 ? '+' : ''}${dPct.toFixed(2)}%`;
+      const dClr   = isBase ? '#9CA3AF' : dB > 0 ? '#16A34A' : '#DC2626';
+      html += `<tr class="${rowCls}">
+        <td style="font-weight:${isBase?700:400}">${isBase ? 'Base' : val}</td>
+        <td style="color:#6B7280">${d.fmt(val)}</td>
+        <td class="center" style="font-weight:${isBase?700:400}">$${res.fy26.toFixed(2)}B</td>
+        <td class="center" style="color:#9CA3AF">$${res.fy27.toFixed(2)}B</td>
+        <td class="center" style="color:${dClr};font-weight:${isBase?400:600}">${dBstr}</td>
+        <td class="center" style="color:${dClr};font-weight:${isBase?400:600}">${dPstr}</td>
+      </tr>`;
+    });
+  });
+  html += '</tbody>';
+  document.getElementById('sens-table').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ANNUAL SUMMARY (bar charts + table)
+// ═══════════════════════════════════════════════════════════════
+function renderFYSummary() {
+  const key   = ACTIVE;
+  const col   = SC_COLORS[key];
+  const fc    = getForecast(key);
+
+  const aggH = qs => ({
+    rev:     +qs.reduce((s,q) => s+q.rev,     0).toFixed(1),
+    members: +qs[3].subs.toFixed(0),
+    arm:     +qs[3].arm.toFixed(2),
+    netAdds: +qs.reduce((s,q) => s+q.netAdds, 0).toFixed(1),
+    churn:   +(qs.reduce((s,q) => s+q.churn,  0) / qs.length).toFixed(2),
+  });
+  const aggF = qs => ({
+    rev:     +qs.reduce((s,q) => s+q.revenue, 0).toFixed(1),
+    members: +qs[3].subs.toFixed(0),
+    arm:     +qs[3].arm.toFixed(2),
+    netAdds: +qs.reduce((s,q) => s+q.netAdds, 0).toFixed(1),
+    churn:   +(qs.reduce((s,q) => s+q.churn,  0) / qs.length).toFixed(2),
+  });
+
+  // Build FY years from available historical data (group into sets of 4)
+  const histFYs = [];
+  for (let i = 0; i + 3 < HIST.length; i += 4) {
+    const qs    = HIST.slice(i, i+4);
+    const year  = qs[3].period.includes("'") ? "FY20" + qs[3].period.split("'")[1] + 'A' : qs[3].period;
+    histFYs.push({ label: year, isForecast: false, ...aggH(qs) });
+  }
+
+  const years = [
+    ...histFYs,
+    { label: 'FY2026E', isForecast: true, ...aggF(fc.slice(0,4)) },
+    { label: 'FY2027E', isForecast: true, ...aggF(fc.slice(4,8)) },
+  ].map((y, i, arr) => ({
+    ...y,
+    revGrowth: i > 0 ? +((y.rev / arr[i-1].rev - 1) * 100).toFixed(1) : null,
+  }));
+
+  // Fixed chart domains across all standard scenarios
+  const allRevs = [], allAdds = [];
+  ['bear','consensus','bull'].forEach(k => {
+    const f = getForecast(k);
+    const g26 = aggF(f.slice(0,4)), g27 = aggF(f.slice(4,8));
+    allRevs.push(g26.rev, g27.rev); allAdds.push(g26.netAdds, g27.netAdds);
+  });
+  histFYs.forEach(y => { allRevs.push(y.rev); allAdds.push(y.netAdds); });
+  const revDomain  = [0, Math.ceil(Math.max(...allRevs) * 1.15 / 5) * 5];
+  const addsDomain = [0, Math.ceil(Math.max(...allAdds) * 1.2  / 5) * 5];
+
+  const barBgs = years.map(y => y.isForecast ? col + 'CC' : '#1D4ED8');
+
+  if (chartFYRev) chartFYRev.destroy();
+  chartFYRev = new Chart(document.getElementById('fy-rev-chart'), {
+    type: 'bar',
+    data: { labels: years.map(y => y.label), datasets: [{ label: 'Revenue ($B)', data: years.map(y => y.rev), backgroundColor: barBgs, borderRadius: 4 }] },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { display: false } },
+      scales: { ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, min: revDomain[0], max: revDomain[1], ticks: { ...chartDefaults.scales.y.ticks, callback: v => `$${v}B` } } } },
+  });
+
+  if (chartFYAdds) chartFYAdds.destroy();
+  chartFYAdds = new Chart(document.getElementById('fy-adds-chart'), {
+    type: 'bar',
+    data: { labels: years.map(y => y.label), datasets: [{ label: 'Net Adds (M)', data: years.map(y => y.netAdds), backgroundColor: barBgs, borderRadius: 4 }] },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { display: false } },
+      scales: { ...chartDefaults.scales,
+        y: { ...chartDefaults.scales.y, min: addsDomain[0], max: addsDomain[1], ticks: { ...chartDefaults.scales.y.ticks, callback: v => `${v}M` } } } },
+  });
+
+  // FY Table
+  const metrics = [
+    { label: 'Revenue ($B)',     fmt: y => `$${y.rev.toFixed(1)}B`,                                  growthKey: null },
+    { label: 'YoY Growth',       fmt: y => y.revGrowth != null ? `${y.revGrowth>0?'+':''}${y.revGrowth}%` : '—', isGrowth: true },
+    { label: 'Members (M)',      fmt: y => `${y.members}M`,                                           growthKey: null },
+    { label: 'ARM ($/mo)†',      fmt: y => `$${y.arm.toFixed(2)}`,                                   growthKey: null },
+    { label: 'Net Adds (M)',     fmt: y => `${y.netAdds>0?'+':''}${y.netAdds}M`,                     growthKey: null },
+    { label: 'Avg Churn (%/mo)', fmt: y => `${y.churn.toFixed(2)}%`,                                 growthKey: null },
+  ];
+
+  let tHtml = `<colgroup><col style="width:20%">${years.map(() => `<col style="width:${80/years.length}%">`).join('')}</colgroup>`;
+  tHtml += '<thead><tr><th>Metric</th>';
+  years.forEach(y => {
+    const fc2 = y.isForecast;
+    tHtml += `<th class="center${fc2?' forecast-col':''}" style="${fc2?`color:${col};border-bottom-color:${col};background:${col}10`:''}">${y.label}${fc2?`<br><span style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px">${SC_LABELS[key]}</span>`:''}</th>`;
+  });
+  tHtml += '</tr></thead><tbody>';
+
+  metrics.forEach((m, mi) => {
+    tHtml += `<tr style="background:${mi%2===0?'#fff':'#F9FAFB'}"><td style="font-weight:600;color:#6B7280">${m.label}</td>`;
+    years.forEach(y => {
+      let clr = y.isForecast ? col : '#0B1628';
+      let extra = '';
+      if (m.isGrowth && y.revGrowth != null) {
+        clr = y.revGrowth >= 0 ? '#16A34A' : '#DC2626';
+        extra = 'font-weight:600';
+      }
+      tHtml += `<td class="center${y.isForecast?' forecast-col':''}" style="color:${clr};${extra};font-weight:${y.isForecast?'600':'400'};background:${y.isForecast?col+'05':''};">${m.fmt(y)}</td>`;
+    });
+    tHtml += '</tr>';
+  });
+  tHtml += '</tbody>';
+  document.getElementById('fy-table').innerHTML = tHtml;
+  document.getElementById('fy-note').textContent =
+    `† ARM shows Q4 exit rate for the period. FY2026–27E reflects the ${SC_LABELS[key]} scenario. Forecasts are illustrative only.`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COLLAPSIBLE
+// ═══════════════════════════════════════════════════════════════
+function toggleCollapsible(id) {
+  const body  = document.getElementById(id + '-body');
+  const arrow = document.getElementById(id + '-arrow');
+  const hdr   = document.getElementById(id + '-toggle');
+  const open  = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+  hdr.classList.toggle('open', open);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+// Set initial CSS variable
+document.documentElement.style.setProperty('--sc-color', SC_COLORS[ACTIVE]);
+
+// Try to load from Google Sheets; fall back to sample data if running standalone
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+  google.script.run
+    .withSuccessHandler(init)
+    .withFailureHandler(err => {
+      console.warn('Apps Script call failed, using sample data:', err);
+      init(getSampleData());
+    })
+    .getData();
+} else {
+  // Running outside Apps Script (e.g. local preview) — use sample data
+  init(getSampleData());
+}
+
+// ── Embedded sample data for standalone preview ───────────────
+function getSampleData() {
+  return {
+    config: {
+      title: 'Revenue Forecast', company: 'Sample Co.',
+      startRevenue: 12.05, startMembers: 332, startARM: 12.23,
+      startPeriod: 'Q4 2025',
+      currencySymbol: '$', revenueUnit: 'B', memberUnit: 'M',
+      driver1Label: 'Net Adds/Q', driver2Label: 'ARM Growth', driver3Label: 'Churn Rate',
+      d1Min: 0.5, d1Max: 55, d2Min: 0, d2Max: 10, d3Min: 0.5, d3Max: 5,
+      d1SensRows: '2,4,8,12,14', d2SensRows: '0,1.5,3,4.5,6', d3SensRows: '1.5,1.8,2.05,2.6,3',
+    },
+    scenarios: {
+      bear:      { d1Start: 5,  d1End: 4,  d2Start: 0.5, d2End: 1.5, d3Start: 2.6, d3End: 3.0 },
+      consensus: { d1Start: 7,  d1End: 9,  d2Start: 2.0, d2End: 3.0, d3Start: 2.2, d3End: 1.9 },
+      bull:      { d1Start: 10, d1End: 13, d2Start: 3.5, d2End: 5.0, d3Start: 2.1, d3End: 1.5 },
+    },
+    historical: [
+      { period: "Q1'23", subs: 232.5, arm: 10.13, rev: 8.16,  netAdds: 1.75,  churn: 2.4 },
+      { period: "Q2'23", subs: 238.4, arm: 10.37, rev: 8.19,  netAdds: 5.89,  churn: 2.4 },
+      { period: "Q3'23", subs: 247.2, arm: 10.55, rev: 8.54,  netAdds: 8.76,  churn: 2.3 },
+      { period: "Q4'23", subs: 260.3, arm: 11.18, rev: 8.83,  netAdds: 13.12, churn: 2.2 },
+      { period: "Q1'24", subs: 269.6, arm: 11.10, rev: 9.37,  netAdds: 9.33,  churn: 2.1 },
+      { period: "Q2'24", subs: 277.7, arm: 11.01, rev: 9.56,  netAdds: 8.05,  churn: 2.1 },
+      { period: "Q3'24", subs: 282.7, arm: 11.18, rev: 9.83,  netAdds: 5.07,  churn: 2.1 },
+      { period: "Q4'24", subs: 301.6, arm: 11.79, rev: 10.25, netAdds: 18.91, churn: 2.0 },
+      { period: "Q1'25", subs: 313.6, arm: 11.93, rev: 10.54, netAdds: 11.99, churn: 2.1 },
+      { period: "Q2'25", subs: 320.0, arm: 12.00, rev: 11.03, netAdds: 6.4,   churn: 2.1 },
+      { period: "Q3'25", subs: 326.0, arm: 12.12, rev: 11.63, netAdds: 6.0,   churn: 2.1 },
+      { period: "Q4'25", subs: 332.0, arm: 12.23, rev: 12.05, netAdds: 6.0,   churn: 2.1 },
+    ],
+  };
+}
+</script>
+</body>
+</html>
