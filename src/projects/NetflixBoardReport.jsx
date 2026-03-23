@@ -1,5 +1,6 @@
 import { useNetflix } from "./NetflixContext.js";
 import { HISTORICAL, QUARTERS, getForecast, buildForecast, START, SEASONAL_FACTORS } from "./NetflixShared.js";
+import { OPEX_FORE } from "./NetflixOpEx.jsx";
 import { ComposedChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
@@ -266,14 +267,18 @@ function FinancialOutlook() {
     return { rev, members, arm, arpu: avgArm, netAdds };
   };
 
+  const scKey     = ["bear","consensus","bull"].includes(scenario) ? scenario : "consensus";
+  const histMgns  = [20.5, 26.7, 29.0]; // FY2023A, FY2024A, FY2025A (from Netflix 10-K / guided)
+
   const years = [
-    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true) },
-    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true) },
-    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true) },
-    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false) },
-    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false) },
+    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true),  opMgn: histMgns[0] },
+    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true),  opMgn: histMgns[1] },
+    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true),  opMgn: histMgns[2] },
+    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false), opMgn: +(OPEX_FORE[scKey].fy26.margin * 100).toFixed(1) },
+    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false), opMgn: +(OPEX_FORE[scKey].fy27.margin * 100).toFixed(1) },
   ].map((y, i, arr) => ({
     ...y,
+    opInc:     +(y.rev * y.opMgn / 100).toFixed(1),
     revGrowth: i > 0 ? +((y.rev / arr[i - 1].rev - 1) * 100).toFixed(1) : null,
   }));
 
@@ -284,8 +289,10 @@ function FinancialOutlook() {
     { label: "Revenue ($B)",      fmt: y => `$${y.rev.toFixed(1)}B` },
     { label: "YoY Growth",        fmt: y => y.revGrowth != null ? `${y.revGrowth > 0 ? "+" : ""}${y.revGrowth}%` : "—" },
     { label: "Members (M)",       fmt: y => `${y.members}M` },
-    { label: "ARPU ($/mo)",       fmt: y => `$${y.arpu.toFixed(2)}` },
-    { label: "Net Adds (M)",      fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
+    { label: "ARPU ($/mo)",           fmt: y => `$${y.arpu.toFixed(2)}` },
+    { label: "Net Adds (M)",          fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
+    { label: "Operating Income ($B)", fmt: y => `$${y.opInc.toFixed(1)}B` },
+    { label: "Operating Margin (%)",  fmt: y => `${y.opMgn.toFixed(1)}%` },
   ];
 
   return (
