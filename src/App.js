@@ -1045,9 +1045,9 @@ export default function App() {
               About Me
             </div>
             {[
-              "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of expertise in financial audit, accounting, planning, forecasting, and strategic analysis.",
+              "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of experience across multiple areas of accounting and finance.",
               "Currently, I'm a Financial Planning & Analysis Manager where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
-              "I actively integrate AI into my workflow at every stage: automating recurring variance commentary that previously took a full day, compressing multi-scenario model builds from days to hours, and generating first-draft board narratives directly from data. The measurable result is more time on interpretation and less on production, which is where the actual finance value is.",
+              "Efficient process design has always been part of how I work. AI has simply raised the ceiling on what's possible. Today I use it to automate commentary, accelerate model builds, and draft board narratives directly from data, freeing more time for the interpretation that actually drives decisions.",
               "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I believe AI will play a key role in the future of FP&A, and I'm exploring how to leverage these tools to deliver better insights every day.",
             ].map((para, i) => (
               <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.85, marginBottom: 18 }}>{para}</p>

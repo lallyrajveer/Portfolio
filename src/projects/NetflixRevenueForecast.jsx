@@ -166,7 +166,7 @@ function ScenarioTab() {
       <div style={{ marginBottom: 12, fontFamily: "'Outfit', sans-serif" }}>
         <button onClick={() => setRationaleOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 700, color: C.navy, textTransform: "uppercase", letterSpacing: 0.5 }}>
           <span style={{ fontSize: 13, lineHeight: 1, transition: "transform 0.2s", display: "inline-block", transform: rationaleOpen ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
-          Scenario Driver Rationale
+          Scenario Driver Rationale — {rationaleOpen ? "Collapse" : "Expand"}
         </button>
         {rationaleOpen && (
           <div style={{ marginTop: 10 }}>
@@ -230,8 +230,8 @@ function ScenarioTab() {
 
       {/* Custom sliders */}
       <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, padding: "10px 16px", marginBottom: 8, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
-        <strong>Bear / Consensus / Bull</strong> are fixed research scenarios, named market views that cannot be edited.{" "}
-        <strong>Custom</strong> uses fixed net adds — the same model as the named scenarios: adjust the sliders to test any driver combination. Sync the Executive Deck to Custom when you want the financial outlook to reflect your specific assumptions rather than a named case.
+        <strong>Bear / Consensus / Bull</strong> are fixed analyst scenarios and cannot be edited.{" "}
+        <strong>Custom</strong> lets you stress-test any driver combination — use the sliders below to set your own net adds and ARM trajectory, then select Custom to reflect those assumptions in the Executive Deck.
       </div>
       <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>

@@ -15,59 +15,37 @@ const SCENARIO_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull",
 
 const priorities = [
   {
-    title: "Ad-Supported Tier Monetization",
-    impact: "+$2–3B by FY2027",
+    title: "Net Adds Growth",
+    driver: "Subscriber Driver",
+    driverColor: "#1D4ED8",
+    driverBg: "#EFF6FF",
     bullets: [
-      "Target 40% of new sign-ups on ad tier by Q4'26",
-      "Expand CPM yield and programmatic inventory in UCAN and EMEA",
-      "Scale measurement partnerships to capture premium brand budgets",
+      "Ad-supported tier was 40% of new sign-ups in ad-available markets (Q4'24); scaling this base drives incremental adds through FY2027.",
+      "International expansion in India and SEA via mobile-only tiers at lower price points — both markets remain below 10% broadband penetration.",
+      "Live events (NFL Christmas, WWE Raw, FIFA World Cup 2026) reduce off-season churn and pull in new subscribers during event windows.",
     ],
-    status: "Scaling",
-    statusColor: "#16A34A",
   },
   {
-    title: "Live Events & Sports Rights",
-    impact: "+$1.5B incremental rev",
+    title: "ARM Expansion",
+    driver: "Revenue per Member Driver",
+    driverColor: "#16A34A",
+    driverBg: "#F0FDF4",
     bullets: [
-      "Build on NFL/WWE Raw to establish Netflix as a live destination",
-      "Pursue FIFA World Cup 2026 streaming rights",
-      "Expand live sports in India and LatAm for retention",
+      "UCAN price hike cycle expected to resume in late 2026 after a pause; prior hikes averaged ~7% and were well-tolerated.",
+      "Ad-tier CPM monetization scales as programmatic inventory matures — incremental revenue with no additional content spend.",
+      "Tier mix shift toward Standard and Premium as ad tier serves as a price-floor entry point rather than a permanent destination.",
     ],
-    status: "In Flight",
-    statusColor: "#D97706",
   },
   {
-    title: "Gaming & Interactive Content",
-    impact: "Retention driver",
+    title: "Key Risks",
+    driver: "Downside Factors",
+    driverColor: "#DC2626",
+    driverBg: "#FEF2F2",
     bullets: [
-      "Scale from 100+ mobile titles toward premium AAA releases",
-      "Explore cloud gaming as a competitive moat vs. Disney+ and Max",
-      "Target 10M daily active players by FY2026",
+      "Password-sharing tailwind is largely exhausted by Q1'26; net adds must be earned through product and content rather than enforcement.",
+      "Disney+/Max bundle competition and price fatigue could suppress UCAN acquisition and increase voluntary churn.",
+      "International growth dilutes blended ARM — faster subscriber growth in lower-ARPU markets compresses the global average.",
     ],
-    status: "Early Stage",
-    statusColor: "#6B7280",
-  },
-  {
-    title: "ARM Expansion via Pricing",
-    impact: "+0.5–1.0% ARM/yr",
-    bullets: [
-      "Price increases in under-monetized UCAN and EMEA markets",
-      "Shift mix toward Standard/Premium tiers",
-      "Zero incremental content spend, flows directly to operating income",
-    ],
-    status: "Ongoing",
-    statusColor: "#16A34A",
-  },
-  {
-    title: "Global Market Penetration",
-    impact: "+25–40M members",
-    bullets: [
-      "Target India, SEA, Middle East, and Africa",
-      "Mobile-only tiers at sub-$5/mo",
-      "Near-term ARM dilution; long-term pricing ladder opportunity",
-    ],
-    status: "Scaling",
-    statusColor: "#16A34A",
   },
 ];
 
@@ -224,22 +202,16 @@ function SectionHeading({ title }) {
 
 function StrategicPriorities() {
   return (
-    <div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14, marginBottom: 20 }}>
-        {priorities.map((p, i) => (
-          <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${NF}` }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: NAVY, flex: 1, lineHeight: 1.3 }}>{p.title}</div>
-              <span style={{ fontSize: 10, fontWeight: 600, color: p.statusColor, background: `${p.statusColor}18`, padding: "2px 8px", borderRadius: 20, whiteSpace: "nowrap", marginLeft: 8, flexShrink: 0 }}>{p.status}</span>
-            </div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: NF, marginBottom: 6 }}>{p.impact}</div>
-            <ul style={{ fontSize: 12, color: MUTED, lineHeight: 1.65, margin: 0, paddingLeft: 16 }}>
-              {p.bullets.map((b, bi) => <li key={bi} style={{ marginBottom: 4 }}>{b}</li>)}
-            </ul>
-          </div>
-        ))}
-      </div>
-
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+      {priorities.map((p, i) => (
+        <div key={i} style={{ background: "#fff", borderRadius: 10, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderTop: `3px solid ${p.driverColor}` }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: p.driverColor, background: p.driverBg, display: "inline-block", padding: "2px 8px", borderRadius: 20, marginBottom: 10 }}>{p.driver}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginBottom: 12, lineHeight: 1.3 }}>{p.title}</div>
+          <ul style={{ fontSize: 12, color: MUTED, lineHeight: 1.65, margin: 0, paddingLeft: 16 }}>
+            {p.bullets.map((b, bi) => <li key={bi} style={{ marginBottom: 6 }}>{b}</li>)}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
