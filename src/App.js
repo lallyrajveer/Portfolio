@@ -149,8 +149,16 @@ const WORKFLOW_NODES = [
     tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
   },
   {
-    id:    "netflix-board-report",
+    id:    "netflix-opex",
     step:  "03",
+    role:  "Model",
+    title: "Cost Structure & Margin",
+    desc:  "Operating expense model breaking down COR, T&D, Marketing, and G&A with scenario-linked margin expansion through FY2027.",
+    tags:  ["OpEx", "Operating margin", "Cost leverage"],
+  },
+  {
+    id:    "netflix-board-report",
+    step:  "04",
     role:  "Output",
     title: "Executive Deck",
     desc:  "Scenario-driven executive view with KPIs, revenue charts, and strategic priorities.",
@@ -160,6 +168,7 @@ const WORKFLOW_NODES = [
 
 const CONNECTOR_LABELS = [
   { top: "Peer data informs", bottom: "model assumptions" },
+  { top: "Revenue drives", bottom: "cost forecasts" },
   { top: "Model outputs drive", bottom: "scenario projections" },
 ];
 
@@ -183,7 +192,7 @@ function NetflixWorkflow() {
         </div>
 
         {/* Flow */}
-        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 112px 1fr 112px 1fr", alignItems: "stretch" }}>
+        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 88px 1fr 88px 1fr 88px 1fr", alignItems: "stretch" }}>
 
           {WORKFLOW_NODES.map((node, i) => (
             <div key={node.id} style={{ display: "contents" }}>

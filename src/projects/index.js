@@ -2,6 +2,7 @@ import { lazy } from "react";
 
 const NetflixStreamingAnalysis = lazy(() => import("./NetflixStreamingAnalysis.jsx"));
 const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx"));
+const NetflixOpEx              = lazy(() => import("./NetflixOpEx.jsx"));
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));
 const GoogleCloudProject       = lazy(() => import("./GoogleCloudProject.jsx"));
 
@@ -73,6 +74,17 @@ export const projects = [
     tags: ["forecast", "Netflix", "streaming", "scenario analysis", "ARM", "driver-based"],
     featured: true,
     component: NetflixRevenueForecast,
+  },
+  {
+    id: "netflix-opex",
+    title: "Netflix Cost Structure & Operating Margin",
+    category: "Forecasting",
+    description:
+      "Operating expense model forecasting Netflix's cost structure through FY2027. Breaks down Cost of Revenue, Technology & Development, Marketing, and G&A as a percentage of revenue, with scenario-linked operating income and margin expansion analysis.",
+    date: "Q1 2026",
+    tags: ["OpEx", "Netflix", "operating margin", "cost structure", "scenario analysis", "FP&A"],
+    featured: true,
+    component: NetflixOpEx,
   },
   {
     id: "netflix-board-report",
