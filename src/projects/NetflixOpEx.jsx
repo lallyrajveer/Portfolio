@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, Cell,
@@ -84,6 +85,7 @@ function enrich(r) {
    ══════════════════════════════════════════════════════════════ */
 export default function NetflixOpEx() {
   const { scenario, setScenario, customDrivers } = useNetflix();
+  const [methOpen, setMethOpen] = useState(false);
   const scKey = ["bear", "consensus", "bull"].includes(scenario) ? scenario : "consensus";
   const col   = SC_COLORS[scenario] ?? SC_COLORS.consensus;
 
@@ -169,6 +171,31 @@ export default function NetflixOpEx() {
             );
           })}
           <span style={{ fontSize: 11, color: "#16a34a", background: "#F0FDF4", padding: "3px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>⟳ Live</span>
+        </div>
+
+        {/* Methodology note — collapsible */}
+        <div style={{ marginBottom: 16, fontFamily: "'Outfit', sans-serif" }}>
+          <button onClick={() => setMethOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 700, color: C.navy, textTransform: "uppercase", letterSpacing: 0.5 }}>
+            <span style={{ fontSize: 13, lineHeight: 1, display: "inline-block", transition: "transform 0.2s", transform: methOpen ? "rotate(90deg)" : "rotate(0deg)" }}>▶</span>
+            How This Model Works — {methOpen ? "Collapse" : "Expand"}
+          </button>
+          {methOpen && (
+            <div style={{ marginTop: 10, background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", fontSize: 12, color: C.tick, lineHeight: 1.7 }}>
+              <p style={{ margin: "0 0 10px", fontWeight: 700, color: C.navy }}>Top-Down Margin Approach</p>
+              <p style={{ margin: "0 0 8px" }}>
+                This model forecasts OpEx using a top-down method: revenue comes from the Netflix Revenue Forecast model (net adds × ARM), and operating margin is assumed per scenario. Each cost line is then back-calculated as a percentage of that revenue — it does not build costs from unit economics.
+              </p>
+              <p style={{ margin: "0 0 8px" }}>
+                <strong style={{ color: C.navy }}>What drives the difference between scenarios</strong> — Cost of Revenue (content amortization + delivery) absorbs most of the margin swing, reflecting that content leverage differs by subscriber growth trajectory. Technology & Development, Marketing, and G&A are held at relatively stable percentages across scenarios, consistent with their historically low sensitivity to revenue growth.
+              </p>
+              <p style={{ margin: "0 0 8px" }}>
+                <strong style={{ color: C.navy }}>Limitation</strong> — A bottoms-up OpEx model would forecast content spend from slate commitments, headcount costs for T&D and G&A, and CPM yield for marketing efficiency. Those inputs are not publicly disclosed. The margin assumptions used here are grounded in Netflix's public guidance (~29% for FY2025) and sell-side consensus for FY2026–27.
+              </p>
+              <p style={{ margin: 0, color: C.muted, fontSize: 11 }}>
+                Sources: Netflix FY2023–FY2024 10-K · Netflix Q4 2025 Shareholder Letter (FY2025 margin guidance) · Wells Fargo / JPMorgan / Goldman Sachs equity research (Jan–Mar 2025)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Cost Structure Table */}
