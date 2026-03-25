@@ -1,7 +1,7 @@
 import { useNetflix } from "./NetflixContext.js";
 import { HISTORICAL, QUARTERS, getForecast, buildForecast, START, SEASONAL_FACTORS } from "./NetflixShared.js";
-import { OPEX_FORE } from "./NetflixOpEx.jsx";
-import { ComposedChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { OPEX_FORE, NI_FORE } from "./NetflixOpEx.jsx";
+import { ComposedChart, Line, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts";
 
 /* ─── Colors ─────────────────────────────────────────────────── */
 const NF    = "#E50914";
@@ -10,7 +10,7 @@ const MUTED = "#6B7280";
 const GRID  = "#E5E7EB";
 const LIGHT = "#F8F9FA";
 
-const SCENARIO_COLORS = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
+const SCENARIO_COLORS = { bear: "#EA580C", consensus: "#DC2626", bull: "#16A34A", custom: "#7C3AED" };
 const SCENARIO_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull",  custom: "Custom" };
 
 
@@ -97,6 +97,22 @@ function useScenariosData() {
   return { chartData, subsChartData, armChartData };
 }
 
+// Fixed Y-axis domain for FinancialOutlook — computed once across all standard scenarios
+// so the axis never rescales when switching Bear / Consensus / Bull / Custom.
+const _fyAnnualRevs = [
+  HISTORICAL.slice(0, 4).reduce((s, q) => s + q.rev, 0),
+  HISTORICAL.slice(4, 8).reduce((s, q) => s + q.rev, 0),
+  HISTORICAL.slice(8, 12).reduce((s, q) => s + q.rev, 0),
+  ...["bear", "consensus", "bull"].flatMap(sc => {
+    const f = getForecast(sc, SEASONAL_FACTORS);
+    return [
+      f.slice(0, 4).reduce((s, q) => s + q.revenue, 0),
+      f.slice(4, 8).reduce((s, q) => s + q.revenue, 0),
+    ];
+  }),
+];
+const FY_REV_DOMAIN = [0, Math.ceil(Math.max(..._fyAnnualRevs) * 1.12)];
+
 // chartData = 11 hist + 1 connector + 8 forecast = 20 points
 const HIST_END_IDX = HISTORICAL.length - 1;          // 11: last actual point
 const FORE_END_IDX = HISTORICAL.length + QUARTERS.length - 1; // 19: last forecast point
@@ -113,9 +129,9 @@ const makeEndLabel = (color, formatter, idx) => (props) => {
 const SC_LINES = [
   { dataKey: "actual",   name: "Historical", stroke: "#94A3B8",                  width: 1.5, dash: "3 2",  endIdx: HIST_END_IDX },
   { dataKey: "bear_v",   name: "Bear",       stroke: SCENARIO_COLORS.bear,       width: 2,   dash: null,   endIdx: FORE_END_IDX },
-  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus,  width: 2,   dash: null,   endIdx: FORE_END_IDX },
   { dataKey: "bull_v",   name: "Bull",       stroke: SCENARIO_COLORS.bull,       width: 2,   dash: null,   endIdx: FORE_END_IDX },
   { dataKey: "custom_v", name: "Custom",     stroke: SCENARIO_COLORS.custom,     width: 2.5, dash: "5 3",  endIdx: FORE_END_IDX },
+  { dataKey: "cons_v",   name: "Consensus",  stroke: SCENARIO_COLORS.consensus,  width: 2,   dash: null,   endIdx: FORE_END_IDX },
 ];
 
 function RevenueScenariosChart() {
@@ -217,32 +233,9 @@ function StrategicPriorities() {
   );
 }
 
-/* Fixed chart domains — computed once across all standard scenarios so axis range
-   never shifts when the user switches Bear / Consensus / Bull / Custom.          */
-const _aggH = qs => ({
-  rev:      +(qs.reduce((s, q) => s + q.rev,      0)).toFixed(1),
-  netAdds:  +(qs.reduce((s, q) => s + q.netAdds,  0)).toFixed(1),
-});
-const _aggF = qs => ({
-  rev:      +(qs.reduce((s, q) => s + q.revenue,  0)).toFixed(1),
-  netAdds:  +(qs.reduce((s, q) => s + q.netAdds,  0)).toFixed(1),
-});
-const _domainRevs     = [];
-const _domainNetAdds  = [];
-[HISTORICAL.slice(0,4), HISTORICAL.slice(4,8), HISTORICAL.slice(8,12)].forEach(qs => {
-  const d = _aggH(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
-});
-["bear","consensus","bull"].forEach(sc => {
-  const f = getForecast(sc, SEASONAL_FACTORS);
-  [f.slice(0,4), f.slice(4,8)].forEach(qs => {
-    const d = _aggF(qs); _domainRevs.push(d.rev); _domainNetAdds.push(d.netAdds);
-  });
-});
-const FY_REV_DOMAIN   = [0, Math.ceil(Math.max(..._domainRevs)    * 1.12 / 5) * 5];
-const FY_ADDS_DOMAIN  = [0, Math.ceil(Math.max(..._domainNetAdds) * 1.15 / 5) * 5];
 
 function FinancialOutlook() {
-  const { scenario, setScenario, customDrivers } = useNetflix();
+  const { scenario, setScenario, customDrivers, customOpEx } = useNetflix();
 
   const cd = customDrivers ?? {};
   const customArmGrowthEnd = (((cd.armEnd ?? 13.51) / START.arm) ** (1 / 8) - 1) * 400;
@@ -268,22 +261,52 @@ function FinancialOutlook() {
   };
 
   const scKey     = ["bear","consensus","bull"].includes(scenario) ? scenario : "consensus";
-  const histMgns  = [20.5, 26.7, 29.0]; // FY2023A, FY2024A, FY2025A (from Netflix 10-K / guided)
+  const histMgns   = [20.5, 26.7, 29.0]; // FY2023A, FY2024A, FY2025A (from Netflix 10-K / guided)
+  const histNetInc = [5.4, 8.7, 10.5];   // FY2023A, FY2024A, FY2025A (reported / estimated)
+  const taxRate    = NI_FORE.taxRate[scKey] ?? 0.16;
 
   const years = [
-    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true),  opMgn: histMgns[0] },
-    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true),  opMgn: histMgns[1] },
-    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true),  opMgn: histMgns[2] },
-    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false), opMgn: +(OPEX_FORE[scKey].fy26.margin * 100).toFixed(1) },
-    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false), opMgn: +(OPEX_FORE[scKey].fy27.margin * 100).toFixed(1) },
-  ].map((y, i, arr) => ({
-    ...y,
-    opInc:     +(y.rev * y.opMgn / 100).toFixed(1),
-    revGrowth: i > 0 ? +((y.rev / arr[i - 1].rev - 1) * 100).toFixed(1) : null,
-  }));
+    { label: "FY2023A", isForecast: false, ...agg(HISTORICAL.slice(0, 4),  true),  opMgn: histMgns[0], netInc: histNetInc[0] },
+    { label: "FY2024A", isForecast: false, ...agg(HISTORICAL.slice(4, 8),  true),  opMgn: histMgns[1], netInc: histNetInc[1] },
+    { label: "FY2025A", isForecast: false, ...agg(HISTORICAL.slice(8, 12), true),  opMgn: histMgns[2], netInc: histNetInc[2] },
+    { label: "FY2026E", isForecast: true,  ...agg(forecast.slice(0, 4),    false), opMgn: +((scenario === "custom" ? ((0.290 + (customOpEx?.mgn27 ?? OPEX_FORE.consensus.fy27.margin)) / 2) : OPEX_FORE[scKey].fy26.margin) * 100).toFixed(1) },
+    { label: "FY2027E", isForecast: true,  ...agg(forecast.slice(4, 8),    false), opMgn: +((scenario === "custom" ? (customOpEx?.mgn27 ?? OPEX_FORE.consensus.fy27.margin) : OPEX_FORE[scKey].fy27.margin) * 100).toFixed(1) },
+  ].map((y, i, arr) => {
+    const opInc    = +(y.rev * y.opMgn / 100).toFixed(1);
+    const netInc   = y.netInc != null
+      ? y.netInc
+      : +(( opInc - NI_FORE.netIntExp) * (1 - taxRate)).toFixed(1);
+    const netMgn   = +(netInc / y.rev * 100).toFixed(1);
+    const revGrowth = i > 0 ? +((y.rev / arr[i - 1].rev - 1) * 100).toFixed(1) : null;
+    return { ...y, opInc, netInc, netMgn, revGrowth };
+  });
 
   const col      = SCENARIO_COLORS[scenario] ?? SCENARIO_COLORS.consensus;
   const ttStyle  = { fontFamily: "'Outfit', sans-serif", fontSize: 12 };
+
+  // Custom legend: bars show dual swatch (actual | forecast); sorted to match desired order
+  const LEGEND_ORDER = ["Revenue", "Op Income", "Net Income", "Op Margin %", "Net Income Margin %"];
+  const renderLegend = ({ payload }) => {
+    const sorted = [...payload].sort((a, b) => LEGEND_ORDER.indexOf(a.value) - LEGEND_ORDER.indexOf(b.value));
+    return (
+      <div style={{ display: "flex", gap: 14, justifyContent: "center", fontSize: 10, fontFamily: "'Outfit',sans-serif", paddingTop: 4 }}>
+        {sorted.map((entry, i) => {
+          const isLine = entry.type === "line";
+          const actualFill = entry.value === "Revenue" ? NF : entry.value === "Op Income" ? `${NF}BB` : `${NF}66`;
+          const foreFill   = entry.value === "Revenue" ? col : entry.value === "Op Income" ? `${col}AA` : `${col}55`;
+          return (
+            <span key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              {isLine
+                ? <span style={{ width: 18, height: 2, background: entry.color, display: "inline-block", borderRadius: 1 }} />
+                : <><span style={{ width: 7, height: 10, background: actualFill, borderRadius: 1, display: "inline-block" }} /><span style={{ width: 7, height: 10, background: foreFill, borderRadius: 1, display: "inline-block" }} /></>
+              }
+              <span style={{ color: MUTED }}>{entry.value}</span>
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   const metrics = [
     { label: "Revenue ($B)",      fmt: y => `$${y.rev.toFixed(1)}B` },
@@ -293,6 +316,8 @@ function FinancialOutlook() {
     { label: "Net Adds (M)",          fmt: y => `${y.netAdds > 0 ? "+" : ""}${y.netAdds}M` },
     { label: "Operating Income ($B)", fmt: y => `$${y.opInc.toFixed(1)}B` },
     { label: "Operating Margin (%)",  fmt: y => `${y.opMgn.toFixed(1)}%` },
+    { label: "Net Income ($B)",       fmt: y => `$${y.netInc.toFixed(1)}B` },
+    { label: "Net Margin (%)",        fmt: y => `${y.netMgn.toFixed(1)}%` },
   ];
 
   return (
@@ -318,36 +343,32 @@ function FinancialOutlook() {
         </span>
       </div>
 
-      {/* Bar charts */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "16px 20px" }}>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: NAVY, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Annual Revenue ($B)</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={years} barCategoryGap="30%">
-              <CartesianGrid vertical={false} stroke={GRID} />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} />
-              <YAxis domain={FY_REV_DOMAIN} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}B`} />
-              <Tooltip contentStyle={ttStyle} formatter={v => [`$${v.toFixed(1)}B`, "Revenue"]} />
-              <Bar dataKey="rev" radius={[4, 4, 0, 0]}>
-                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? col : NF} opacity={y.isForecast ? 0.75 : 1} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Consolidated income trend chart */}
+      <div style={{ padding: "16px 20px 8px" }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: NAVY, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          Revenue, Operating Income & Net Income ($B) · Margin % (right axis)
         </div>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: NAVY, marginBottom: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Annual Net Adds (M)</div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={years} barCategoryGap="30%">
-              <CartesianGrid vertical={false} stroke={GRID} />
-              <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} />
-              <YAxis domain={FY_ADDS_DOMAIN} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} tickFormatter={v => `${v}M`} />
-              <Tooltip contentStyle={ttStyle} formatter={v => [`${v > 0 ? "+" : ""}${v.toFixed(1)}M`, "Net Adds"]} />
-              <Bar dataKey="netAdds" radius={[4, 4, 0, 0]}>
-                {years.map((y, i) => <Cell key={i} fill={y.isForecast ? col : NF} opacity={y.isForecast ? 0.75 : 1} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={220}>
+          <ComposedChart data={years} margin={{ top: 8, right: 56, bottom: 0, left: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+            <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="left" tickFormatter={v => `$${v}B`} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} width={48} domain={FY_REV_DOMAIN} />
+            <YAxis yAxisId="right" orientation="right" tickFormatter={v => `${v}%`} tick={{ fontSize: 10, fill: MUTED, fontFamily: "'Outfit',sans-serif" }} axisLine={false} tickLine={false} width={40} domain={[0, 55]} />
+            <Tooltip contentStyle={ttStyle} formatter={(v, name) => (name === "Op Margin %" || name === "Net Income Margin %") ? [`${v.toFixed(1)}%`, name] : [`$${v.toFixed(1)}B`, name]} />
+            <Legend content={renderLegend} />
+            <Bar yAxisId="left" dataKey="rev" name="Revenue" radius={[3, 3, 0, 0]} fill={NF}>
+              {years.map((y, i) => <Cell key={i} fill={y.isForecast ? col : NF} />)}
+            </Bar>
+            <Bar yAxisId="left" dataKey="opInc" name="Op Income" radius={[3, 3, 0, 0]} fill={`${col}AA`}>
+              {years.map((y, i) => <Cell key={i} fill={y.isForecast ? `${col}AA` : `${NF}BB`} />)}
+            </Bar>
+            <Bar yAxisId="left" dataKey="netInc" name="Net Income" radius={[3, 3, 0, 0]} fill={`${col}55`}>
+              {years.map((y, i) => <Cell key={i} fill={y.isForecast ? `${col}55` : `${NF}66`} />)}
+            </Bar>
+            <Line yAxisId="right" type="monotone" dataKey="opMgn" name="Op Margin %" stroke={NAVY} strokeWidth={2} dot={{ r: 3, fill: NAVY }} />
+            <Line yAxisId="right" type="monotone" dataKey="netMgn" name="Net Income Margin %" stroke={col} strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3, fill: col }} />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Metrics table */}
@@ -402,7 +423,7 @@ function FinancialOutlook() {
           Driver-based model. Change scenario above; charts and table update automatically. Not financial guidance.
         </p>
         <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
-          ARPU = annual avg ARM ($/mo) across the four quarters; matches the ARM driver shown in the sensitivity table. Model starts from Q4'25 exit rate of $12.23/mo.
+          ARPU = annual avg ARM ($/mo) across the four quarters; matches the ARM driver shown in the sensitivity table. Model starts from Q4'25 exit rate of $12.23/mo. Net income assumes ${NI_FORE.netIntExp.toFixed(1)}B net interest expense and effective tax rates of {(NI_FORE.taxRate.bear * 100).toFixed(0)}% / {(NI_FORE.taxRate.consensus * 100).toFixed(0)}% / {(NI_FORE.taxRate.bull * 100).toFixed(0)}% (Bear / Consensus / Bull).
         </p>
         <p style={{ fontSize: 11, color: MUTED, margin: "6px 0 0", lineHeight: 1.6 }}>
           FY2026&#8594;27E ~14% revenue growth: ~9% paid member growth + ~4% ARM lift. Ad-tier CPM monetization contributes an estimated +$1.5&#8211;2.5B by FY2027, embedded in the ARM growth assumption. Password-sharing tailwind largely exhausted; growth is ad-tier and international-led.

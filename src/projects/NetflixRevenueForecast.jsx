@@ -92,7 +92,7 @@ const SLIDER_CONFIG = [
 /* ══════════════════════════════════════════════════════════════
    TAB 1: SCENARIO FORECAST
    ══════════════════════════════════════════════════════════════ */
-const SC_COLORS = { bear: "#DC2626", consensus: "#1D4ED8", bull: "#16A34A", custom: "#7C3AED" };
+const SC_COLORS = { bear: "#EA580C", consensus: "#DC2626", bull: "#16A34A", custom: "#7C3AED" };
 const SC_LABELS = { bear: "Bear",    consensus: "Consensus", bull: "Bull", custom: "Custom" };
 
 function ScenarioTab() {
@@ -174,9 +174,9 @@ function ScenarioTab() {
               {[
                 {
                   label: "Bear",
-                  color: "#DC2626",
-                  bg: "#FEF2F2",
-                  border: "#FECACA",
+                  color: "#EA580C",
+                  bg: "#FFF7ED",
+                  border: "#FED7AA",
                   drivers: [
                     { name: "Net Adds  7→4M/Q", points: ["Starts at Q4'25 actuals; deteriorates as password-sharing tailwind exhausts and ad-tier fails to offset. Disney+/Max bundles and price fatigue suppress acquisition.", "International growth in MENA and SEA slower than expected; mobile-only tier uptake muted."] },
                     { name: "ARM  4.5→1.5%/yr",  points: ["Starts at Q4'25 trailing rate; decelerates as price hike fatigue limits UCAN increases. Ad-tier CPM monetization ramps slowly; programmatic inventory underpriced.", "EM mix dilution persists; no meaningful pricing cycle resumes before Q4'27."] },
@@ -184,9 +184,9 @@ function ScenarioTab() {
                 },
                 {
                   label: "Consensus",
-                  color: "#1D4ED8",
-                  bg: "#EFF6FF",
-                  border: "#BFDBFE",
+                  color: "#DC2626",
+                  bg: "#FEF2F2",
+                  border: "#FECACA",
                   drivers: [
                     { name: "Net Adds  7→9M/Q",   points: ["Mid-point of Wall Street consensus (Wells Fargo, JPMorgan, Goldman Sachs). The +2M/Q ramp is sourced as follows: ~1M/Q from ad-tier acquisition growth (ad tier was 40% of new sign-ups in ad-available markets per Netflix Q4'24; scaling gross adds on a larger base adds ~1M/Q by FY2027); ~0.8M/Q from APAC/MENA mobile-tier expansion (APAC at <10% penetration in a 500M+ broadband-HH market); ~0.2M/Q residual from FIFA World Cup 2026 host-market spikes absorbed into the H2'26 ramp.", "Password-sharing tailwind is assumed exhausted by Q1'26. Sports content (NFL Christmas, WWE Raw) reduces off-season churn but is not credited as a net-adds driver."] },
                     { name: "ARM  4.5→5.0%/yr",   points: ["Conservative start: EM mix dilutes blended ARM; no UCAN price hike expected until late 2026. Accelerates as ad-tier CPM matures.", "New UCAN pricing cycle in late 2026/early 2027 adds an estimated 1–2pp to ARM growth."] },
@@ -229,26 +229,23 @@ function ScenarioTab() {
       </div>
 
       {/* Custom sliders */}
-      <div style={{ background: "#F5F3FF", border: "1px solid #DDD6FE", borderRadius: 7, padding: "10px 16px", marginBottom: 8, fontSize: 12, color: "#5B21B6", lineHeight: 1.6 }}>
-        <strong>Bear / Consensus / Bull</strong> are fixed analyst scenarios and cannot be edited.{" "}
-        <strong>Custom</strong> lets you stress-test any driver combination — use the sliders below to set your own net adds and ARM trajectory, then select Custom to reflect those assumptions in the Executive Deck.
-      </div>
-      <div style={{ background: "#fff", borderRadius: 10, padding: "16px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <div>
+      <div style={{ background: "#fff", borderRadius: 10, padding: "10px 16px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 4 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "#7C3AED" }}>Custom Drivers</div>
+            <span style={{ fontSize: 10, color: C.muted }}>Bear / Consensus / Bull are fixed · Custom is editable</span>
           </div>
-          <button onClick={() => setCustomDrivers(prev => ({ ...prev, netAddsEnd: 9.0, armEnd: 13.51, churnEnd: 1.9 }))} style={{ padding: "5px 14px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>
-            Reset to Consensus
+          <button onClick={() => setCustomDrivers(prev => ({ ...prev, netAddsEnd: 9.0, armEnd: 13.51, churnEnd: 1.9 }))} style={{ padding: "3px 10px", borderRadius: 20, border: "1.5px solid #7C3AED", background: "transparent", color: "#7C3AED", fontSize: 10, cursor: "pointer", fontWeight: 600 }}>
+            Reset
           </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
           {SLIDER_CONFIG.map(cfg => {
             const startVal = customDrivers[cfg.startKey];
             const endVal   = customDrivers[cfg.endKey];
             return (
               <div key={cfg.key}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: C.navy, marginBottom: 10 }}>{cfg.label}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: C.navy, marginBottom: 6 }}>{cfg.label}</div>
                 <DualRangeSlider
                   min={cfg.min} max={cfg.max} step={cfg.step}
                   startVal={startVal} endVal={endVal}
