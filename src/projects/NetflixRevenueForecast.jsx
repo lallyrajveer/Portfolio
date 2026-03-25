@@ -414,7 +414,7 @@ function SensitivityTab() {
     },
     {
       label: "ARM", key: "armGrowth", baseRes: baseArm,
-      rows: [{ val: 0.0 }, { val: 1.5 }, { isBase: true }, { val: 4.5 }, { val: 6.0 }],
+      rows: [{ val: 0.0 }, { val: 1.5 }, { isBase: true }, { val: 5.5 }, { val: 6.5 }],
       getFn: getArmSens,
     },
   ];
