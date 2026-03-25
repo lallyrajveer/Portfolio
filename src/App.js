@@ -1047,10 +1047,10 @@ export default function App() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ padding: "clamp(48px, 8vw, 96px) clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
+      <section id="about" style={{ paddingTop: "calc(64px + clamp(24px, 4vw, 48px))", paddingBottom: "clamp(24px, 4vw, 48px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 24 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 16 }}>
               About Me
             </div>
             {[
@@ -1059,7 +1059,7 @@ export default function App() {
               "Efficient process design has always been part of how I work. AI has simply raised the ceiling on what's possible. Today I use it to automate commentary, accelerate model builds, and draft board narratives directly from data, freeing more time for the interpretation that actually drives decisions.",
               "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I believe AI will play a key role in the future of FP&A, and I'm exploring how to leverage these tools to deliver better insights every day.",
             ].map((para, i) => (
-              <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.85, marginBottom: 18 }}>{para}</p>
+              <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.7, marginBottom: 10 }}>{para}</p>
             ))}
           </div>
           <div style={{ display: "none" }}>
