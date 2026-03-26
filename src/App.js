@@ -8,7 +8,7 @@ import { NetflixProvider } from "./projects/NetflixContext.js";
 const CAT_COLORS = {
   Budgeting:         { bg: "#EBF5EC", text: "#1E6B2E" },
   Forecasting:       { bg: "#EBF0FB", text: "#1E3A8A" },
-  "Variance Analysis":{ bg: "#FEF3EC", text: "#9A3412" },
+  "Variance Analysis": { bg: "#FEF3EC", text: "#9A3412" },
   "Board Reporting": { bg: "#F5EBF8", text: "#6B21A8" },
   Modeling:          { bg: "#ECFAF8", text: "#0F5345" },
   "Streaming Market Analysis":  { bg: "#FFF8EB", text: "#92400E" },
@@ -164,12 +164,22 @@ const WORKFLOW_NODES = [
     desc:  "Scenario-driven executive view with KPIs, revenue charts, and strategic priorities.",
     tags:  ["Live scenario sync", "Strategic priorities", "Exec-ready"],
   },
+  {
+    id:         "netflix-variance-q1-2026",
+    step:       "05",
+    role:       "Variance",
+    title:      "Q1 2026 Variance Analysis",
+    desc:       "Forecast vs. actuals once Q1 2026 earnings are filed. Breaks down revenue, membership, and ARM deltas by driver.",
+    tags:       ["Forecast vs. Actuals", "Q1 2026", "Driver attribution"],
+    comingSoon: true,
+  },
 ];
 
 const CONNECTOR_LABELS = [
   { top: "Peer data informs", bottom: "model assumptions" },
   { top: "Revenue drives", bottom: "cost forecasts" },
   { top: "Model outputs drive", bottom: "scenario projections" },
+  { top: "Actuals close", bottom: "the loop" },
 ];
 
 function NetflixWorkflow() {
@@ -192,24 +202,25 @@ function NetflixWorkflow() {
         </div>
 
         {/* Flow */}
-        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 88px 1fr 88px 1fr 88px 1fr", alignItems: "stretch" }}>
+        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 60px 1fr 60px 1fr 60px 1fr", alignItems: "stretch" }}>
 
           {WORKFLOW_NODES.map((node, i) => (
             <div key={node.id} style={{ display: "contents" }}>
               {/* Card */}
               <div
-                onClick={() => window.open(`#/project/${node.id}`, "_blank")}
-                onMouseEnter={() => setHovered(node.id)}
+                onClick={() => !node.comingSoon && window.open(`#/project/${node.id}`, "_blank")}
+                onMouseEnter={() => !node.comingSoon && setHovered(node.id)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  background: hovered === node.id ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.04)",
-                  border: `1px solid ${hovered === node.id ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.08)"}`,
+                  background: node.comingSoon ? "rgba(255,255,255,0.02)" : hovered === node.id ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.04)",
+                  border: node.comingSoon ? "1px dashed rgba(255,255,255,0.12)" : `1px solid ${hovered === node.id ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.08)"}`,
                   borderRadius: 10,
                   padding: "24px 22px",
-                  cursor: "pointer",
+                  cursor: node.comingSoon ? "default" : "pointer",
                   transition: "all 0.18s",
                   display: "flex",
                   flexDirection: "column",
+                  opacity: node.comingSoon ? 0.6 : 1,
                 }}
               >
                 {/* Title */}
@@ -223,8 +234,8 @@ function NetflixWorkflow() {
                 </div>
 
                 {/* CTA */}
-                <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
-                  Open →
+                <div style={{ fontSize: 11, color: node.comingSoon ? "rgba(255,255,255,0.25)" : hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
+                  {node.comingSoon ? "⏳ After Q1 2026 filing" : "Open →"}
                 </div>
               </div>
 
@@ -381,7 +392,9 @@ function GoogleCloudWorkflow() {
 // ── Project Card ─────────────────────────────────────────────
 function ProjectCard({ project, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const soon = !!project.comingSoon;
   const handleClick = () => {
+    if (soon) return;
     if (project.fileUrl) {
       const a = document.createElement("a");
       a.href = project.fileUrl;
@@ -397,24 +410,27 @@ function ProjectCard({ project, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: "#fff",
-        border: hovered ? "1.5px solid #C9A84C" : "1.5px solid #E8EAF0",
-        borderRadius: 10, overflow: "hidden", cursor: "pointer",
+        background: soon ? "#FAFAFA" : "#fff",
+        border: soon ? "1.5px dashed #D1D5DB" : hovered ? "1.5px solid #C9A84C" : "1.5px solid #E8EAF0",
+        borderRadius: 10, overflow: "hidden", cursor: soon ? "default" : "pointer",
         transition: "all 0.22s ease",
-        boxShadow: hovered ? "0 12px 36px rgba(11,22,40,0.1)" : "0 2px 8px rgba(0,0,0,0.04)",
-        transform: hovered ? "translateY(-3px)" : "none",
+        boxShadow: soon ? "none" : hovered ? "0 12px 36px rgba(11,22,40,0.1)" : "0 2px 8px rgba(0,0,0,0.04)",
+        transform: !soon && hovered ? "translateY(-3px)" : "none",
         display: "flex", flexDirection: "column",
+        opacity: soon ? 0.75 : 1,
       }}
     >
       {/* Card top bar */}
       <div style={{
-        background: hovered ? "#0B1628" : "#F4F5F8",
+        background: soon ? "#F4F5F8" : hovered ? "#0B1628" : "#F4F5F8",
         padding: "18px 20px",
         transition: "background 0.22s",
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <CategoryPill cat={project.category} />
-        {project.featured && (
+        {soon ? (
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#9BA3B8" }}>⏳ Coming Soon</span>
+        ) : project.featured && (
           <span style={{
             fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
             color: hovered ? "#C9A84C" : "#9BA3B8",
@@ -427,7 +443,7 @@ function ProjectCard({ project, onClick }) {
       <div style={{ padding: "20px 22px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
         <h3 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 19, fontWeight: 600, color: "#0B1628",
+          fontSize: 19, fontWeight: 600, color: soon ? "#6B7490" : "#0B1628",
           marginBottom: 10, lineHeight: 1.25,
         }}>{project.title}</h3>
         <p style={{ fontSize: 13, color: "#6B7490", lineHeight: 1.65, flex: 1, marginBottom: 16 }}>
@@ -446,13 +462,13 @@ function ProjectCard({ project, onClick }) {
       {/* Preview indicator */}
       <div style={{
         padding: "10px 22px",
-        background: hovered ? "#C9A84C" : "#F9FAFB",
+        background: soon ? "#F3F4F6" : hovered ? "#C9A84C" : "#F9FAFB",
         transition: "background 0.22s",
         textAlign: "center",
         fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase",
-        color: hovered ? "#0B1628" : "#9BA3B8",
+        color: soon ? "#9BA3B8" : hovered ? "#0B1628" : "#9BA3B8",
       }}>
-        {project.component ? "View Live Preview →" : project.fileUrl ? "Download Excel →" : "View Details →"}
+        {soon ? project.comingSoonLabel : project.component ? "View Live Preview →" : project.fileUrl ? "Download Excel →" : "View Details →"}
       </div>
     </div>
   );
@@ -467,7 +483,7 @@ function ContactModal({ onClose }) {
     e.preventDefault();
     setStatus("sending");
     try {
-      const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+      const res = await fetch("https://formspree.io/f/mykbzzzd", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
@@ -579,7 +595,7 @@ function ContactModal({ onClose }) {
                 />
               </div>
               {status === "error" && (
-                <div style={{ fontSize: 12, color: "#C0392B", marginBottom: 12 }}>Something went wrong. Please try again or email me directly at lallyrajveer@gmail.com</div>
+                <div style={{ fontSize: 12, color: "#C0392B", marginBottom: 12 }}>Something went wrong. Please try again later.</div>
               )}
               <button
                 type="submit"
@@ -1035,7 +1051,7 @@ export default function App() {
 
           {/* Stats */}
           <div className="fade-up d3" style={{ display: "none", justifyContent: "center", gap: 52, marginBottom: 48, paddingTop: 28, paddingBottom: 28, borderTop: "1px solid rgba(201,168,76,0.2)", borderBottom: "1px solid rgba(201,168,76,0.2)" }}>
-            {[["10+","Years Experience"],["5","Core Disciplines"],[allProjects.length.toString(),"Projects Shared"]].map(([n, l]) => (
+            {[["10+","Years Experience"],["5","Core Disciplines"],[allProjects.filter(p => !p.comingSoon).length.toString(),"Projects Shared"]].map(([n, l]) => (
               <div key={l}>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 40, fontWeight: 600, color: "#C9A84C", lineHeight: 1 }}>{n}</div>
                 <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: 1.2, marginTop: 5 }}>{l}</div>

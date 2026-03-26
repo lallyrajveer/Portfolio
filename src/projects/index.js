@@ -87,6 +87,18 @@ export const projects = [
     component: NetflixOpEx,
   },
   {
+    id: "netflix-variance-q1-2026",
+    title: "Netflix Q1 2026: Forecast vs. Actuals Variance Analysis",
+    category: "Variance Analysis",
+    description:
+      "Quarterly variance analysis comparing the ARM-based revenue forecast against Netflix Q1 2026 reported actuals. Breaks down revenue, membership, and ARM deltas by driver, quantifies forecast error, and identifies what the model got right — and what it missed.",
+    date: "Q1 2026",
+    tags: ["variance analysis", "Netflix", "forecast vs. actuals", "FP&A", "Q1 2026"],
+    featured: true,
+    comingSoon: true,
+    comingSoonLabel: "Available after Q1 2026 earnings filing",
+  },
+  {
     id: "netflix-board-report",
     title: "Netflix Streaming Strategy: Executive Deck",
     category: "Board Reporting",
@@ -99,4 +111,4 @@ export const projects = [
   },
 ];
 
-export const categories = ["All", "Cloud Infrastructure", "Streaming Market Analysis", "Forecasting", "Board Reporting"];
+export const categories = ["All", "Cloud Infrastructure", "Streaming Market Analysis", "Forecasting", "Variance Analysis", "Board Reporting"];
