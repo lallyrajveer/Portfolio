@@ -183,31 +183,57 @@ const CONNECTOR_LABELS = [
   { top: "Actuals close", bottom: "the loop" },
 ];
 
-function NetflixWorkflow() {
+// ── Netflix FP&A Case Study (merged workflow + financial models) ──
+const SUITE_NODES = [
+  {
+    id:    "netflix-three-statement",
+    title: "Three-Statement Model",
+    desc:  "Annual Income Statement, Balance Sheet, and Cash Flow for FY2023A–FY2027E, sourced from Netflix 10-K filings and scenario-synced.",
+  },
+  {
+    id:    "netflix-dcf",
+    title: "DCF & Intrinsic Valuation",
+    desc:  "FCFF-based DCF with editable WACC inputs, scenario-linked terminal growth rates, EV-to-equity bridge, and sensitivity grid.",
+  },
+  {
+    id:    "netflix-unit-economics",
+    title: "Unit Economics",
+    desc:  "Customer-level profitability — LTV, CAC, LTV/CAC ratio, payback period, and contribution margin across FY2023A–FY2027E.",
+  },
+];
+
+function NetflixCaseStudy() {
   const [hovered, setHovered] = useState(null);
   return (
     <section style={{ background: "#060E1A", padding: "clamp(40px, 6vw, 64px) clamp(16px, 5vw, 56px)", borderTop: "1px solid rgba(201,168,76,0.10)" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 44 }}>
+        {/* ── Top header ── */}
+        <div style={{ textAlign: "center", marginBottom: 52 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Revenue &amp; Operating Model</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix</span>
           </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
-            One Integrated FP&A Workflow
+            FP&amp;A Case Study
           </h2>
+          <p style={{ margin: "0 auto", fontSize: 13, color: "rgba(255,255,255,0.38)", maxWidth: 520, lineHeight: 1.65 }}>
+            End-to-end analysis, forecasting, and valuation — eight interconnected projects built as one cohesive case study.
+          </p>
         </div>
 
-        {/* Flow */}
-        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 60px 1fr 60px 1fr 60px 1fr", alignItems: "stretch" }}>
+        {/* ── Tier label: Integrated Workflow ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "rgba(201,168,76,0.7)", whiteSpace: "nowrap", fontFamily: "'Outfit', sans-serif" }}>Integrated Workflow</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.15)" }} />
+        </div>
 
+        {/* ── Workflow grid ── */}
+        <div className="rsp-wf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 60px 1fr 60px 1fr 60px 1fr 60px 1fr", alignItems: "stretch", marginBottom: 48 }}>
           {WORKFLOW_NODES.map((node, i) => (
             <div key={node.id} style={{ display: "contents" }}>
-              {/* Card */}
               <div
                 onClick={() => !node.comingSoon && window.open(`#/project/${node.id}`, "_blank")}
                 onMouseEnter={() => !node.comingSoon && setHovered(node.id)}
@@ -215,40 +241,24 @@ function NetflixWorkflow() {
                 style={{
                   background: node.comingSoon ? "rgba(255,255,255,0.02)" : hovered === node.id ? "rgba(201,168,76,0.07)" : "rgba(255,255,255,0.04)",
                   border: node.comingSoon ? "1px dashed rgba(255,255,255,0.12)" : `1px solid ${hovered === node.id ? "rgba(201,168,76,0.40)" : "rgba(255,255,255,0.08)"}`,
-                  borderRadius: 10,
-                  padding: "24px 22px",
+                  borderRadius: 10, padding: "24px 22px",
                   cursor: node.comingSoon ? "default" : "pointer",
-                  transition: "all 0.18s",
-                  display: "flex",
-                  flexDirection: "column",
+                  transition: "all 0.18s", display: "flex", flexDirection: "column",
                   opacity: node.comingSoon ? 0.6 : 1,
                 }}
               >
-                {/* Title */}
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "#fff", marginBottom: 10 }}>
-                  {node.title}
-                </div>
-
-                {/* Description */}
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.65, marginBottom: 18, flex: 1 }}>
-                  {node.desc}
-                </div>
-
-                {/* CTA */}
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 600, color: "#fff", marginBottom: 10 }}>{node.title}</div>
+                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.65, marginBottom: 18, flex: 1 }}>{node.desc}</div>
                 <div style={{ fontSize: 11, color: node.comingSoon ? "rgba(255,255,255,0.25)" : hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
                   {node.comingSoon ? "⏳ After Q1 2026 filing" : "Open →"}
                 </div>
               </div>
-
-              {/* Connector (between cards only) */}
               {i < WORKFLOW_NODES.length - 1 && (
                 <div className="rsp-wf-conn" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 8px" }}>
-                  {/* Arrow line */}
                   <div style={{ width: "100%", display: "flex", alignItems: "center", marginBottom: 10 }}>
                     <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.3)" }} />
                     <div style={{ color: "#C9A84C", fontSize: 16, lineHeight: 1, marginLeft: 2 }}>▶</div>
                   </div>
-                  {/* Label */}
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textAlign: "center", lineHeight: 1.5, fontFamily: "'Outfit', sans-serif" }}>
                     {CONNECTOR_LABELS[i].top}<br />{CONNECTOR_LABELS[i].bottom}
                   </div>
@@ -256,63 +266,15 @@ function NetflixWorkflow() {
               )}
             </div>
           ))}
-
         </div>
 
-
-      </div>
-    </section>
-  );
-}
-
-// ── Netflix Financial Modeling Suite ─────────────────────────
-const SUITE_NODES = [
-  {
-    id:    "netflix-three-statement",
-    step:  "01",
-    title: "Three-Statement Model",
-    desc:  "Annual Income Statement, Balance Sheet, and Cash Flow for FY2023A–FY2027E, sourced from Netflix 10-K filings and scenario-synced.",
-    tags:  ["P&L", "Balance Sheet", "Cash Flow"],
-  },
-  {
-    id:    "netflix-dcf",
-    step:  "02",
-    title: "DCF & Intrinsic Valuation",
-    desc:  "FCFF-based DCF with editable WACC inputs, scenario-linked terminal growth rates, EV-to-equity bridge, and sensitivity grid.",
-    tags:  ["WACC", "FCFF", "Sensitivity grid"],
-  },
-  {
-    id:    "netflix-unit-economics",
-    step:  "03",
-    title: "Unit Economics",
-    desc:  "Customer-level profitability — LTV, CAC, LTV/CAC ratio, payback period, and contribution margin across FY2023A–FY2027E.",
-    tags:  ["LTV / CAC", "Payback", "Contribution Margin"],
-  },
-];
-
-function NetflixModelingSuite() {
-  const [hovered, setHovered] = useState(null);
-  return (
-    <section style={{ background: "#080F1C", padding: "clamp(32px, 5vw, 56px) clamp(16px, 5vw, 56px)", borderTop: "1px solid rgba(229,9,20,0.12)" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 44 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
-            </div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Financial Modeling Suite</span>
-          </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
-            Full-Stack Financial Models
-          </h2>
-          <p style={{ margin: "0 auto", fontSize: 13, color: "rgba(255,255,255,0.40)", maxWidth: 560, lineHeight: 1.6 }}>
-            Three standalone models — three-statement, valuation, and unit economics — each scenario-synced and sourced from Netflix 10-K filings.
-          </p>
+        {/* ── Tier label: Financial Models ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "rgba(201,168,76,0.7)", whiteSpace: "nowrap", fontFamily: "'Outfit', sans-serif" }}>Financial Models</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.15)" }} />
         </div>
 
-        {/* Cards */}
+        {/* ── Models grid ── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {SUITE_NODES.map((node) => (
             <div
@@ -321,22 +283,14 @@ function NetflixModelingSuite() {
               onMouseEnter={() => setHovered(node.id)}
               onMouseLeave={() => setHovered(null)}
               style={{
-                background: hovered === node.id ? "rgba(229,9,20,0.06)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${hovered === node.id ? "rgba(229,9,20,0.35)" : "rgba(255,255,255,0.08)"}`,
-                borderRadius: 10,
-                padding: "22px 20px",
-                cursor: "pointer",
-                transition: "all 0.18s",
-                display: "flex",
-                flexDirection: "column",
+                background: hovered === node.id ? "rgba(201,168,76,0.06)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${hovered === node.id ? "rgba(201,168,76,0.35)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 10, padding: "22px 20px",
+                cursor: "pointer", transition: "all 0.18s", display: "flex", flexDirection: "column",
               }}
             >
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 600, color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
-                {node.title}
-              </div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 16, flex: 1 }}>
-                {node.desc}
-              </div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 600, color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>{node.title}</div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 16, flex: 1 }}>{node.desc}</div>
               <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
                 Open →
               </div>
@@ -1366,11 +1320,8 @@ export default function App() {
         </section>
       )}
 
-      {/* ── NETFLIX WORKFLOW ── */}
-      <NetflixWorkflow />
-
-      {/* ── NETFLIX FINANCIAL MODELING SUITE ── */}
-      <NetflixModelingSuite />
+      {/* ── NETFLIX FP&A CASE STUDY ── */}
+      <NetflixCaseStudy />
 
       {/* ── GOOGLE CLOUD WORKFLOW ── */}
       {false && <GoogleCloudWorkflow />}
