@@ -337,7 +337,7 @@ function NetflixModelingSuite() {
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 16, flex: 1 }}>
                 {node.desc}
               </div>
-              <div style={{ fontSize: 11, color: hovered === node.id ? "#E50914" : "rgba(229,9,20,0.45)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
+              <div style={{ fontSize: 11, color: hovered === node.id ? "#C9A84C" : "rgba(201,168,76,0.5)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
                 Open →
               </div>
             </div>
