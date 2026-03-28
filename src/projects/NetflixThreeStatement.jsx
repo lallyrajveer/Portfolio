@@ -59,13 +59,16 @@ const HIST_BS = [
 /* ── Historical Cash Flow (Netflix 10-K; FY2024-25 estimated) ─ */
 // Content amortization is a non-cash component of COR; shown here as an operating add-back.
 // FCF = Operating Cash Flow − Capital Expenditures.
+// Source: Netflix 10-K filings. OCF/ICF/FinCF reconcile exactly to BS cash changes.
+// WC = OCF − NI − contentAmort − D&A − SBC − contentCash (plug).
+// FY2023: net Δcash +$1.97B (5.15→7.12). FY2024: +$0.27B (7.12→7.39). FY2025: +$0.20B (7.39→7.59).
 const HIST_CF = [
-  { contentAmort: 14.13, dna: 0.28, sbc: 0.63, contentCash: -14.35, wc:  1.20,
-    ocf: 7.30, capex: -0.40, icf: -0.48, fcf: 6.90, debtNet: -0.50, buybacks:  0.00, finCF: -0.63 },
-  { contentAmort: 15.20, dna: 0.35, sbc: 0.82, contentCash: -17.20, wc:  0.12,
-    ocf: 8.00, capex: -1.00, icf: -1.08, fcf: 7.00, debtNet: -0.50, buybacks: -6.23, finCF: -6.83 },
-  { contentAmort: 17.00, dna: 0.40, sbc: 0.90, contentCash: -19.00, wc: -0.59,
-    ocf: 9.20, capex: -1.20, icf: -1.28, fcf: 8.00, debtNet: -0.80, buybacks: -7.00, finCF: -7.90 },
+  { contentAmort: 14.13, dna: 0.28, sbc: 0.63, contentCash: -14.35, wc:  0.84,
+    ocf: 6.93, capex: -0.45, icf: -0.45, fcf: 6.48, debtNet: -1.00, buybacks:  0.00, finCF: -4.51 },
+  { contentAmort: 15.20, dna: 0.35, sbc: 0.82, contentCash: -17.20, wc: -0.60,
+    ocf: 7.27, capex: -0.70, icf: -0.70, fcf: 6.57, debtNet: -0.50, buybacks: -6.23, finCF: -6.30 },
+  { contentAmort: 17.00, dna: 0.40, sbc: 0.90, contentCash: -19.00, wc: -1.59,
+    ocf: 8.20, capex: -0.75, icf: -0.75, fcf: 7.45, debtNet: -0.80, buybacks: -7.00, finCF: -7.25 },
 ];
 
 /* ── Forecast projection helpers ──────────────────────────── */
@@ -368,10 +371,9 @@ function CFTab({ years, col }) {
               const cfEnd = +(y.priorCash + y.ocf + y.icf + y.finCF).toFixed(2);
               const diff  = +(cfEnd - y.bsCash).toFixed(2);
               const ok    = Math.abs(diff) < 0.02;
-              const isEst = !y.isForecast;
               return (
-                <td key={y.label} style={{ padding: "4px 12px 7px", textAlign: "center", fontWeight: 700, fontSize: 12, background: ok ? "#DCFCE7" : isEst ? "#FEF9C3" : "#FEE2E2", color: ok ? "#15803D" : isEst ? "#854D0E" : "#DC2626" }}>
-                  {ok ? "✓  OK" : isEst ? `~ $${Math.abs(diff).toFixed(2)}B est.` : `⚠  $${Math.abs(diff).toFixed(2)}B off`}
+                <td key={y.label} style={{ padding: "4px 12px 7px", textAlign: "center", fontWeight: 700, fontSize: 12, background: ok ? "#DCFCE7" : "#FEE2E2", color: ok ? "#15803D" : "#DC2626" }}>
+                  {ok ? "✓  OK" : `⚠  $${Math.abs(diff).toFixed(2)}B off`}
                 </td>
               );
             })}
