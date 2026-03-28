@@ -86,7 +86,6 @@ const _allRows = [
   ...["bear","consensus","bull"].flatMap(sc => buildForeRows(sc)),
 ];
 const _maxLtv    = Math.max(..._allRows.map(r => r.ltv));
-const _maxCac    = Math.max(..._allRows.map(r => r.cac));
 const _maxLtvCac = Math.max(..._allRows.map(r => r.ltvCac));
 const _maxPaybk  = Math.max(..._allRows.map(r => r.payback));
 const LTV_CAC_DOMAIN   = [0, Math.ceil(_maxLtv  * 1.10)];
