@@ -80,6 +80,19 @@ const HIST_ROWS = [
   buildHistRow(2, "FY2025A"),
 ];
 
+/* ── Fixed chart domains (computed once across all standard scenarios) ── */
+const _allRows = [
+  ...HIST_ROWS,
+  ...["bear","consensus","bull"].flatMap(sc => buildForeRows(sc)),
+];
+const _maxLtv    = Math.max(..._allRows.map(r => r.ltv));
+const _maxCac    = Math.max(..._allRows.map(r => r.cac));
+const _maxLtvCac = Math.max(..._allRows.map(r => r.ltvCac));
+const _maxPaybk  = Math.max(..._allRows.map(r => r.payback));
+const LTV_CAC_DOMAIN   = [0, Math.ceil(_maxLtv  * 1.10)];
+const LTVCAC_RATIO_DOM = [0, Math.ceil(_maxLtvCac * 1.10)];
+const PAYBACK_DOM      = [0, Math.ceil(_maxPaybk  * 1.10)];
+
 /* ── Forecast unit economics builder ────────────────────────── */
 // Uses getForecast() quarterly data + OPEX_FORE margins per scenario
 function buildForeRows(scenario, customDrivers, customOpEx) {
@@ -325,7 +338,7 @@ export default function NetflixUnitEconomics() {
             <LineChart data={chartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: C.tick }} />
-              <YAxis tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => "$" + v} domain={[0, "auto"]} />
+              <YAxis tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => "$" + v} domain={LTV_CAC_DOMAIN} />
               <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <ReferenceLine x="FY2025A" stroke="#9CA3AF" strokeDasharray="4 2" label={{ value: "Hist → Fore", fontSize: 9, fill: "#9CA3AF", position: "insideTopRight" }} />
@@ -342,8 +355,8 @@ export default function NetflixUnitEconomics() {
             <LineChart data={chartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: C.tick }} />
-              <YAxis yAxisId="left"  tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => v + "x"} domain={[0, "auto"]} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => v + "mo"} domain={[0, "auto"]} />
+              <YAxis yAxisId="left"  tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => v + "x"} domain={LTVCAC_RATIO_DOM} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: C.tick }} tickFormatter={v => v + "mo"} domain={PAYBACK_DOM} />
               <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <ReferenceLine yAxisId="left" x="FY2025A" stroke="#9CA3AF" strokeDasharray="4 2" />

@@ -113,6 +113,34 @@ const _fyAnnualRevs = [
 ];
 const FY_REV_DOMAIN = [0, Math.ceil(Math.max(..._fyAnnualRevs) * 1.12)];
 
+// Fixed domains for quarterly scenario charts — computed once across all standard scenarios
+const _allQtrRevs = [
+  ...HISTORICAL.map(h => h.rev),
+  ...["bear","consensus","bull"].flatMap(sc => getForecast(sc, SEASONAL_FACTORS).map(q => q.revenue)),
+];
+const QTR_REV_CHART_DOMAIN = [
+  Math.floor(Math.min(..._allQtrRevs) * 0.95),
+  Math.ceil(Math.max(..._allQtrRevs) * 1.05),
+];
+
+const _allSubs = [
+  ...HISTORICAL.map(h => h.subs),
+  ...["bear","consensus","bull"].flatMap(sc => getForecast(sc, SEASONAL_FACTORS).map(q => q.subs)),
+];
+const SUBS_DOMAIN = [
+  Math.floor(Math.min(..._allSubs) * 0.97),
+  Math.ceil(Math.max(..._allSubs) * 1.03),
+];
+
+const _allARM = [
+  ...HISTORICAL.map(h => h.arm),
+  ...["bear","consensus","bull"].flatMap(sc => getForecast(sc, SEASONAL_FACTORS).map(q => q.arm)),
+];
+const ARM_DOMAIN = [
+  +((Math.min(..._allARM) * 0.97).toFixed(1)),
+  +((Math.max(..._allARM) * 1.03).toFixed(1)),
+];
+
 // chartData = 11 hist + 1 connector + 8 forecast = 20 points
 const HIST_END_IDX = HISTORICAL.length - 1;          // 11: last actual point
 const FORE_END_IDX = HISTORICAL.length + QUARTERS.length - 1; // 19: last forecast point
@@ -145,7 +173,7 @@ function RevenueScenariosChart() {
         <ComposedChart data={chartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
-          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
+          <YAxis domain={QTR_REV_CHART_DOMAIN} tick={axisStyle} tickFormatter={v => `$${v}B`} width={56} />
           <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(1)}B` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
           {SC_LINES.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `$${v.toFixed(1)}B`, l.endIdx)} />)}
@@ -170,7 +198,7 @@ function MembershipChart() {
         <ComposedChart data={subsChartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
-          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
+          <YAxis domain={SUBS_DOMAIN} tick={axisStyle} tickFormatter={v => `${v}M`} width={56} />
           <Tooltip formatter={(v, name) => [v != null ? `${v.toFixed(1)}M` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
           {subLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `${Math.round(v)}M`, l.endIdx)} />)}
@@ -195,7 +223,7 @@ function ARMChart() {
         <ComposedChart data={armChartData} margin={{ top: 8, right: 72, bottom: 4, left: 8 }}>
           <CartesianGrid {...gridProps} />
           <XAxis dataKey="period" tick={axisStyle} />
-          <YAxis domain={["auto","auto"]} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
+          <YAxis domain={ARM_DOMAIN} tick={axisStyle} tickFormatter={v => `$${v}`} width={52} />
           <Tooltip formatter={(v, name) => [v != null ? `$${v.toFixed(2)}/mo` : "—", name]} />
           <ReferenceLine x="Q4'25" stroke={MUTED} strokeDasharray="5 3" label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: MUTED }} />
           {armLines.map(l => <Line key={l.dataKey} dataKey={l.dataKey} name={l.name} stroke={l.stroke} strokeWidth={l.width} strokeDasharray={l.dash ?? undefined} dot={false} connectNulls label={makeEndLabel(l.stroke, v => `$${v.toFixed(2)}`, l.endIdx)} />)}
