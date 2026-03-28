@@ -331,9 +331,6 @@ function NetflixModelingSuite() {
                 flexDirection: "column",
               }}
             >
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(229,9,20,0.7)", marginBottom: 8, fontFamily: "'Outfit', sans-serif" }}>
-                Model {node.step}
-              </div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 600, color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
                 {node.title}
               </div>
