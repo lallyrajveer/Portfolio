@@ -297,17 +297,17 @@ function NetflixModelingSuite() {
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
             </div>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Financial Modeling Suite</span>
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 600, color: "#fff", margin: "0 0 6px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
             Full-Stack Financial Models
           </h2>
-          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.40)", maxWidth: 560, lineHeight: 1.6 }}>
+          <p style={{ margin: "0 auto", fontSize: 13, color: "rgba(255,255,255,0.40)", maxWidth: 560, lineHeight: 1.6 }}>
             Three standalone models — three-statement, valuation, and unit economics — each scenario-synced and sourced from Netflix 10-K filings.
           </p>
         </div>
