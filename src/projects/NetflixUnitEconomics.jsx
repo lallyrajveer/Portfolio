@@ -350,6 +350,9 @@ export default function NetflixUnitEconomics() {
         {/* LTV/CAC & Payback chart */}
         <div style={{ background: "#fff", borderRadius: 10, border: "1px solid #E5E7EB", padding: "16px" }}>
           <SectionHeader title="LTV/CAC Ratio & Payback Period" sub="Ratio >3x is strong; payback <12 months is best-in-class for subscription" />
+          <div style={{ fontSize: 11, color: "#6B7280", background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 6, padding: "6px 10px", marginBottom: 10, lineHeight: 1.5 }}>
+            <strong style={{ color: "#9A3412" }}>FY2023 note:</strong> LTV/CAC is lower and payback is longer vs. FY2024–25 because Netflix's cost of revenue was 57.6% of revenue in 2023 (vs. ~51% in 2024), compressing gross margin by ~6.6pp. Content spend was near-peak while subscriber scale had not yet compounded — the improvement reflects margin leverage, not a model anomaly.
+          </div>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={chartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={C.grid} />
