@@ -145,9 +145,9 @@ const WORKFLOW_NODES = [
     id:    "netflix-revenue-forecast",
     step:  "02",
     role:  "Model",
-    title: "Revenue Forecast",
-    desc:  "Driver-based model projecting Netflix revenue through FY2027.",
-    tags:  ["Bear / Consensus / Bull", "Sensitivity analysis"],
+    title: "Revenue & Operating Model",
+    desc:  "Driver-based model projecting Netflix revenue and operating margin through FY2027.",
+    tags:  ["Bear / Consensus / Bull", "Sensitivity analysis", "OpEx"],
   },
   {
     id:    "netflix-opex",

@@ -69,12 +69,12 @@ export const projects = [
   },
   {
     id: "netflix-revenue-forecast",
-    title: "Netflix Revenue Forecast: ARM-Based Model",
+    title: "Netflix Revenue & Operating Model",
     category: "Forecasting",
     description:
-      "Driver-based revenue forecast for Netflix through FY2027, projecting from two key levers: quarterly net membership adds and annual ARM growth, across Bear / Base / Bull scenarios, sensitivity (tornado) analysis, and a custom scenario builder synced to the Executive Deck.",
+      "Integrated driver-based model forecasting Netflix revenue and operating margin through FY2027. Projects revenue from net membership adds and ARM growth, then flows through to cost structure, operating income, and scenario-linked margin expansion — across Bear / Consensus / Bull scenarios with sensitivity analysis and a custom scenario builder.",
     date: "Q1 2026",
-    tags: ["forecast", "Netflix", "streaming", "scenario analysis", "ARM", "driver-based"],
+    tags: ["forecast", "Netflix", "streaming", "scenario analysis", "ARM", "OpEx", "operating margin", "driver-based"],
     featured: true,
     component: NetflixRevenueForecast,
   },
