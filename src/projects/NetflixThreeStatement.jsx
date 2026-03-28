@@ -233,6 +233,27 @@ function BSTab({ years, col }) {
         <tbody>
           {renderSection(assetRows, "Assets")}
           {renderSection(liabRows, "Liabilities & Stockholders' Equity")}
+
+          {/* ── Balance Sheet Check ── */}
+          <tr>
+            <td colSpan={years.length + 1} style={{ padding: "6px 12px", background: "#0B1628", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
+              Model Check
+            </td>
+          </tr>
+          <tr>
+            <td style={{ padding: "7px 12px", fontSize: 11, fontWeight: 700, color: C.navy, background: "#F8F9FA" }}>
+              Balance Check&nbsp;<span style={{ fontWeight: 400, color: C.muted }}>(Assets − L&amp;E)</span>
+            </td>
+            {years.map(y => {
+              const diff = +(y.totalAssets - (+(y.totalLiab + y.equity).toFixed(2))).toFixed(2);
+              const ok   = Math.abs(diff) < 0.02;
+              return (
+                <td key={y.label} style={{ padding: "7px 12px", textAlign: "center", fontWeight: 700, fontSize: 12, background: ok ? "#DCFCE7" : "#FEE2E2", color: ok ? "#15803D" : "#DC2626" }}>
+                  {ok ? "✓  OK" : `⚠  $${Math.abs(diff).toFixed(2)}B off`}
+                </td>
+              );
+            })}
+          </tr>
         </tbody>
       </table>
     </div>
@@ -312,6 +333,49 @@ function CFTab({ years, col }) {
               })}
             </tr>
           ))}
+
+          {/* ── Cash Reconciliation Check ── */}
+          <tr>
+            <td colSpan={years.length + 1} style={{ padding: "6px 12px", background: "#0B1628", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>
+              Model Check
+            </td>
+          </tr>
+          <tr style={{ background: "#F8F9FA" }}>
+            <td style={{ padding: "7px 12px 4px", fontSize: 11, color: C.tick, paddingLeft: 24 }}>Beginning Cash (prior BS)</td>
+            {years.map(y => (
+              <td key={y.label} style={{ padding: "7px 12px 4px", textAlign: "center", fontSize: 11, color: C.tick, background: y.isForecast ? `${col}05` : undefined }}>
+                {y.priorCash != null ? `$${y.priorCash.toFixed(2)}B` : "—"}
+              </td>
+            ))}
+          </tr>
+          <tr style={{ background: "#F8F9FA" }}>
+            <td style={{ padding: "4px 12px 4px", fontSize: 11, color: C.tick, paddingLeft: 24 }}>Ending Cash (CF Net)</td>
+            {years.map(y => {
+              const cfEnd = y.priorCash != null ? +(y.priorCash + y.ocf + y.icf + y.finCF).toFixed(2) : null;
+              return (
+                <td key={y.label} style={{ padding: "4px 12px", textAlign: "center", fontSize: 11, color: C.navy, fontWeight: 600, background: y.isForecast ? `${col}05` : undefined }}>
+                  {cfEnd != null ? `$${cfEnd.toFixed(2)}B` : "—"}
+                </td>
+              );
+            })}
+          </tr>
+          <tr>
+            <td style={{ padding: "4px 12px 7px", fontSize: 11, fontWeight: 700, color: C.navy, background: "#F8F9FA" }}>
+              Cash Check&nbsp;<span style={{ fontWeight: 400, color: C.muted }}>(CF end − BS cash)</span>
+            </td>
+            {years.map(y => {
+              if (y.priorCash == null) return <td key={y.label} style={{ padding: "4px 12px 7px", textAlign: "center", background: "#F8F9FA" }}>—</td>;
+              const cfEnd = +(y.priorCash + y.ocf + y.icf + y.finCF).toFixed(2);
+              const diff  = +(cfEnd - y.bsCash).toFixed(2);
+              const ok    = Math.abs(diff) < 0.02;
+              const isEst = !y.isForecast;
+              return (
+                <td key={y.label} style={{ padding: "4px 12px 7px", textAlign: "center", fontWeight: 700, fontSize: 12, background: ok ? "#DCFCE7" : isEst ? "#FEF9C3" : "#FEE2E2", color: ok ? "#15803D" : isEst ? "#854D0E" : "#DC2626" }}>
+                  {ok ? "✓  OK" : isEst ? `~ $${Math.abs(diff).toFixed(2)}B est.` : `⚠  $${Math.abs(diff).toFixed(2)}B off`}
+                </td>
+              );
+            })}
+          </tr>
         </tbody>
       </table>
     </div>
@@ -414,7 +478,7 @@ export default function NetflixThreeStatement() {
     const dna    = opexKey === "fy26" ? 0.48 : 0.53;
     const sbc    = SBC_ANNUAL;
     const capex  = opexKey === "fy26" ? -1.35 : -1.50;
-    const icf    = +(capex - 0.08).toFixed(2);
+    const icf    = capex; // ICF = CapEx only; ensures CF ending cash ties to BS
     const ocf    = +(fcf - capex).toFixed(2); // capex negative → ocf = fcf + |capex|
     const wc     = +(ocf - ni - contentAmort - dna - sbc - contentCash).toFixed(2); // plug
     const debtNet = -DEBT_REPAY;
@@ -425,12 +489,14 @@ export default function NetflixThreeStatement() {
 
   const fy26CF = buildForeCF(fy26PL.netInc, fy26BS._fcf, fy26BS._buybacks, "fy26");
   const fy27CF = buildForeCF(fy27PL.netInc, fy27BS._fcf, fy27BS._buybacks, "fy27");
+  // FY2022 ending cash from Netflix 10-K = $5.15B (prior year for FY2023 CF check)
+  const FY2022_CASH = 5.15;
   const cfYears = [
-    { label: "FY2023A", isForecast: false, ...HIST_CF[0], netInc: HIST_PL[0].netInc },
-    { label: "FY2024A", isForecast: false, ...HIST_CF[1], netInc: HIST_PL[1].netInc },
-    { label: "FY2025A", isForecast: false, ...HIST_CF[2], netInc: HIST_PL[2].netInc },
-    { label: "FY2026E", ...fy26CF },
-    { label: "FY2027E", ...fy27CF },
+    { label: "FY2023A", isForecast: false, priorCash: FY2022_CASH,    bsCash: HIST_BS[0].cash, ...HIST_CF[0], netInc: HIST_PL[0].netInc },
+    { label: "FY2024A", isForecast: false, priorCash: HIST_BS[0].cash, bsCash: HIST_BS[1].cash, ...HIST_CF[1], netInc: HIST_PL[1].netInc },
+    { label: "FY2025A", isForecast: false, priorCash: HIST_BS[1].cash, bsCash: HIST_BS[2].cash, ...HIST_CF[2], netInc: HIST_PL[2].netInc },
+    { label: "FY2026E", priorCash: HIST_BS[2].cash, bsCash: fy26BS.cash, ...fy26CF },
+    { label: "FY2027E", priorCash: fy26BS.cash,     bsCash: fy27BS.cash, ...fy27CF },
   ];
 
   const TABS = [
