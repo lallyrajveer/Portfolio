@@ -4,7 +4,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import {
-  HISTORICAL, QUARTERS, SEASONAL_FACTORS, START, SCENARIOS,
+  HISTORICAL, QUARTERS, SEASONAL_FACTORS, START,
   buildForecast, getForecast,
 } from "./NetflixShared.js";
 import { HIST_YR, OPEX_FORE } from "./NetflixOpEx.jsx";

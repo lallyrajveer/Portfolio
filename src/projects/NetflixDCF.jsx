@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  HISTORICAL, QUARTERS, SEASONAL_FACTORS, START,
+  QUARTERS, SEASONAL_FACTORS, START,
   buildForecast, getForecast,
 } from "./NetflixShared.js";
 import { NI_FORE, OPEX_FORE } from "./NetflixOpEx.jsx";

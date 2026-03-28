@@ -61,11 +61,11 @@ const HIST_BS = [
 // FCF = Operating Cash Flow − Capital Expenditures.
 const HIST_CF = [
   { contentAmort: 14.13, dna: 0.28, sbc: 0.63, contentCash: -14.35, wc:  1.20,
-    ocf: 7.30, capex: -0.40, fcf: 6.90, debtNet: -0.50, buybacks:  0.00, finCF: -0.63 },
+    ocf: 7.30, capex: -0.40, icf: -0.48, fcf: 6.90, debtNet: -0.50, buybacks:  0.00, finCF: -0.63 },
   { contentAmort: 15.20, dna: 0.35, sbc: 0.82, contentCash: -17.20, wc:  0.12,
-    ocf: 8.00, capex: -1.00, fcf: 7.00, debtNet: -0.50, buybacks: -6.23, finCF: -6.83 },
+    ocf: 8.00, capex: -1.00, icf: -1.08, fcf: 7.00, debtNet: -0.50, buybacks: -6.23, finCF: -6.83 },
   { contentAmort: 17.00, dna: 0.40, sbc: 0.90, contentCash: -19.00, wc: -0.59,
-    ocf: 9.20, capex: -1.20, fcf: 8.00, debtNet: -0.80, buybacks: -7.00, finCF: -7.90 },
+    ocf: 9.20, capex: -1.20, icf: -1.28, fcf: 8.00, debtNet: -0.80, buybacks: -7.00, finCF: -7.90 },
 ];
 
 /* ── Forecast projection helpers ──────────────────────────── */
@@ -75,18 +75,11 @@ const SBC_ANNUAL  = 1.0;
 const DEBT_REPAY  = 0.75;
 const BUYBACK_RT  = 0.93;
 
-function projectBS(prior, ni, fcf) {
-  const buybacks = +(fcf * BUYBACK_RT).toFixed(2);
-  const cash     = +(prior.cash + fcf * (1 - BUYBACK_RT) - DEBT_REPAY).toFixed(2);
-  return { cash, buybacks, ni };
-}
-
 /* ══════════════════════════════════════════════════════════════
    INCOME STATEMENT TAB
    ══════════════════════════════════════════════════════════════ */
 function PLTab({ years, col }) {
   const fmt  = v => `$${Math.abs(v).toFixed(1)}B`;
-  const fmtN = (v, show) => show ? (v < 0 ? `($${Math.abs(v).toFixed(1)}B)` : fmt(v)) : "—";
   const fmtP = v => `${v.toFixed(1)}%`;
 
   const rows = [
@@ -250,8 +243,7 @@ function BSTab({ years, col }) {
    CASH FLOW TAB
    ══════════════════════════════════════════════════════════════ */
 function CFTab({ years, col }) {
-  const fmt  = v => v === 0 ? "—" : v < 0 ? `($${Math.abs(v).toFixed(1)}B)` : `$${v.toFixed(1)}B`;
-  const fmtP = v => v < 0 ? `($${Math.abs(v).toFixed(1)}B)` : `$${v.toFixed(1)}B`;
+  const fmt = v => (v == null || v === 0) ? "—" : v < 0 ? `($${Math.abs(v).toFixed(1)}B)` : `$${v.toFixed(1)}B`;
 
   const rows = [
     { label: "OPERATING ACTIVITIES", header: true },
@@ -419,15 +411,16 @@ export default function NetflixThreeStatement() {
     const rev  = opexKey === "fy26" ? fy26Rev : fy27Rev;
     const contentAmort = +(rev * (isCustom ? OPEX_FORE.consensus[opexKey].corPct : base[opexKey].corPct) * 0.88).toFixed(2);
     const contentCash  = -(+(contentAmort * 1.06).toFixed(2));
-    const dna = opexKey === "fy26" ? 0.48 : 0.53;
-    const sbc = SBC_ANNUAL;
-    const wc  = +(ni - contentAmort - contentCash - dna - sbc - fcf).toFixed(2); // plug
-    const capex = opexKey === "fy26" ? -1.35 : -1.50;
+    const dna    = opexKey === "fy26" ? 0.48 : 0.53;
+    const sbc    = SBC_ANNUAL;
+    const capex  = opexKey === "fy26" ? -1.35 : -1.50;
+    const icf    = +(capex - 0.08).toFixed(2);
+    const ocf    = +(fcf - capex).toFixed(2); // capex negative → ocf = fcf + |capex|
+    const wc     = +(ocf - ni - contentAmort - dna - sbc - contentCash).toFixed(2); // plug
     const debtNet = -DEBT_REPAY;
-    const finCF = +(debtNet + buybacks).toFixed(2);
-    const icf = capex - 0.08;
+    const finCF  = +(debtNet + buybacks).toFixed(2);
     return { isForecast: true, netInc: ni, contentAmort, dna, sbc, contentCash, wc,
-      ocf: fcf - capex, capex, icf, fcf, debtNet, buybacks, finCF };
+      ocf, capex, icf, fcf, debtNet, buybacks, finCF };
   };
 
   const fy26CF = buildForeCF(fy26PL.netInc, fy26BS._fcf, fy26BS._buybacks, "fy26");
