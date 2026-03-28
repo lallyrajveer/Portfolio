@@ -226,7 +226,7 @@ function NetflixCaseStudy() {
 
         {/* ── Tier label: Integrated Workflow ── */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "rgba(201,168,76,0.7)", whiteSpace: "nowrap", fontFamily: "'Outfit', sans-serif" }}>Integrated Workflow</span>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "rgba(201,168,76,0.7)", whiteSpace: "nowrap", fontFamily: "'Outfit', sans-serif" }}>Analysis &amp; Forecasting</span>
           <div style={{ flex: 1, height: 1, background: "rgba(201,168,76,0.15)" }} />
         </div>
 
