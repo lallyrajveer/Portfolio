@@ -103,7 +103,7 @@ const COST_LINES = [
 /* ── Historical annual cost % by year (derived from Netflix 10-K) ─── */
 // Applied uniformly to each quarter within the year (consistent with top-down method).
 // FY2025 estimated from Q4'25 actuals and Netflix's guided ~29% operating margin.
-const HIST_YR = [
+export const HIST_YR = [
   // FY2023 (10-K): cor 19.4 / tnd 2.7 / mktg 2.7 / ga 2.0 / rev 33.7 / netInc 5.4
   { corPct: 0.5757, tndPct: 0.0801, mktgPct: 0.0801, gaPct: 0.0594, netMgnPct: 0.1602 },
   // FY2024 (10-K): cor 19.9 / tnd 3.1 / mktg 2.8 / ga 2.8 / rev 39.0 / netInc 8.7

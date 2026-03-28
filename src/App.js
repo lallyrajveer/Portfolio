@@ -13,6 +13,7 @@ const CAT_COLORS = {
   Modeling:          { bg: "#ECFAF8", text: "#0F5345" },
   "Streaming Market Analysis":  { bg: "#FFF8EB", text: "#92400E" },
   "Cloud Infrastructure":       { bg: "#E8F0FE", text: "#174EA6" },
+  "Financial Modeling":         { bg: "#FEF2F2", text: "#991B1B" },
   Other:             { bg: "#F3F4F6", text: "#374151" },
 };
 
@@ -258,6 +259,98 @@ function NetflixWorkflow() {
 
         </div>
 
+
+      </div>
+    </section>
+  );
+}
+
+// ── Netflix Financial Modeling Suite ─────────────────────────
+const SUITE_NODES = [
+  {
+    id:    "netflix-three-statement",
+    step:  "01",
+    title: "Three-Statement Model",
+    desc:  "Annual Income Statement, Balance Sheet, and Cash Flow for FY2023A–FY2027E, sourced from Netflix 10-K filings and scenario-synced.",
+    tags:  ["P&L", "Balance Sheet", "Cash Flow"],
+  },
+  {
+    id:    "netflix-dcf",
+    step:  "02",
+    title: "DCF & Intrinsic Valuation",
+    desc:  "FCFF-based DCF with editable WACC inputs, scenario-linked terminal growth rates, EV-to-equity bridge, and sensitivity grid.",
+    tags:  ["WACC", "FCFF", "Sensitivity grid"],
+  },
+  {
+    id:    "netflix-unit-economics",
+    step:  "03",
+    title: "Unit Economics",
+    desc:  "Customer-level profitability — LTV, CAC, LTV/CAC ratio, payback period, and contribution margin across FY2023A–FY2027E.",
+    tags:  ["LTV / CAC", "Payback", "Contribution Margin"],
+  },
+];
+
+function NetflixModelingSuite() {
+  const [hovered, setHovered] = useState(null);
+  return (
+    <section style={{ background: "#080F1C", padding: "clamp(32px, 5vw, 56px) clamp(16px, 5vw, 56px)", borderTop: "1px solid rgba(229,9,20,0.12)" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 24, height: 24, background: "#E50914", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>N</span>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix Financial Modeling Suite</span>
+          </div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 600, color: "#fff", margin: "0 0 6px" }}>
+            Full-Stack Financial Models
+          </h2>
+          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.40)", maxWidth: 560, lineHeight: 1.6 }}>
+            Three standalone models — three-statement, valuation, and unit economics — each scenario-synced and sourced from Netflix 10-K filings.
+          </p>
+        </div>
+
+        {/* Cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {SUITE_NODES.map((node) => (
+            <div
+              key={node.id}
+              onClick={() => window.open(`#/project/${node.id}`, "_blank")}
+              onMouseEnter={() => setHovered(node.id)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                background: hovered === node.id ? "rgba(229,9,20,0.06)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${hovered === node.id ? "rgba(229,9,20,0.35)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 10,
+                padding: "22px 20px",
+                cursor: "pointer",
+                transition: "all 0.18s",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(229,9,20,0.7)", marginBottom: 8, fontFamily: "'Outfit', sans-serif" }}>
+                Model {node.step}
+              </div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 600, color: "#fff", marginBottom: 10, lineHeight: 1.25 }}>
+                {node.title}
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 16, flex: 1 }}>
+                {node.desc}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+                {node.tags.map(t => (
+                  <span key={t} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 20, background: "rgba(229,9,20,0.10)", color: "rgba(229,9,20,0.75)", border: "1px solid rgba(229,9,20,0.18)", fontWeight: 600, fontFamily: "'Outfit', sans-serif" }}>{t}</span>
+                ))}
+              </div>
+              <div style={{ fontSize: 11, color: hovered === node.id ? "#E50914" : "rgba(229,9,20,0.45)", fontWeight: 700, letterSpacing: 0.5, transition: "color 0.18s", fontFamily: "'Outfit', sans-serif" }}>
+                Open →
+              </div>
+            </div>
+          ))}
+        </div>
 
       </div>
     </section>
@@ -1283,6 +1376,9 @@ export default function App() {
 
       {/* ── NETFLIX WORKFLOW ── */}
       <NetflixWorkflow />
+
+      {/* ── NETFLIX FINANCIAL MODELING SUITE ── */}
+      <NetflixModelingSuite />
 
       {/* ── GOOGLE CLOUD WORKFLOW ── */}
       {false && <GoogleCloudWorkflow />}

@@ -5,6 +5,9 @@ const NetflixRevenueForecast   = lazy(() => import("./NetflixRevenueForecast.jsx
 const NetflixOpEx              = lazy(() => import("./NetflixOpEx.jsx"));
 const NetflixBoardReport       = lazy(() => import("./NetflixBoardReport.jsx"));
 const GoogleCloudProject       = lazy(() => import("./GoogleCloudProject.jsx"));
+const NetflixThreeStatement    = lazy(() => import("./NetflixThreeStatement.jsx"));
+const NetflixDCF               = lazy(() => import("./NetflixDCF.jsx"));
+const NetflixUnitEconomics     = lazy(() => import("./NetflixUnitEconomics.jsx"));
 
 export const projects = [
   /* Verizon projects, hidden locally
@@ -109,6 +112,39 @@ export const projects = [
     featured: true,
     component: NetflixBoardReport,
   },
+  {
+    id: "netflix-three-statement",
+    title: "Netflix Three-Statement Financial Model",
+    category: "Financial Modeling",
+    description:
+      "Annual three-statement model (Income Statement, Balance Sheet, Cash Flow) for Netflix from FY2023A through FY2027E. Sourced from Netflix 10-K filings and synced to the scenario selector — forecast P&L, FCF, and balance sheet metrics update dynamically across Bear / Consensus / Bull.",
+    date: "Q1 2026",
+    tags: ["three-statement model", "Netflix", "financial modeling", "10-K", "scenario analysis", "FP&A"],
+    featured: true,
+    component: NetflixThreeStatement,
+  },
+  {
+    id: "netflix-dcf",
+    title: "Netflix DCF & Intrinsic Valuation",
+    category: "Financial Modeling",
+    description:
+      "Full discounted cash flow valuation for Netflix using FCFF from the three-statement model. Includes editable WACC inputs (Rf, ERP, Beta, cost of debt), scenario-linked terminal growth rates, an EV-to-equity bridge, and a WACC × terminal growth rate sensitivity grid.",
+    date: "Q1 2026",
+    tags: ["DCF", "valuation", "Netflix", "WACC", "FCFF", "financial modeling", "FP&A"],
+    featured: true,
+    component: NetflixDCF,
+  },
+  {
+    id: "netflix-unit-economics",
+    title: "Netflix Unit Economics: LTV, CAC & Payback",
+    category: "Financial Modeling",
+    description:
+      "Customer-level profitability analysis for Netflix from FY2023A through FY2027E. Models LTV, CAC, LTV/CAC ratio, payback period, and contribution margin by year — scenario-synced to the Revenue Forecast so all outputs update dynamically across Bear / Consensus / Bull.",
+    date: "Q1 2026",
+    tags: ["unit economics", "LTV", "CAC", "Netflix", "payback", "contribution margin", "FP&A"],
+    featured: true,
+    component: NetflixUnitEconomics,
+  },
 ];
 
-export const categories = ["All", "Cloud Infrastructure", "Streaming Market Analysis", "Forecasting", "Variance Analysis", "Board Reporting"];
+export const categories = ["All", "Cloud Infrastructure", "Streaming Market Analysis", "Forecasting", "Variance Analysis", "Board Reporting", "Financial Modeling"];
