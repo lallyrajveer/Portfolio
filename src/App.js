@@ -217,7 +217,7 @@ function NetflixCaseStudy() {
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#E50914" }}>Netflix</span>
           </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 600, color: "#fff", margin: "0 0 10px" }}>
-            FP&amp;A Case Study
+            Netflix: Integrated Financial Model
           </h2>
           <p style={{ margin: "0 auto", fontSize: 13, color: "rgba(255,255,255,0.38)", maxWidth: 520, lineHeight: 1.65 }}>
             End-to-end analysis, forecasting, and valuation — eight interconnected projects built as one cohesive case study.
