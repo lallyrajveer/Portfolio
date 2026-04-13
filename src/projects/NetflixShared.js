@@ -2,27 +2,16 @@
    Imported by NetflixRevenueForecast.jsx and NetflixBoardReport.jsx
    Revenue model: avgSubs (M) × ARM ($/mo) × 3 months / 1000 = $B
    Churn delta vs base adjusts effective quarterly net adds.
+
+   Data source: data/netflix-data.xlsx — edit that file and run:
+     npm run update-data
+   to regenerate src/projects/NetflixData.js
    ─────────────────────────────────────────────────────────────────────────── */
 
 // Monthly churn %: analyst estimates (Antenna/YipitData). None of these
 // companies officially report churn; figures are third-party estimates.
-export const HISTORICAL = [
-  { period: "Q1'23", rev: 8.16,  subs: 232.5, arm: 11.73, netAdds: 1.75,  churn: 2.40 },
-  { period: "Q2'23", rev: 8.19,  subs: 238.4, arm: 11.60, netAdds: 5.90,  churn: 2.30 },
-  { period: "Q3'23", rev: 8.54,  subs: 247.2, arm: 11.72, netAdds: 8.76,  churn: 2.20 },
-  { period: "Q4'23", rev: 8.83,  subs: 260.3, arm: 11.60, netAdds: 13.12, churn: 1.90 },
-  { period: "Q1'24", rev: 9.37,  subs: 269.6, arm: 11.79, netAdds: 9.33,  churn: 2.10 },
-  { period: "Q2'24", rev: 9.56,  subs: 277.7, arm: 11.64, netAdds: 8.05,  churn: 2.00 },
-  { period: "Q3'24", rev: 9.83,  subs: 282.7, arm: 11.68, netAdds: 5.07,  churn: 2.30 },
-  { period: "Q4'24", rev: 10.25, subs: 301.6, arm: 11.69, netAdds: 19.00, churn: 1.80 },
-  { period: "Q1'25", rev: 10.54, subs: 310.0, arm: 11.49, netAdds: 8.40,  churn: 2.00 },
-  { period: "Q2'25", rev: 11.08, subs: 320.0, arm: 11.72, netAdds: 10.00, churn: 2.10 },
-  { period: "Q3'25", rev: 11.51, subs: 325.0, arm: 11.90, netAdds: 5.00,  churn: 2.00 },
-  { period: "Q4'25", rev: 12.05, subs: 332.0, arm: 12.23, netAdds: 7.00,  churn: 1.90 },
-];
-
-// Starting point: Q4 2025 actuals
-export const START = { subs: 332.0, arm: 12.23, rev: 12.05 };
+import { HISTORICAL, START } from "./NetflixData.js";
+export { HISTORICAL, START };
 
 // Base monthly churn: used as reference point for churn delta calculations
 export const BASE_CHURN = 2.3;

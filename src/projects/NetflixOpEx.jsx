@@ -8,6 +8,7 @@ import {
   buildForecast, getForecast,
 } from "./NetflixShared.js";
 import { useNetflix } from "./NetflixContext.js";
+import { HIST_YR } from "./NetflixData.js";
 
 /* ── Dual-handle range slider (mirrored from Revenue Forecast) ── */
 const DUAL_SLIDER_CSS = `
@@ -100,17 +101,10 @@ const COST_LINES = [
   { label: "General & Administrative", shortLabel: "G&A",          key: "ga",   color: "#6B7280" },
 ];
 
-/* ── Historical annual cost % by year (derived from Netflix 10-K) ─── */
+/* ── Historical annual cost % by year (sourced from data/netflix-data.xlsx) ─ */
 // Applied uniformly to each quarter within the year (consistent with top-down method).
-// FY2025 estimated from Q4'25 actuals and Netflix's guided ~29% operating margin.
-export const HIST_YR = [
-  // FY2023 (10-K): cor 19.4 / tnd 2.7 / mktg 2.7 / ga 2.0 / rev 33.7 / netInc 5.4
-  { corPct: 0.5757, tndPct: 0.0801, mktgPct: 0.0801, gaPct: 0.0594, netMgnPct: 0.1602 },
-  // FY2024 (10-K): cor 19.9 / tnd 3.1 / mktg 2.8 / ga 2.8 / rev 39.0 / netInc 8.7
-  { corPct: 0.5103, tndPct: 0.0795, mktgPct: 0.0718, gaPct: 0.0718, netMgnPct: 0.2231 },
-  // FY2025 (est):  cor 23.3 / tnd 3.4 / mktg 2.9 / ga 2.5 / rev 45.2 / netInc 10.5
-  { corPct: 0.5155, tndPct: 0.0752, mktgPct: 0.0642, gaPct: 0.0553, netMgnPct: 0.2323 },
-];
+// To update: edit the 'Annual' sheet in data/netflix-data.xlsx, then run: npm run update-data
+export { HIST_YR };
 
 /* ── Below-the-line assumptions for net income ─────────────── */
 export const NI_FORE = {
