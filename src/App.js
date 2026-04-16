@@ -1122,7 +1122,7 @@ export default function App() {
 
           {/* Punchy bio */}
           <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 36, lineHeight: 1.65, maxWidth: 600 }}>
-            10 years turning complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
+            Turn complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
           </p>
 
           {/* Stats */}
