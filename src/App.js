@@ -1102,45 +1102,66 @@ export default function App() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section id="about" style={{ paddingTop: "calc(64px + clamp(24px, 4vw, 48px))", paddingBottom: "clamp(24px, 4vw, 48px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", maxWidth: 780, margin: "0 auto" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 16 }}>
-              About Me
-            </div>
+      <section id="about" style={{ paddingTop: "calc(64px + clamp(24px, 4vw, 56px))", paddingBottom: "clamp(32px, 5vw, 64px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+
+          {/* Name */}
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(38px, 5vw, 58px)", fontWeight: 600, color: "#0B1628", margin: "0 0 12px", lineHeight: 1 }}>
+            Rajveer <span style={{ color: "#C9A84C" }}>Sidhu</span>
+          </h1>
+
+          {/* Tagline */}
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: "#9BA3B8", marginBottom: 18 }}>
+            FP&amp;A Manager · Financial Modeler · AI Practitioner
+          </p>
+
+          {/* Career path */}
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(16px, 2vw, 20px)", color: "#5A6277", marginBottom: 24, letterSpacing: 0.3 }}>
+            Accounting → Financial Reporting → FP&amp;A → AI-Assisted Finance
+          </p>
+
+          {/* Punchy bio */}
+          <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 36, lineHeight: 1.65, maxWidth: 600 }}>
+            10 years turning complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "20px 52px", paddingTop: 28, paddingBottom: 28, borderTop: "1px solid rgba(11,22,40,0.10)", borderBottom: "1px solid rgba(11,22,40,0.10)" }}>
             {[
-              "Hi, I'm a finance professional working at the intersection of FP&A and AI. I bring over 10 years of experience across multiple areas of accounting and finance, spanning a range of industries.",
-              "Currently, I'm a Financial Planning & Analysis Manager in the telecom industry where my work sits at the intersection of numbers and narrative. I don't just report what happened, I identify the risks and opportunities within complex financial data, quantify their impact, and translate them into clear recommendations that help leadership take action.",
-              "Efficient process design has always been part of how I work. AI has simply raised the ceiling on what's possible. Today I use it to automate commentary, accelerate model builds, and draft board narratives directly from data, freeing more time for the interpretation that actually drives decisions.",
-              "This portfolio reflects that approach. The strategic analyses, visualizations, and even this website were built in collaboration with AI platforms. I'm exploring how to leverage these tools to deliver better insights every day.",
-            ].map((para, i) => (
-              <p key={i} style={{ fontSize: 15, color: "#5A6277", lineHeight: 1.7, marginBottom: 10 }}>{para}</p>
+              ["10+",   "Years Experience"],
+              ["FMVA®", "Certified Analyst"],
+              ["FP&A",  "Manager"],
+              ["AI",    "Practitioner"],
+            ].map(([n, l]) => (
+              <div key={l}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 600, color: "#C9A84C", lineHeight: 1 }}>{n}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#9BA3B8", textTransform: "uppercase", letterSpacing: 1.2, marginTop: 5 }}>{l}</div>
+              </div>
             ))}
           </div>
-          <div style={{ display: "none" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: "#C9A84C", marginBottom: 20 }}>Core Competencies</div>
+
+        </div>
+      </section>
+
+      {/* ── EXPERTISE ── */}
+      <section style={{ paddingTop: "clamp(32px, 4vw, 52px)", paddingBottom: "clamp(32px, 4vw, 52px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#fff" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: "#9BA3B8", marginBottom: 6 }}>Expertise</div>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: "#0B1628", margin: "0 0 24px" }}>Tools of the trade.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {[
-              ["📐","Financial Modeling","Multi-scenario models built for executive decision-making"],
-              ["📊","Budgeting & Forecasting","Annual plans and rolling forecasts tied to business strategy"],
-              ["📋","Board Reporting","Executive packages distilling financials into clear narratives"],
-              ["🔍","Variance Analysis","Actuals vs. budget deep-dives with root-cause commentary"],
-              ["📈","Competitive Analysis","Real-time performance visibility for finance and operations"],
-            ].map(([icon, name, desc]) => (
-              <div key={name} style={{
-                display: "flex", alignItems: "center", gap: 16,
-                padding: "16px 20px", background: "#fff",
-                border: "1px solid #E8EAF0", borderRadius: 6, marginBottom: 10,
-                transition: "border-color 0.2s, box-shadow 0.2s", cursor: "default",
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor="#C9A84C"; e.currentTarget.style.boxShadow="0 4px 16px rgba(201,168,76,0.1)"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor="#E8EAF0"; e.currentTarget.style.boxShadow="none"; }}
-              >
-                <div style={{ width: 40, height: 40, borderRadius: 6, background: "#0B1628", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>{icon}</div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#0B1628" }}>{name}</div>
-                  <div style={{ fontSize: 12, color: "#9BA3B8", marginTop: 2 }}>{desc}</div>
-                </div>
-              </div>
+              "Financial Modeling", "FP&A", "Forecasting & Budgeting", "Variance Analysis",
+              "Board Reporting", "Scenario Analysis", "KPI Development", "DCF Valuation",
+              "Unit Economics", "Competitive Analysis", "Operating Model",
+              "SQL", "Advanced Excel", "Tableau", "Qlik", "Alteryx",
+              "SAP", "Oracle", "Hyperion / Essbase", "Workiva",
+              "React", "Data Visualization", "Claude", "ChatGPT", "NotebookLM",
+            ].map(s => (
+              <span key={s} style={{
+                fontSize: 13, fontWeight: 500, padding: "6px 16px",
+                borderRadius: 999, background: "#F0EFE8", color: "#0B1628",
+                letterSpacing: 0.1,
+              }}>{s}</span>
             ))}
           </div>
         </div>
