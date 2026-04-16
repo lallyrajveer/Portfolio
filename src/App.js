@@ -1143,29 +1143,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── EXPERTISE ── */}
-      <section style={{ paddingTop: "clamp(32px, 4vw, 52px)", paddingBottom: "clamp(32px, 4vw, 52px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#fff" }}>
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: "#9BA3B8", marginBottom: 6 }}>Expertise</div>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: "#0B1628", margin: "0 0 24px" }}>Tools of the trade.</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {[
-              "Financial Modeling", "FP&A", "Forecasting & Budgeting", "Variance Analysis",
-              "Board Reporting", "Scenario Analysis", "KPI Development", "DCF Valuation",
-              "Unit Economics", "Competitive Analysis", "Operating Model",
-              "SQL", "Advanced Excel", "Tableau", "Qlik", "Alteryx",
-              "SAP", "Oracle", "Hyperion / Essbase", "Workiva",
-              "React", "Data Visualization", "Claude", "ChatGPT", "NotebookLM",
-            ].map(s => (
-              <span key={s} style={{
-                fontSize: 13, fontWeight: 500, padding: "6px 16px",
-                borderRadius: 999, background: "#F0EFE8", color: "#0B1628",
-                letterSpacing: 0.1,
-              }}>{s}</span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── WORK HISTORY ── */}
       <section id="experience" style={{ padding: "96px 56px", background: "#fff", display: "none" }}>
