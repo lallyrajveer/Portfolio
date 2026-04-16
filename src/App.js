@@ -1112,7 +1112,7 @@ export default function App() {
 
           {/* Tagline */}
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: "#9BA3B8", marginBottom: 18 }}>
-            FP&amp;A Manager · Financial Modeler · AI Practitioner
+            FP&amp;A Manager · Certified Financial Modeling &amp; Valuation Analyst · AI Practitioner
           </p>
 
           {/* Career path */}
