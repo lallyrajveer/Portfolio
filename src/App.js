@@ -1115,10 +1115,6 @@ export default function App() {
             FP&amp;A Manager · Certified Financial Modeling &amp; Valuation Analyst · AI Practitioner
           </p>
 
-          {/* Career path */}
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(16px, 2vw, 20px)", color: "#5A6277", marginBottom: 24, letterSpacing: 0.3 }}>
-            Auditing → Accounting → Financial Reporting → FP&amp;A → AI-Assisted Finance
-          </p>
 
           {/* Punchy bio */}
           <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 0, lineHeight: 1.65, maxWidth: 600, margin: "0 auto" }}>
