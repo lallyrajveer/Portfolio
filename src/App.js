@@ -1117,12 +1117,12 @@ export default function App() {
 
           {/* Career path */}
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(16px, 2vw, 20px)", color: "#5A6277", marginBottom: 24, letterSpacing: 0.3 }}>
-            Accounting → Financial Reporting → FP&amp;A → AI-Assisted Finance
+            Auditing → Accounting → Financial Reporting → FP&amp;A → AI-Assisted Finance
           </p>
 
           {/* Punchy bio */}
           <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 36, lineHeight: 1.65, maxWidth: 600 }}>
-            Turn complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
+            Expert in turning complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
           </p>
 
           {/* Stats */}
