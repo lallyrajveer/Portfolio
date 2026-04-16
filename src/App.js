@@ -1125,20 +1125,6 @@ export default function App() {
             Expert in turning complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
           </p>
 
-          {/* Stats */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "20px 52px", paddingTop: 28, paddingBottom: 28, borderTop: "1px solid rgba(11,22,40,0.10)", borderBottom: "1px solid rgba(11,22,40,0.10)" }}>
-            {[
-              ["10+",   "Years Experience"],
-              ["FMVA®", "Certified Analyst"],
-              ["FP&A",  "Manager"],
-              ["AI",    "Practitioner"],
-            ].map(([n, l]) => (
-              <div key={l}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 600, color: "#C9A84C", lineHeight: 1 }}>{n}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#9BA3B8", textTransform: "uppercase", letterSpacing: 1.2, marginTop: 5 }}>{l}</div>
-              </div>
-            ))}
-          </div>
 
         </div>
       </section>
