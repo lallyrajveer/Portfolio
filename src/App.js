@@ -1103,7 +1103,7 @@ export default function App() {
 
       {/* ── ABOUT ── */}
       <section id="about" style={{ paddingTop: "calc(64px + clamp(24px, 4vw, 56px))", paddingBottom: "clamp(32px, 5vw, 64px)", paddingLeft: "clamp(16px, 5vw, 56px)", paddingRight: "clamp(16px, 5vw, 56px)", background: "#F8F6F1" }}>
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
+        <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
 
           {/* Name */}
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(38px, 5vw, 58px)", fontWeight: 600, color: "#0B1628", margin: "0 0 12px", lineHeight: 1 }}>
@@ -1121,7 +1121,7 @@ export default function App() {
           </p>
 
           {/* Punchy bio */}
-          <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 36, lineHeight: 1.65, maxWidth: 600 }}>
+          <p style={{ fontSize: 16, color: "#0B1628", fontWeight: 500, marginBottom: 0, lineHeight: 1.65, maxWidth: 600, margin: "0 auto" }}>
             Expert in turning complex financial data into clear decisions. Currently exploring how AI raises the ceiling on what's possible in FP&amp;A.
           </p>
 
